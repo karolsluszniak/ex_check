@@ -1,6 +1,6 @@
 defmodule Mix.Tasks.Check do
   @moduledoc """
-  Runs all checks configured in an Elixir project.
+  One task to efficiently run all code analysis & testing tools in an Elixir project.
 
   There are following benefits from using this task:
 
@@ -21,6 +21,10 @@ defmodule Mix.Tasks.Check do
   First it runs the compiler and aborts upon compilation errors (but not warnings). Further checks
   are run in parallel (unless `--no-parallel` option is passed) and their output is streamed one by one for instant insight.
 
+  *NOTE: In order to ensure that output from Elixir checks is colorized even though they're not
+  being run in a terminal, you may add `config :elixir, :ansi_enabled, true` to your project
+  configuration.*
+
   After all checks are completed, output from those that have failed gets reprinted for sake of
   easily reading into them all at once.
 
@@ -31,30 +35,40 @@ defmodule Mix.Tasks.Check do
 
   Following curated checks are configured by default:
 
-  - `:compiler` (uses built-in `mix compile`) - produces compilation warnings that allow to early
-    detect bugs & typos in the code eg. an attempt to call non-existing or deprecated function
+  - [`:compiler`] - produces compilation warnings that allow to early detect bugs & typos in the
+    code eg. an attempt to call non-existing or deprecated function
 
-  - `:formatter` (uses built-in `mix format`) - ensures that all the code follows the same basic
-    formatting rules such as maximum number of chars in a line or function indentation
+  - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
+    maximum number of chars in a line or function indentation
 
-  - `:credo` (uses `Credo`) - ensures that all the code follows a further established set of
-    software design, consistency, readability & misc rules and conventions (still statical)
+  - [`:ex_unit`] - starts the application in test mode and runs all runtime tests against it
+    (defined as test modules or embedded in docs as doctests)
 
-  - `:dialyzer` (uses `Dialyxir`) - performs static code analysis around type mismatches and other
-    issues that are commonly detected by static language compilers
+  - [`:credo`] - ensures that all the code follows a further established set of software design,
+    consistency, readability & misc rules and conventions (still statical)
 
-  - `:ex_unit` (uses `ExUnit`) - starts the application in test mode and runs all runtime tests
-    against it (defined as test modules or embedded in docs as doctests)
+  - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
+    framework, but also detecting vulnerable dependencies in arbitrary Mix projects
 
-  - `:ex_doc` (uses `ExDoc`) - compiles the project documentation in order to ensure that there are
-    no issues that would make it impossible for docs to get collected and assembled
+  - [`:dialyzer`] - performs static code analysis around type mismatches and other issues that are
+    commonly detected by static language compilers
+
+  - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
+    that would make it impossible for docs to get collected and assembled
 
   You can disable or adjust curated checks as well as add custom ones via the config file.
 
   ## Configuration
 
-  Check configuration may be adjusted with the optional `.check.exs` file. Use the `mix
-  check.gen.config` task to get started with the configuration.
+  Check configuration may be adjusted with the optional `.check.exs` file. Task will load the
+  configuration in following order:
+
+  1. Default stock configuration.
+  2. `.check.exs` in user home directory.
+  3. `.check.exs` in root directory of the umbrella project when called from umbrella sub-app.
+  4. `.check.exs` in current working directory.
+
+  Use the `mix check.gen.config` task to generate sample configuration with well-commented examples.
 
   ## Command line options
 
@@ -63,9 +77,20 @@ defmodule Mix.Tasks.Check do
   - `--no-skipped` - don't print skipped checks in summary
   - `--no-exit-status` - don't halt EVM to return non-zero exit status
   - `--no-parallel` - don't run checks in parallel
+
+  [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
+  [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
+  [`:ex_unit`]: https://hexdocs.pm/ex_unit
+  [`:credo`]: https://hexdocs.pm/credo
+  [`:sobelow`]: https://hexdocs.pm/sobelow
+  [`:dialyzer`]: https://hexdocs.pm/dialyxir
+  [`:ex_doc`]: https://hexdocs.pm/ex_doc
   """
 
-  @shortdoc "Runs all checks configured in the project"
+  use Mix.Task
+  alias ExCheck.Check
+
+  @shortdoc "Runs all code analysis & testing tools in an Elixir project"
 
   @switches [
     only: :keep,
@@ -74,9 +99,6 @@ defmodule Mix.Tasks.Check do
     exit_status: :boolean,
     parallel: :boolean
   ]
-
-  use Mix.Task
-  alias ExCheck.Check
 
   @impl Mix.Task
   def run(args) do

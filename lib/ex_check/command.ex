@@ -18,7 +18,17 @@ defmodule ExCheck.Command do
     cd = Keyword.get(opts, :cd, Path.dirname(exec))
     env = Keyword.get(opts, :env, [])
 
-    spawn_opts = [:stderr_to_stdout, :binary, :exit_status, args: args, cd: cd, env: env]
+    spawn_opts = [
+      :stream,
+      :binary,
+      :exit_status,
+      :hide,
+      :use_stdio,
+      :stderr_to_stdout,
+      args: args,
+      cd: cd,
+      env: env
+    ]
 
     Task.async(fn ->
       start_time = DateTime.utc_now()

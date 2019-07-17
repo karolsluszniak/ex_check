@@ -2,14 +2,15 @@ defmodule ExCheck.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/karolsluszniak/ex_check"
+  @description "One task to efficiently run all code analysis & testing tools in an Elixir project"
 
   def project do
     [
       app: :ex_check,
       version: "0.1.0",
-      elixir: "~> 1.9",
+      elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
-      description: "Runs all checks configured in an Elixir project",
+      description: @description,
       deps: deps(),
       dialyzer: dialyzer(),
       docs: docs(),
@@ -27,7 +28,8 @@ defmodule ExCheck.MixProject do
     [
       {:credo, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:sobelow, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 

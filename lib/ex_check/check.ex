@@ -82,7 +82,7 @@ defmodule ExCheck.Check do
   end
 
   defp find_missing_file(require_files) do
-    dirs = Project.get_root_and_app_dirs()
+    dirs = Project.get_mix_child_dirs()
 
     Enum.find(require_files, fn file ->
       not Enum.any?(dirs, fn dir ->
@@ -100,7 +100,13 @@ defmodule ExCheck.Check do
   end
 
   defp start_check_task({:pending, {name, cmd}}) do
-    task = Command.async(cmd, stream: true, silenced: true)
+    stream = fn out ->
+      out
+      |> String.replace(~r/(\x1b\[[0-9;]*m)/, "\\1" <> IO.ANSI.faint())
+      |> IO.write()
+    end
+
+    task = Command.async(cmd, stream: stream, silenced: true)
     {:running, {name, cmd}, task}
   end
 
@@ -109,7 +115,7 @@ defmodule ExCheck.Check do
   end
 
   defp await_check_task({:running, {name, cmd}, task}) do
-    Printer.info([:cyan, "=> running ", :bright, to_string(name), :normal, " with ", :bright, cmd])
+    Printer.info([:magenta, "=> running ", :bright, to_string(name)])
     Printer.info()
     IO.write(IO.ANSI.faint())
 
@@ -144,7 +150,7 @@ defmodule ExCheck.Check do
       if output_needs_padding?(output), do: Printer.info()
     end)
 
-    Printer.info([:cyan, "=> finished in ", :bright, format_duration(total_duration)])
+    Printer.info([:magenta, "=> finished in ", :bright, format_duration(total_duration)])
     Printer.info()
 
     Enum.each(finished_checks, fn
