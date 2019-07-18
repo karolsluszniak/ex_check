@@ -5,24 +5,24 @@ defmodule ExCheck.Check do
 
   def run(opts) do
     config = Config.load()
-    checks_from_config = Config.get_checks(config)
+    tools_from_config = Config.get_tools(config)
     opts_from_config = Config.get_opts(config)
     opts_merged = Keyword.merge(opts_from_config, opts)
 
-    compile_and_run_checks(checks_from_config, opts_merged)
+    compile_and_run_tools(tools_from_config, opts_merged)
   end
 
-  defp compile_and_run_checks(checks, opts) do
+  defp compile_and_run_tools(tools, opts) do
     start_time = DateTime.utc_now()
-    compiler_result = run_compiler(checks, opts)
-    other_results = if run_others?(compiler_result), do: run_others(checks, opts), else: []
+    compiler_result = run_compiler(tools, opts)
+    other_results = if run_others?(compiler_result), do: run_others(tools, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
 
     present_results([compiler_result] ++ other_results, total_duration, opts)
   end
 
-  defp run_compiler(checks, opts) do
-    check = List.keyfind(checks, :compiler, 0) || raise("compiler check not found")
+  defp run_compiler(tools, opts) do
+    check = List.keyfind(tools, :compiler, 0) || raise("compiler check not found")
     check = prepare_check(check, opts)
     check = with {:disabled, _} <- check, do: {:pending, {:compiler, "mix compile"}}
 
@@ -35,18 +35,18 @@ defmodule ExCheck.Check do
     status == :ok or String.contains?(output, @compile_warn_out)
   end
 
-  defp run_others(checks, opts) do
-    checks =
-      checks
+  defp run_others(tools, opts) do
+    tools =
+      tools
       |> List.keydelete(:compiler, 0)
       |> Enum.map(&prepare_check(&1, opts))
 
     if Keyword.get(opts, :parallel, true) do
-      checks
+      tools
       |> Enum.map(&start_check_task/1)
       |> Enum.map(&await_check_task/1)
     else
-      Enum.map(checks, &run_check/1)
+      Enum.map(tools, &run_check/1)
     end
   end
 
@@ -140,10 +140,10 @@ defmodule ExCheck.Check do
     not (String.match?(output, ~r/\n{2,}$/) or output == "")
   end
 
-  defp present_results(finished_checks, total_duration, opts) do
-    failed_checks = Enum.filter(finished_checks, &match?({:error, _, _}, &1))
+  defp present_results(finished_tools, total_duration, opts) do
+    failed_tools = Enum.filter(finished_tools, &match?({:error, _, _}, &1))
 
-    Enum.each(failed_checks, fn {_, {name, _}, {_, output, _}} ->
+    Enum.each(failed_tools, fn {_, {name, _}, {_, output, _}} ->
       Printer.info([:red, "=> reprinting errors from ", :bright, to_string(name)])
       Printer.info()
       IO.write(output)
@@ -153,7 +153,7 @@ defmodule ExCheck.Check do
     Printer.info([:magenta, "=> finished in ", :bright, format_duration(total_duration)])
     Printer.info()
 
-    Enum.each(finished_checks, fn
+    Enum.each(finished_tools, fn
       {:ok, {name, _}, {_, _, duration}} ->
         took = format_duration(duration)
         name = to_string(name)
@@ -181,8 +181,8 @@ defmodule ExCheck.Check do
 
     Printer.info()
 
-    if Keyword.get(opts, :exit_status, true) and Enum.any?(failed_checks) do
-      System.halt(length(failed_checks))
+    if Keyword.get(opts, :exit_status, true) and Enum.any?(failed_tools) do
+      System.halt(length(failed_tools))
       Process.sleep(:infinity)
     end
   end

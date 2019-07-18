@@ -7,7 +7,7 @@
       },
       strict: true,
       color: true,
-      checks: [
+      tools: [
         {Credo.Check.Readability.MaxLineLength, [max_length: 100]}
       ]
     }

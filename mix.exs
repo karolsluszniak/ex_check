@@ -41,8 +41,9 @@ defmodule ExCheck.MixProject do
 
   defp docs do
     [
-      main: "Mix.Tasks.Check",
-      source_url: @github_url
+      main: "readme",
+      source_url: @github_url,
+      extras: ["README.md"]
     ]
   end
 

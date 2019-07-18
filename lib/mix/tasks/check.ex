@@ -2,38 +2,24 @@ defmodule Mix.Tasks.Check do
   @moduledoc """
   One task to efficiently run all code analysis & testing tools in an Elixir project.
 
-  There are following benefits from using this task:
-
-  - **check consistency** is achieved by running the same, established set of checks for the project
-    by all developers - be it locally or on the CI server, as a Pull Request or deployment check
-
-  - **reasonable defaults** with a set of curated checks for effortlessly ensuring top code quality
-    and taking the best out of the rich set of tools that the Elixir ecosystem has to offer
-
-  - **shorter feedback loop** thanks to compiling the project once and then running all the
-    remaining checks in parallel while the output is streamed live during the check run
-
-  - **reduced fixing iterations** thanks to executing all the checks regardless of the failures of
-    others and reprinting the errors from all of them at the end of the check run
-
   ## How it works
 
-  First it runs the compiler and aborts upon compilation errors (but not warnings). Further checks
+  First it runs the compiler and aborts upon compilation errors (but not warnings). Further tools
   are run in parallel (unless `--no-parallel` option is passed) and their output is streamed one by one for instant insight.
 
-  *NOTE: In order to ensure that output from Elixir checks is colorized even though they're not
+  *NOTE: In order to ensure that output from Elixir tools is colorized even though they're not
   being run in a terminal, you may add `config :elixir, :ansi_enabled, true` to your project
   configuration.*
 
-  After all checks are completed, output from those that have failed gets reprinted for sake of
+  After all tools are completed, output from those that have failed gets reprinted for sake of
   easily reading into them all at once.
 
-  Finally, a summary is presented with a list of all checks that have succeeded, failed or were
+  Finally, a summary is presented with a list of all tools that have succeeded, failed or were
   skipped due to missing files or project dependencies (unless `--no-skipped` option is passed).
 
-  ## Checks
+  ## Tools
 
-  Following curated checks are configured by default:
+  Following curated tools are configured by default:
 
   - [`:compiler`] - produces compilation warnings that allow to early detect bugs & typos in the
     code eg. an attempt to call non-existing or deprecated function
@@ -56,27 +42,27 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
-  You can disable or adjust curated checks as well as add custom ones via the config file.
+  You can disable or adjust curated tools as well as add custom ones via the config file.
 
-  ## Configuration
+  ## Configuration file
 
   Check configuration may be adjusted with the optional `.check.exs` file. Task will load the
   configuration in following order:
 
   1. Default stock configuration.
   2. `.check.exs` in user home directory.
-  3. `.check.exs` in root directory of the umbrella project when called from umbrella sub-app.
-  4. `.check.exs` in current working directory.
+  3. `.check.exs` in umbrella root directory when called from sub-project.
+  4. `.check.exs` in current project directory.
 
-  Use the `mix check.gen.config` task to generate sample configuration with well-commented examples.
+  Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 
   ## Command line options
 
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
-  - `--no-skipped` - don't print skipped checks in summary
+  - `--no-skipped` - don't print skipped tools in summary
   - `--no-exit-status` - don't halt EVM to return non-zero exit status
-  - `--no-parallel` - don't run checks in parallel
+  - `--no-parallel` - don't run tools in parallel
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html

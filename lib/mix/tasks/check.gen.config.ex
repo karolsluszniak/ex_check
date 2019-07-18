@@ -1,9 +1,9 @@
 defmodule Mix.Tasks.Check.Gen.Config do
   @moduledoc """
-  Generates optional configuration file (`.check.exs`) for adjusting project checks.
+  Generates optional configuration file (`.check.exs`) for adjusting the check.
   """
 
-  @shortdoc "Generates optional configuration file for adjusting project checks"
+  @shortdoc "Generates optional configuration file for adjusting the check"
 
   @switches []
 

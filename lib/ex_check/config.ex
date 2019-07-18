@@ -3,7 +3,7 @@ defmodule ExCheck.Config do
 
   alias ExCheck.{Printer, Project}
 
-  @curated_checks [
+  @curated_tools [
     {:compiler, command: "mix compile --warnings-as-errors --force"},
     {:formatter, command: "mix format --check-formatted", require_files: [".formatter.exs"]},
     {:ex_unit, command: "mix test", require_files: ["test/test_helper.exs"]},
@@ -17,7 +17,7 @@ defmodule ExCheck.Config do
     parallel: true,
     exit_status: true,
     skipped: true,
-    checks: @curated_checks
+    tools: @curated_tools
   ]
 
   @option_list [:parallel, :exit_status, :skipped]
@@ -28,8 +28,8 @@ defmodule ExCheck.Config do
     Keyword.take(config, @option_list)
   end
 
-  def get_checks(config) do
-    Keyword.fetch!(config, :checks)
+  def get_tools(config) do
+    Keyword.fetch!(config, :tools)
   end
 
   # sobelow_skip ["RCE.CodeModule"]
@@ -59,18 +59,18 @@ defmodule ExCheck.Config do
     next_config_opts = Keyword.take(next_config, @option_list)
     merged_opts = Keyword.merge(config_opts, next_config_opts)
 
-    config_checks = Keyword.fetch!(config, :checks)
-    next_config_checks = Keyword.get(next_config, :checks, [])
+    config_tools = Keyword.fetch!(config, :tools)
+    next_config_tools = Keyword.get(next_config, :tools, [])
 
-    merged_checks =
-      Enum.reduce(next_config_checks, config_checks, fn next_check, checks ->
+    merged_tools =
+      Enum.reduce(next_config_tools, config_tools, fn next_check, tools ->
         next_check_name = elem(next_check, 0)
-        check = List.keyfind(checks, next_check_name, 0)
+        check = List.keyfind(tools, next_check_name, 0)
         merged_check = merge_check(check, next_check)
-        List.keystore(checks, next_check_name, 0, merged_check)
+        List.keystore(tools, next_check_name, 0, merged_check)
       end)
 
-    Keyword.put(merged_opts, :checks, merged_checks)
+    Keyword.put(merged_opts, :tools, merged_tools)
   end
 
   defp merge_check(check, next_check)
@@ -81,20 +81,20 @@ defmodule ExCheck.Config do
 
   @generated_config """
   [
-    ## all available options with default values
+    ## all available options with default values (see `mix check` docs for description)
     # skipped: true,
     # exit_status: true,
     # parallel: true,
 
-    ## check list (see the `mix check` docs for the list of default ones)
-    checks: [
-      ## curated checks may be disabled (e.g. the check for compilation warnings)
+    ## list of tools (see `mix check` docs for defaults)
+    tools: [
+      ## curated tools may be disabled (e.g. the check for compilation warnings)
       # {:compiler, false},
 
       ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
       # {:credo, command: "mix credo --format oneline"},
 
-      ## custom new checks may be added (mix tasks or arbitrary commands)
+      ## custom new tools may be added (mix tasks or arbitrary commands)
       # {:my_mix_check, command: "mix some_task"},
       # {:my_other_check, command: "my_cmd"}
     ]
