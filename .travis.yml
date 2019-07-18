@@ -4,6 +4,11 @@ elixir:
   - '1.7.0'
   - '1.9.0'
 
+otp_release: '22.0'
+
+before_script:
+  - travis_wait mix dialyzer --plt
+
 script:
   - mix check
 
