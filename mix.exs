@@ -8,7 +8,7 @@ defmodule ExCheck.MixProject do
     [
       app: :ex_check,
       version: "0.1.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       description: @description,
       deps: deps(),
