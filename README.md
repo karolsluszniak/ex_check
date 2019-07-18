@@ -1,6 +1,10 @@
 # ExCheck
 
-**Runs all checks configured in an Elixir project.**
+[![license](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
+[![build status](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg)](https://travis-ci.org/karolsluszniak/ex_check)
+[![Hex version](https://img.shields.io/hexpm/v/ex_check.svg)](https://hex.pm/packages/ex_check)
+
+**One task to efficiently run all code analysis & testing tools in an Elixir project.**
 
 There are following benefits from using this task:
 
