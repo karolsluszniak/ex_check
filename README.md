@@ -20,6 +20,8 @@ There are following benefits from using this task:
 - **reduced fixing iterations** thanks to executing all the tools regardless of the failures of
   others and reprinting the errors from all of them at the end of the check run
 
+Read more and see demo on [Cloudless Studio blog](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools).
+
 ## Getting started
 
 Add `ex_check` to your list of dependencies in `mix.exs`:
@@ -93,4 +95,4 @@ Learn more about the task workflow, included tools, configuration and options:
 mix help check
 ```
 
-Read docs for `mix check` on HexDocs: [docs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html)
+Read docs for `mix check` on HexDocs: [latest version](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html).
