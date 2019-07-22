@@ -45,12 +45,6 @@ def deps do
 end
 ```
 
-Optionally enforce output with colors from Elixir checks in `config/config.exs`:
-
-```elixir
-config :elixir, :ansi_enabled, true
-```
-
 Run the check:
 
 ```

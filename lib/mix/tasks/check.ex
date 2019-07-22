@@ -7,10 +7,6 @@ defmodule Mix.Tasks.Check do
   First it runs the compiler and aborts upon compilation errors (but not warnings). Further tools
   are run in parallel (unless `--no-parallel` option is passed) and their output is streamed one by one for instant insight.
 
-  *NOTE: In order to ensure that output from Elixir tools is colorized even though they're not
-  being run in a terminal, you may add `config :elixir, :ansi_enabled, true` to your project
-  configuration.*
-
   After all tools are completed, output from those that have failed gets reprinted for sake of
   easily reading into them all at once.
 

@@ -77,7 +77,7 @@ defmodule ExCheckTest do
   test "all tools (except dialyzer)", %{project_dir: project_dir} do
     set_mix_deps(project_dir, [:ex_check, :credo, :ex_doc, :sobelow])
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
+    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir, env: %{"MIX_ENV" => "dev"})
 
     assert String.contains?(output, "compiler success")
     assert String.contains?(output, "formatter success")
@@ -144,7 +144,7 @@ defmodule ExCheckTest do
     unless String.contains?(new_config, "ex_check"), do: raise("unable to add ex_check dep")
 
     File.write!(config_path, new_config)
-    System.cmd("mix", ~w[deps.get], cd: project_dir)
+    {_, 0} = System.cmd("mix", ~w[deps.get], cd: project_dir)
 
     project_dir
   end
