@@ -57,6 +57,34 @@ Optionally generate config to adjust the check:
 mix check.gen.config
 ```
 
+## Continuous Integration
+
+With `mix check` you can consistently run the same set of checks locally and on the CI. CI
+configuration also becomes trivial and comes out of the box with parallelism and error output from
+all checks at once regardless if previous one failed.
+
+Here's the minimal `.travis.yml` to get you started on [Travis CI](https://travis-ci.org):
+
+```yaml
+language: elixir
+
+script: mix check
+```
+
+If you use the `dialyzer` tool, you'll also want to cover PLT build timeouts and caching:
+
+```yaml
+# ...
+
+before_script:
+  - travis_wait mix dialyzer --plt
+
+cache:
+  directories:
+    - _build
+    - deps
+```
+
 ## Documentation
 
 Learn more about the task workflow, included tools, configuration and options:
