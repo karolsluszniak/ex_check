@@ -124,7 +124,7 @@ defmodule ExCheckTest do
     deps_list =
       Enum.map(deps, fn
         :ex_check ->
-          "{:ex_check, path: \"#{File.cwd!()}\"}"
+          "{:ex_check, path: \"#{File.cwd!()}\", only: [:dev, :test], runtime: false}"
 
         dep ->
           "{:#{dep}, \">= 0.0.0\", only: :dev, runtime: false}"
@@ -146,6 +146,7 @@ defmodule ExCheckTest do
     unless String.contains?(new_config, "ex_check"), do: raise("unable to add ex_check dep")
 
     File.write!(config_path, new_config)
+    {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
     {_, 0} = System.cmd("mix", ~w[deps.get], cd: project_dir)
 
     project_dir

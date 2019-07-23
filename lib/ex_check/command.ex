@@ -9,20 +9,14 @@ defmodule ExCheck.Command do
 
   def async(command, opts \\ [])
 
-  def async(command, opts) when is_binary(command), do: async(String.split(command, " "), opts)
-
-  def async(args, opts) do
-    {env, [exec | args]} = extract_env(args)
+  def async([exec | args], opts) do
     stream_fn = parse_stream_option(opts)
-    exec_path = resolve_exec_path(exec)
-
-    cd = Keyword.get(opts, :cd, Path.dirname(exec))
+    cd = Keyword.get(opts, :cd, ".")
+    exec_path = resolve_exec_path(exec, cd)
 
     env =
-      env
-      |> Map.new()
-      |> Map.merge(Keyword.get(opts, :env, %{}))
-      |> Map.to_list()
+      opts
+      |> Keyword.get(:env, %{})
       |> Enum.map(fn {n, v} -> {String.to_charlist(n), String.to_charlist(v)} end)
 
     spawn_opts = [
@@ -55,18 +49,6 @@ defmodule ExCheck.Command do
     {output, status, duration}
   end
 
-  defp extract_env(list) do
-    {env, args} = Enum.split_while(list, &String.match?(&1, ~r/^[A-Z_]+=\w+$/))
-
-    env_tuples =
-      Enum.map(env, fn env_string ->
-        [[name, value]] = Regex.scan(~r/^([A-Z_]+)=(\w+)$/, env_string, capture: :all_but_first)
-        {name, value}
-      end)
-
-    {env_tuples, args}
-  end
-
   defp parse_stream_option(opts) do
     case Keyword.get(opts, :stream) do
       true -> &IO.write/1
@@ -75,10 +57,11 @@ defmodule ExCheck.Command do
     end
   end
 
-  defp resolve_exec_path(exec) do
+  defp resolve_exec_path(exec, cd) do
     cond do
-      File.exists?(exec) -> exec
-      path_to_exec = System.find_executable(Path.basename(exec)) -> path_to_exec
+      Path.type(exec) == :absolute -> exec
+      File.exists?(Path.join(cd, exec)) -> Path.join(cd, exec) |> Path.expand()
+      path_to_exec = System.find_executable(exec) -> path_to_exec
       true -> raise("executable not found: #{exec}")
     end
   end

@@ -4,14 +4,13 @@ defmodule ExCheck.Config do
   alias ExCheck.{Printer, Project}
 
   @curated_tools [
-    {:compiler, command: "mix check.run compile --warnings-as-errors --force"},
-    {:formatter,
-     command: "mix check.run format --check-formatted", require_files: [".formatter.exs"]},
-    {:ex_unit, command: "MIX_ENV=test mix check.run test", require_files: ["test/test_helper.exs"]},
-    {:credo, command: "mix check.run credo", require_deps: [:credo]},
-    {:sobelow, command: "mix check.run sobelow --exit --skip", require_deps: [:sobelow]},
-    {:dialyzer, command: "mix check.run dialyzer --halt-exit-status", require_deps: [:dialyxir]},
-    {:ex_doc, command: "mix check.run docs", require_deps: [:ex_doc]}
+    {:compiler, command: "mix compile --warnings-as-errors --force"},
+    {:formatter, command: "mix format --check-formatted", require_files: [".formatter.exs"]},
+    {:ex_unit, command: "mix test", require_files: ["test/test_helper.exs"]},
+    {:credo, command: "mix credo", require_deps: [:credo]},
+    {:sobelow, command: "mix sobelow --exit --skip", require_deps: [:sobelow]},
+    {:dialyzer, command: "mix dialyzer --halt-exit-status", require_deps: [:dialyxir]},
+    {:ex_doc, command: "mix docs", require_deps: [:ex_doc]}
   ]
 
   @default_config [
@@ -93,11 +92,12 @@ defmodule ExCheck.Config do
       # {:compiler, false},
 
       ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
-      # {:credo, command: "mix check.run credo --format oneline"},
+      # {:credo, command: "mix credo --format oneline"},
 
       ## custom new tools may be added (mix tasks or arbitrary commands)
-      # {:my_mix_check, command: "mix check.run some_task"},
-      # {:my_other_check, command: "my_cmd"}
+      # {:my_mix_check, command: "mix release", env: %{"MIX_ENV" => "prod"}},
+      # {:my_arbitrary_check, command: "npm test", cd: "assets"},
+      # {:my_arbitrary_script, command: ["my_script", "argument with spaces"], cd: "scripts"}
     ]
   ]
   """

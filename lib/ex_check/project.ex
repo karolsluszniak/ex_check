@@ -1,10 +1,44 @@
 defmodule ExCheck.Project do
   @moduledoc false
 
-  def has_dep?(name) do
+  def config do
     Mix.Project.config()
+  end
+
+  def has_dep?(name) do
+    config()
     |> Keyword.fetch!(:deps)
     |> List.keymember?(name, 0)
+  end
+
+  # sobelow_skip ["DOS.StringToAtom"]
+  def get_task_env(task) when is_binary(task) do
+    task
+    |> String.to_atom()
+    |> get_task_env()
+  end
+
+  def get_task_env(task) do
+    config()[:preferred_cli_env][task] || Mix.Task.preferred_cli_env(task) || :dev
+  end
+
+  def check_runner_available?(env) do
+    own_dep =
+      config()
+      |> Keyword.fetch!(:deps)
+      |> List.keyfind(:ex_check, 0)
+
+    opts =
+      case own_dep do
+        {_, _, opts} when is_list(opts) -> opts
+        {_, opts} when is_list(opts) -> opts
+        _ -> []
+      end
+
+    only = opts[:only]
+
+    Mix.Project.config()[:app] == :ex_check || (own_dep && (!only || Enum.member?(only, env))) ||
+      false
   end
 
   def get_mix_root_dir do
