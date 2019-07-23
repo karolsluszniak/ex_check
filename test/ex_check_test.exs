@@ -1,6 +1,8 @@
 defmodule ExCheckTest do
   use ExUnit.Case
 
+  @moduletag timeout: 5 * 60 * 1_000
+
   setup do
     project_dir =
       create_tmp_directory()
