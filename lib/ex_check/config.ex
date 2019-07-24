@@ -63,21 +63,21 @@ defmodule ExCheck.Config do
     next_config_tools = Keyword.get(next_config, :tools, [])
 
     merged_tools =
-      Enum.reduce(next_config_tools, config_tools, fn next_check, tools ->
-        next_check_name = elem(next_check, 0)
-        check = List.keyfind(tools, next_check_name, 0)
-        merged_check = merge_check(check, next_check)
-        List.keystore(tools, next_check_name, 0, merged_check)
+      Enum.reduce(next_config_tools, config_tools, fn next_tool, tools ->
+        next_tool_name = elem(next_tool, 0)
+        tool = List.keyfind(tools, next_tool_name, 0)
+        merged_tool = merge_tool(tool, next_tool)
+        List.keystore(tools, next_tool_name, 0, merged_tool)
       end)
 
     Keyword.put(merged_opts, :tools, merged_tools)
   end
 
-  defp merge_check(check, next_check)
-  defp merge_check(nil, next_check), do: next_check
-  defp merge_check({name, false}, next_check = {name, _}), do: next_check
-  defp merge_check({name, _}, next_check = {name, false}), do: next_check
-  defp merge_check({name, opts}, {name, next_opts}), do: {name, Keyword.merge(opts, next_opts)}
+  defp merge_tool(tool, next_tool)
+  defp merge_tool(nil, next_tool), do: next_tool
+  defp merge_tool({name, false}, next_tool = {name, _}), do: next_tool
+  defp merge_tool({name, _}, next_tool = {name, false}), do: next_tool
+  defp merge_tool({name, opts}, {name, next_opts}), do: {name, Keyword.merge(opts, next_opts)}
 
   @generated_config """
   [
@@ -94,9 +94,12 @@ defmodule ExCheck.Config do
       ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
       # {:credo, command: "mix credo --format oneline"},
 
+      ## ...or reordered (e.g. to see output from ex_unit before others)
+      {:ex_unit, order: -1}
+
       ## custom new tools may be added (mix tasks or arbitrary commands)
-      # {:my_mix_check, command: "mix release", env: %{"MIX_ENV" => "prod"}},
-      # {:my_arbitrary_check, command: "npm test", cd: "assets"},
+      # {:my_mix_task, command: "mix release", env: %{"MIX_ENV" => "prod"}},
+      # {:my_arbitrary_tool, command: "npm test", cd: "assets"},
       # {:my_arbitrary_script, command: ["my_script", "argument with spaces"], cd: "scripts"}
     ]
   ]

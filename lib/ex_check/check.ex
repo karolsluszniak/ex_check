@@ -43,6 +43,7 @@ defmodule ExCheck.Check do
     tools =
       tools
       |> List.keydelete(:compiler, 0)
+      |> Enum.sort_by(&get_tool_order/1)
       |> Enum.map(&prepare_tool(&1, opts))
 
     if Keyword.get(opts, :parallel, true) do
@@ -97,6 +98,9 @@ defmodule ExCheck.Check do
       end)
     end)
   end
+
+  defp get_tool_order({_, opts}), do: Keyword.get(opts, :order, 0)
+  defp get_tool_order(_), do: 0
 
   defp run_tool(tool) do
     tool

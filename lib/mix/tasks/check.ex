@@ -50,15 +50,30 @@ defmodule Mix.Tasks.Check do
   3. `.check.exs` in umbrella root directory when called from sub-project.
   4. `.check.exs` in current project directory.
 
+  Configuration file should evaluate to keyword list with following options:
+
+  - `:exit_status` - toggles halting EVM to return non-zero exit status (default: true)
+  - `:parallel` - toggles running tools in parallel (default: true)
+  - `:skipped` - toggles printing skipped tools in summary (default: true)
+  - `:tools` - a list of tools to run
+
+  Each tool is a `{:tool_name, false}` tuple to disable specific tool or `{:tool_name, opts}` tuple
+  where `opts` is a keyword list with following options:
+
+  - `:command` - command as string or list of strings (executable + arguments)
+  - `:cd` - directory (relative to cwd) to change to before running the command
+  - `:env` - environment variables as map with string keys & values
+  - `:order` - integer that controls the order in which tool output is presented (default: 0)
+
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 
   ## Command line options
 
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
-  - `--no-skipped` - don't print skipped tools in summary
   - `--no-exit-status` - don't halt EVM to return non-zero exit status
   - `--no-parallel` - don't run tools in parallel
+  - `--no-skipped` - don't print skipped tools in summary
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
