@@ -17,16 +17,20 @@ defmodule ExCheck.Check do
     compiler_result = run_compiler(tools, opts)
     other_results = if run_others?(compiler_result), do: run_others(tools, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
+    all_results = [compiler_result | other_results]
+    failed_results = Enum.filter(all_results, &match?({:error, _, _}, &1))
 
-    present_results([compiler_result] ++ other_results, total_duration, opts)
+    reprint_errors(failed_results)
+    print_summary(all_results, total_duration, opts)
+    maybe_halt_with_exit_status(failed_results, opts)
   end
 
   defp run_compiler(tools, opts) do
-    check = List.keyfind(tools, :compiler, 0) || raise("compiler check not found")
-    check = prepare_check(check, opts)
-    check = with {:disabled, _} <- check, do: {:pending, {:compiler, "mix compile", []}}
+    compiler = List.keyfind(tools, :compiler, 0) || raise("compiler tool definition missing")
+    compiler = prepare_tool(compiler, opts)
+    compiler = with {:disabled, _} <- compiler, do: {:pending, {:compiler, "mix compile", []}}
 
-    run_check(check)
+    run_tool(compiler)
   end
 
   @compile_warn_out "Compilation failed due to warnings while using the --warnings-as-errors option"
@@ -39,22 +43,22 @@ defmodule ExCheck.Check do
     tools =
       tools
       |> List.keydelete(:compiler, 0)
-      |> Enum.map(&prepare_check(&1, opts))
+      |> Enum.map(&prepare_tool(&1, opts))
 
     if Keyword.get(opts, :parallel, true) do
       tools
-      |> Enum.map(&start_check_task/1)
-      |> Enum.map(&await_check_task/1)
+      |> Enum.map(&start_tool/1)
+      |> Enum.map(&await_tool/1)
     else
-      Enum.map(tools, &run_check/1)
+      Enum.map(tools, &run_tool/1)
     end
   end
 
-  defp prepare_check({name, false}, _opts) do
+  defp prepare_tool({name, false}, _opts) do
     {:disabled, name}
   end
 
-  defp prepare_check({name, config}, opts) do
+  defp prepare_tool({name, config}, opts) do
     command = Keyword.fetch!(config, :command)
     command_opts = Keyword.take(config, [:cd, :env])
     require_deps = Keyword.get(config, :require_deps, [])
@@ -94,22 +98,22 @@ defmodule ExCheck.Check do
     end)
   end
 
-  defp run_check(check) do
-    check
-    |> start_check_task()
-    |> await_check_task()
+  defp run_tool(tool) do
+    tool
+    |> start_tool()
+    |> await_tool()
   end
 
   @ansi_code_regex ~r/(\x1b\[[0-9;]*m)/
 
-  defp start_check_task({:pending, {name, cmd, opts}}) do
+  defp start_tool({:pending, {name, cmd, opts}}) do
     stream = fn out ->
       out
       |> String.replace(@ansi_code_regex, "\\1" <> IO.ANSI.faint())
       |> IO.write()
     end
 
-    {final_cmd, env_from_cmd} = prepare_cmd_and_env(cmd)
+    {final_cmd, env_from_cmd} = prepare_tool_cmd(cmd)
     env_from_opts = Keyword.get(opts, :env, %{})
     final_env = Map.merge(env_from_cmd, env_from_opts)
     final_opts = Keyword.merge(opts, stream: stream, silenced: true, env: final_env)
@@ -118,17 +122,17 @@ defmodule ExCheck.Check do
     {:running, {name, cmd, opts}, task}
   end
 
-  defp start_check_task(inactive_check) do
-    inactive_check
+  defp start_tool(inactive_tool) do
+    inactive_tool
   end
 
-  defp prepare_cmd_and_env(cmd) when is_binary(cmd) do
+  defp prepare_tool_cmd(cmd) when is_binary(cmd) do
     cmd
     |> String.split(" ")
-    |> prepare_cmd_and_env()
+    |> prepare_tool_cmd()
   end
 
-  defp prepare_cmd_and_env(["mix", task | task_args]) do
+  defp prepare_tool_cmd(["mix", task | task_args]) do
     task_env = Project.get_task_env(task)
 
     if Project.check_runner_available?(task_env) do
@@ -138,11 +142,11 @@ defmodule ExCheck.Check do
     end
   end
 
-  defp prepare_cmd_and_env(cmd) do
+  defp prepare_tool_cmd(cmd) do
     {cmd, %{}}
   end
 
-  defp await_check_task({:running, {name, cmd, opts}, task}) do
+  defp await_tool({:running, {name, cmd, opts}, task}) do
     Printer.info([:magenta, "=> running ", :bright, to_string(name)])
     Printer.info()
     IO.write(IO.ANSI.faint())
@@ -160,59 +164,57 @@ defmodule ExCheck.Check do
     {status, {name, cmd, opts}, {code, output, duration}}
   end
 
-  defp await_check_task(inactive_check) do
-    inactive_check
+  defp await_tool(inactive_tool) do
+    inactive_tool
   end
 
   defp output_needs_padding?(output) do
     not (String.match?(output, ~r/\n{2,}$/) or output == "")
   end
 
-  defp present_results(finished_tools, total_duration, opts) do
-    failed_tools = Enum.filter(finished_tools, &match?({:error, _, _}, &1))
-
+  defp reprint_errors(failed_tools) do
     Enum.each(failed_tools, fn {_, {name, _, _}, {_, output, _}} ->
       Printer.info([:red, "=> reprinting errors from ", :bright, to_string(name)])
       Printer.info()
       IO.write(output)
       if output_needs_padding?(output), do: Printer.info()
     end)
+  end
 
+  defp print_summary(items, total_duration, opts) do
     Printer.info([:magenta, "=> finished in ", :bright, format_duration(total_duration)])
     Printer.info()
 
-    Enum.each(finished_tools, fn
-      {:ok, {name, _, _}, {_, _, duration}} ->
-        took = format_duration(duration)
-        name = to_string(name)
-        Printer.info([:green, " ✓ ", :bright, name, :normal, " success in ", :bright, took])
-
-      {:error, {name, _, _}, {code, _, duration}} ->
-        n = :normal
-        b = :bright
-        name = to_string(name)
-        code_string = to_string(code)
-        took = format_duration(duration)
-
-        Printer.info([:red, " ✕ ", b, name, n, " error code ", b, code_string, n, " in ", b, took])
-
-      {:skipped, name, reason} ->
-        if Keyword.get(opts, :skipped, true) do
-          Printer.info(
-            [:cyan, "   ", :bright, to_string(name), :normal, " skipped due to "] ++ reason
-          )
-        end
-
-      {:disabled, _} ->
-        :ok
-    end)
+    items
+    |> Enum.sort()
+    |> Enum.each(&print_summary_item(&1, opts))
 
     Printer.info()
+  end
 
-    if Keyword.get(opts, :exit_status, true) and Enum.any?(failed_tools) do
-      System.halt(length(failed_tools))
-      Process.sleep(:infinity)
+  defp print_summary_item({:ok, {name, _, _}, {_, _, duration}}, _) do
+    took = format_duration(duration)
+    name = to_string(name)
+    Printer.info([:green, " ✓ ", :bright, name, :normal, " success in ", :bright, took])
+  end
+
+  defp print_summary_item({:error, {name, _, _}, {code, _, duration}}, _) do
+    n = :normal
+    b = :bright
+    name = to_string(name)
+    code_string = to_string(code)
+    took = format_duration(duration)
+    Printer.info([:red, " ✕ ", b, name, n, " error code ", b, code_string, n, " in ", b, took])
+  end
+
+  defp print_summary_item({:skipped, name, reason}, opts) do
+    if Keyword.get(opts, :skipped, true) do
+      Printer.info([:cyan, "   ", :bright, to_string(name), :normal, " skipped due to "] ++ reason)
     end
+  end
+
+  defp print_summary_item({:disabled, _}, _) do
+    :ok
   end
 
   defp format_duration(secs) do
@@ -221,5 +223,12 @@ defmodule ExCheck.Check do
     sec_str = if sec < 10, do: "0#{sec}", else: "#{sec}"
 
     "#{min}:#{sec_str}"
+  end
+
+  defp maybe_halt_with_exit_status(failed_tools, opts) do
+    if Keyword.get(opts, :exit_status, true) do
+      System.halt(length(failed_tools))
+      Process.sleep(:infinity)
+    end
   end
 end
