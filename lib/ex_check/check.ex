@@ -55,10 +55,6 @@ defmodule ExCheck.Check do
     end
   end
 
-  defp prepare_tool({name, false}, _opts) do
-    {:disabled, name}
-  end
-
   defp prepare_tool({name, config}, opts) do
     command = Keyword.fetch!(config, :command)
     command_opts = Keyword.take(config, [:cd, :env])
@@ -66,6 +62,9 @@ defmodule ExCheck.Check do
     require_files = Keyword.get(config, :require_files, [])
 
     cond do
+      Keyword.get(config, :enabled, true) == false ->
+        {:disabled, name}
+
       Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name})) ->
         {:disabled, name}
 
@@ -117,9 +116,8 @@ defmodule ExCheck.Check do
       |> IO.write()
     end
 
-    {final_cmd, env_from_cmd} = prepare_tool_cmd(cmd)
-    env_from_opts = Keyword.get(opts, :env, %{})
-    final_env = Map.merge(env_from_cmd, env_from_opts)
+    env = Keyword.get(opts, :env, %{})
+    {final_cmd, final_env} = prepare_tool_cmd(cmd, env)
     final_opts = Keyword.merge(opts, stream: stream, silenced: true, env: final_env)
     task = Command.async(final_cmd, final_opts)
 
@@ -130,24 +128,30 @@ defmodule ExCheck.Check do
     inactive_tool
   end
 
-  defp prepare_tool_cmd(cmd) when is_binary(cmd) do
+  defp prepare_tool_cmd(cmd, env) when is_binary(cmd) do
     cmd
     |> String.split(" ")
-    |> prepare_tool_cmd()
+    |> prepare_tool_cmd(env)
   end
 
-  defp prepare_tool_cmd(["mix", task | task_args]) do
-    task_env = Project.get_task_env(task)
+  # sobelow_skip ["DOS.StringToAtom"]
+  defp prepare_tool_cmd(["mix", task | task_args], env) do
+    task_env =
+      if env_string = Map.get(env, "MIX_ENV"),
+        do: String.to_atom(env_string),
+        else: Project.get_task_env(task)
+
+    final_env = Map.merge(%{"MIX_ENV" => "#{task_env}"}, env)
 
     if Project.check_runner_available?(task_env) do
-      {["mix", "check.run", task | task_args], %{"MIX_ENV" => "#{task_env}"}}
+      {["mix", "check.run", task | task_args], final_env}
     else
-      {["mix", task | task_args], %{"MIX_ENV" => "#{task_env}"}}
+      {["mix", task | task_args], final_env}
     end
   end
 
-  defp prepare_tool_cmd(cmd) do
-    {cmd, %{}}
+  defp prepare_tool_cmd(cmd, env) do
+    {cmd, env}
   end
 
   defp await_tool({:running, {name, cmd, opts}, task}) do

@@ -9,6 +9,7 @@ defmodule ExCheck.MixProject do
       app: :ex_check,
       version: "0.5.0",
       elixir: "~> 1.7",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       description: @description,
       deps: deps(),
@@ -17,6 +18,9 @@ defmodule ExCheck.MixProject do
       package: package()
     ]
   end
+
+  defp elixirc_paths(:test), do: ["test/support", "lib"]
+  defp elixirc_paths(_), do: ["lib"]
 
   def application do
     [

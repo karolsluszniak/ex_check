@@ -67,6 +67,7 @@ defmodule ExCheck.Config do
         next_tool_name = elem(next_tool, 0)
         tool = List.keyfind(tools, next_tool_name, 0)
         merged_tool = merge_tool(tool, next_tool)
+
         List.keystore(tools, next_tool_name, 0, merged_tool)
       end)
 
@@ -75,9 +76,21 @@ defmodule ExCheck.Config do
 
   defp merge_tool(tool, next_tool)
   defp merge_tool(nil, next_tool), do: next_tool
-  defp merge_tool({name, false}, next_tool = {name, _}), do: next_tool
-  defp merge_tool({name, _}, next_tool = {name, false}), do: next_tool
-  defp merge_tool({name, opts}, {name, next_opts}), do: {name, Keyword.merge(opts, next_opts)}
+  defp merge_tool({name, opts}, {name, false}), do: {name, merge_tool_opts(opts, enabled: false)}
+  defp merge_tool({name, opts}, {name, next_opts}), do: {name, merge_tool_opts(opts, next_opts)}
+
+  defp merge_tool_opts(opts, next_opts) do
+    merged_opts = Keyword.merge(opts, next_opts)
+
+    env = opts[:env]
+    next_env = next_opts[:env]
+
+    if env && next_env do
+      Keyword.put(merged_opts, :env, Map.merge(env, next_env))
+    else
+      merged_opts
+    end
+  end
 
   @generated_config """
   [
@@ -89,7 +102,7 @@ defmodule ExCheck.Config do
     ## list of tools (see `mix check` docs for defaults)
     tools: [
       ## curated tools may be disabled (e.g. the check for compilation warnings)
-      # {:compiler, false},
+      # {:compiler, enabled: false},
 
       ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
       # {:credo, command: "mix credo --format oneline"},

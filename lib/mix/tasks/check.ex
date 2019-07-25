@@ -52,18 +52,20 @@ defmodule Mix.Tasks.Check do
 
   Configuration file should evaluate to keyword list with following options:
 
-  - `:exit_status` - toggles halting EVM to return non-zero exit status (default: true)
-  - `:parallel` - toggles running tools in parallel (default: true)
-  - `:skipped` - toggles printing skipped tools in summary (default: true)
-  - `:tools` - a list of tools to run
+  - `:exit_status` - toggles halting EVM to return non-zero exit status (default: `true`)
+  - `:parallel` - toggles running tools in parallel (default: `true`)
+  - `:skipped` - toggles printing skipped tools in summary (default: `true`)
+  - `:tools` - a list of tools to run (default: curated tools)
 
-  Each tool is a `{:tool_name, false}` tuple to disable specific tool or `{:tool_name, opts}` tuple
-  where `opts` is a keyword list with following options:
+  Each tool is a`{:tool_name, opts}` tuple where `opts` is a keyword list with following options:
 
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:order` - integer that controls the order in which tool output is presented (default: 0)
+  - `:enabled` - when set to false it disables already defined tools (default: `true`)
+  - `:order` - integer that controls the order in which tool output is presented (default: `0`)
+  - `:require_deps` - list of package names that must be present or tool will be skipped
+  - `:require_files` - list of file names that must be present or tool will be skipped
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 
