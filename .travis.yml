@@ -1,16 +1,13 @@
 language: elixir
 
-elixir:
-  - '1.7.0'
-  - '1.9.0'
+script: mix check
 
-otp_release: '22.0'
+elixir: "1.9.1"
+
+otp_release: "22.0.7"
 
 before_script:
   - travis_wait mix dialyzer --plt
-
-script:
-  - mix check
 
 cache:
   directories:

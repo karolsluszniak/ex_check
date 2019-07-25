@@ -11,9 +11,8 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
       tools: [
         {:compiler, false},
         {:formatter, false},
-        {:credo, command: "mix credo --format oneline"},
-        {:ex_unit, order: -1},
-        {:release, command: "mix release", env: %{"MIX_ENV" => "prod"}},
+        {:ex_unit, order: 2, command: ~w[mix test --cover]},
+        {:release, order: 1, command: "mix release", env: %{"MIX_ENV" => "prod"}},
         {:my_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
       ]
     ]
@@ -34,7 +33,7 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
     File.write!(script_path, script)
     File.chmod!(script_path, 0o755)
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
+    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir, stderr_to_stdout: true)
 
     assert String.contains?(output, "compiler success")
     refute String.contains?(output, "formatter success")
@@ -43,7 +42,10 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
     assert String.contains?(output, "release success")
     assert String.contains?(output, "my_script success")
 
+    assert String.contains?(output, "Generated HTML coverage results")
     assert String.contains?(output, "Release created at _build/prod/rel/test_project")
     assert String.contains?(output, "a b xyz")
+
+    assert String.match?(output, ~r/running release.*running ex_unit/s)
   end
 end
