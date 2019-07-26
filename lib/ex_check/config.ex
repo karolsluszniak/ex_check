@@ -75,6 +75,7 @@ defmodule ExCheck.Config do
   end
 
   defp merge_tool(tool, next_tool)
+  defp merge_tool(nil, {name, false}), do: raise("cannot disable undefined tool #{inspect(name)}")
   defp merge_tool(nil, next_tool), do: next_tool
   defp merge_tool({name, opts}, {name, false}), do: {name, merge_tool_opts(opts, enabled: false)}
   defp merge_tool({name, opts}, {name, next_opts}), do: {name, merge_tool_opts(opts, next_opts)}

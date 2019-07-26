@@ -2,12 +2,12 @@ language: elixir
 
 script: mix check
 
-elixir: "1.9.1"
-
-otp_release: "22.0.7"
-
-before_script:
-  - travis_wait mix dialyzer --plt
+matrix:
+  include:
+  - elixir: "1.9.1"
+    otp_release: "22.0.7"
+  - elixir: "1.7.0"
+    otp_release: "19.0"
 
 cache:
   directories:

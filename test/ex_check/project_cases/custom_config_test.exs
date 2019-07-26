@@ -2,6 +2,13 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
   use ExCheck.ProjectCase, async: true
 
   test "custom config", %{project_dir: project_dir} do
+    elixir_with_release? = Version.match?(System.version(), ">= 1.9.0")
+
+    maybe_release_tool =
+      if elixir_with_release?,
+        do: ~S'{:release, order: 1, command: "mix release", env: %{"MIX_ENV" => "prod"}},',
+        else: ""
+
     config = """
     [
       skipped: false,
@@ -12,7 +19,7 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
         {:compiler, false},
         {:formatter, false},
         {:ex_unit, order: 2, command: ~w[mix test --cover]},
-        {:release, order: 1, command: "mix release", env: %{"MIX_ENV" => "prod"}},
+        #{maybe_release_tool}
         {:my_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
       ]
     ]
@@ -39,13 +46,15 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
     refute String.contains?(output, "formatter success")
     assert String.contains?(output, "ex_unit success")
     refute String.contains?(output, "credo skipped due to missing dependency credo")
-    assert String.contains?(output, "release success")
     assert String.contains?(output, "my_script success")
 
     assert String.contains?(output, "Generated HTML coverage results")
-    assert String.contains?(output, "Release created at _build/prod/rel/test_project")
     assert String.contains?(output, "a b xyz")
 
-    assert String.match?(output, ~r/running release.*running ex_unit/s)
+    if elixir_with_release? do
+      assert String.contains?(output, "release success")
+      assert String.contains?(output, "Release created at _build/prod/rel/test_project")
+      assert String.match?(output, ~r/running release.*running ex_unit/s)
+    end
   end
 end
