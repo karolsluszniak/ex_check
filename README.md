@@ -6,19 +6,13 @@
 
 **One task to efficiently run all code analysis & testing tools in an Elixir project.**
 
-There are following benefits from using this task:
-
-- **check consistency** is achieved by running the same, established set of tools for the project
-  by all developers - be it locally or on the CI server, as a Pull Request or deployment check
-
-- **reasonable defaults** with a set of curated tools for effortlessly ensuring top code quality
-  and taking the best out of the rich set of tools that the Elixir ecosystem has to offer
-
-- **shorter feedback loop** thanks to compiling the project once and then running all the
-  remaining tools in parallel while the output is streamed live during the check run
-
-- **reduced fixing iterations** thanks to executing all the tools regardless of the failures of
-  others and reprinting the errors from all of them at the end of the check run
+- Runs all tools with a single convenient command
+- Comes out of the box with a predefined set of curated tools
+- Checks the project consistently for all developers & on the CI
+- Facilitates custom mix tasks and scripts acting as project checks
+- Delivers results faster by running tools concurrently & with live streaming
+- Identifies all project issues in one go by always running all tools
+- Takes care of the little details (compile once, enable ANSI etc)
 
 Read more and see demo on [Cloudless Studio blog](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools).
 
