@@ -6,7 +6,7 @@
 
 **One task to efficiently run all code analysis & testing tools in an Elixir project.**
 
-- Runs all tools with a single convenient command
+- Runs all tools with a single convenient `mix check` command
 - Comes out of the box with a predefined set of curated tools
 - Checks the project consistently for all developers & on the CI
 - Facilitates custom mix tasks and scripts acting as project checks

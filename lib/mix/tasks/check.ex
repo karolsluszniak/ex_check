@@ -2,17 +2,6 @@ defmodule Mix.Tasks.Check do
   @moduledoc """
   One task to efficiently run all code analysis & testing tools in an Elixir project.
 
-  ## How it works
-
-  First it runs the compiler and aborts upon compilation errors (but not warnings). Further tools
-  are run in parallel (unless `--no-parallel` option is passed) and their output is streamed one by one for instant insight.
-
-  After all tools are completed, output from those that have failed gets reprinted for sake of
-  easily reading into them all at once.
-
-  Finally, a summary is presented with a list of all tools that have succeeded, failed or were
-  skipped due to missing files or project dependencies (unless `--no-skipped` option is passed).
-
   ## Tools
 
   Following curated tools are configured by default:
@@ -38,7 +27,36 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
-  You can disable or adjust curated tools as well as add custom ones via the config file.
+  You can disable or adjust curated tools as well as add custom ones via the configuration file.
+
+  ## Workflow
+
+  1. `:compiler` tool is run before others in order to compile the project just once and to avoid
+     reprinting the compilation error multiple times.
+
+  2. If the compilation succeded (even if with warnings), further tools are run in parallel while
+     their output is streamed live one by one for instant insight.
+
+  3. Output from tools that have failed gets reprinted for sake of easily reading into them all at
+     once and identifying all project issues in one go.
+
+  4. Summary is presented with a list of all tools that have failed, succeeded or were skipped due
+     to missing files or project dependencies.
+
+  5. Task halts the VM with exit code that equals to the number of failed tools. This means non-zero
+     exit code if at least one tool has failed.
+
+  ## Tool execution
+
+  Tools are run in separate processes. This has following benefits:
+
+  - allows to run tools in parallel & stream their output
+  - catches exit codes in order to detect failures
+  - enables including non-Elixir scripts and tools in the check
+
+  The downside is that tools will be run without TTY which will usually result in tools disabling
+  ANSI formatting. This issue is fixed for mix tasks (which often depend on `IO.ANSI.format/1` for
+  output formatting) by wrapping them in `mix do` that explicitly enables ANSI.
 
   ## Configuration file
 
@@ -62,7 +80,7 @@ defmodule Mix.Tasks.Check do
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:enable_ansi` - toggles patching mix tasks to have ANSI enabled (default: `true`)
+  - `:enable_ansi` - toggles wrapping mix tasks to have ANSI enabled (default: `true`)
   - `:enabled` - toggles including already defined tools in the check (default: `true`)
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:require_deps` - list of package atoms that must be present or tool will be skipped
