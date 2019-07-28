@@ -10,7 +10,7 @@
 - Comes out of the box with a predefined set of curated tools
 - Checks the project consistently for all developers & on the CI
 - Facilitates custom mix tasks and scripts acting as project checks
-- Delivers results faster by running tools concurrently & with live streaming
+- Delivers results faster by running & streaming tools in parallel
 - Identifies all project issues in one go by always running all tools
 - Takes care of the little details (compile once, enable ANSI etc)
 
@@ -23,7 +23,7 @@ Add `ex_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_check, ">= 0.0.0", only: [:dev, :test], runtime: false}
+    {:ex_check, ">= 0.0.0", only: :dev, runtime: false}
   ]
 end
 ```

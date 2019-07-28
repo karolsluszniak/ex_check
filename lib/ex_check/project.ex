@@ -22,25 +22,6 @@ defmodule ExCheck.Project do
     config()[:preferred_cli_env][task] || Mix.Task.preferred_cli_env(task) || :dev
   end
 
-  def check_runner_available?(env) do
-    own_dep =
-      config()
-      |> Keyword.fetch!(:deps)
-      |> List.keyfind(:ex_check, 0)
-
-    opts =
-      case own_dep do
-        {_, _, opts} when is_list(opts) -> opts
-        {_, opts} when is_list(opts) -> opts
-        _ -> []
-      end
-
-    only = opts[:only]
-
-    Mix.Project.config()[:app] == :ex_check || (own_dep && (!only || Enum.member?(only, env))) ||
-      false
-  end
-
   def get_mix_root_dir do
     if in_umbrella?() do
       "../.."

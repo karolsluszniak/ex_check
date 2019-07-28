@@ -62,10 +62,11 @@ defmodule Mix.Tasks.Check do
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:enabled` - when set to false it disables already defined tools (default: `true`)
+  - `:enable_ansi` - toggles patching mix tasks to have ANSI enabled (default: `true`)
+  - `:enabled` - toggles including already defined tools in the check (default: `true`)
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
-  - `:require_deps` - list of package names that must be present or tool will be skipped
-  - `:require_files` - list of file names that must be present or tool will be skipped
+  - `:require_deps` - list of package atoms that must be present or tool will be skipped
+  - `:require_files` - list of file name strings that must be present or tool will be skipped
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 

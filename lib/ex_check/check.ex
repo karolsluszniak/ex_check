@@ -45,6 +45,7 @@ defmodule ExCheck.Check do
       |> List.keydelete(:compiler, 0)
       |> Enum.sort_by(&get_tool_order/1)
       |> Enum.map(&prepare_tool(&1, opts))
+      |> Enum.reject(&match?({:disabled, _}, &1))
 
     if Keyword.get(opts, :parallel, true) do
       tools
@@ -57,7 +58,7 @@ defmodule ExCheck.Check do
 
   defp prepare_tool({name, config}, opts) do
     command = Keyword.fetch!(config, :command)
-    command_opts = Keyword.take(config, [:cd, :env])
+    command_opts = Keyword.take(config, [:cd, :env, :enable_ansi])
     require_deps = Keyword.get(config, :require_deps, [])
     require_files = Keyword.get(config, :require_files, [])
 
@@ -117,7 +118,7 @@ defmodule ExCheck.Check do
     end
 
     env = Keyword.get(opts, :env, %{})
-    {final_cmd, final_env} = prepare_tool_cmd(cmd, env)
+    {final_cmd, final_env} = prepare_tool_cmd(cmd, env, opts)
     final_opts = Keyword.merge(opts, stream: stream, silenced: true, env: final_env)
     task = Command.async(final_cmd, final_opts)
 
@@ -128,30 +129,35 @@ defmodule ExCheck.Check do
     inactive_tool
   end
 
-  defp prepare_tool_cmd(cmd, env) when is_binary(cmd) do
+  defp prepare_tool_cmd(cmd, env, opts) when is_binary(cmd) do
     cmd
     |> String.split(" ")
-    |> prepare_tool_cmd(env)
+    |> prepare_tool_cmd(env, opts)
   end
 
-  # sobelow_skip ["DOS.StringToAtom"]
-  defp prepare_tool_cmd(["mix", task | task_args], env) do
-    task_env =
-      if env_string = Map.get(env, "MIX_ENV"),
-        do: String.to_atom(env_string),
-        else: Project.get_task_env(task)
-
-    final_env = Map.merge(%{"MIX_ENV" => "#{task_env}"}, env)
-
-    if Project.check_runner_available?(task_env) do
-      {["mix", "check.run", task | task_args], final_env}
+  defp prepare_tool_cmd(cmd = ["mix" | task], env, opts) do
+    if Keyword.get(opts, :enable_ansi, true) do
+      enable_ansi(task, env)
     else
-      {["mix", task | task_args], final_env}
+      {cmd, env}
     end
   end
 
-  defp prepare_tool_cmd(cmd, env) do
+  defp prepare_tool_cmd(cmd, env, _opts) do
     {cmd, env}
+  end
+
+  @enable_ansi_eval "Application.put_env(:elixir, :ansi_enabled, true, persistent: true)"
+
+  # Mix tasks executed by `mix check` are not run in a TTY and will by default not print ANSI
+  # characters in their output - which means no colors, no bold etc. This makes the tool output
+  # (e.g. assertion diffs from ex_unit) less useful. We explicitly enable ANSI to fix that.
+  defp enable_ansi(task = [task_name | _], env) do
+    # In order to enable ANSI, we must wrap the original mix task in `mix do` which will mean that
+    # its preferred CLI env won't be respected by default. We explicitly set MIX_ENV to fix that.
+    final_env = Map.put_new_lazy(env, "MIX_ENV", fn -> "#{Project.get_task_env(task_name)}" end)
+
+    {["mix", "do", "run", "-e", @enable_ansi_eval, "," | task], final_env}
   end
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
@@ -219,10 +225,6 @@ defmodule ExCheck.Check do
     if Keyword.get(opts, :skipped, true) do
       Printer.info([:cyan, "   ", :bright, to_string(name), :normal, " skipped due to "] ++ reason)
     end
-  end
-
-  defp print_summary_item({:disabled, _}, _) do
-    :ok
   end
 
   defp format_duration(secs) do
