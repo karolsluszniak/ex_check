@@ -157,7 +157,7 @@ defmodule ExCheck.Check do
     # its preferred CLI env won't be respected by default. We explicitly set MIX_ENV to fix that.
     final_env = Map.put_new_lazy(env, "MIX_ENV", fn -> "#{Project.get_task_env(task_name)}" end)
 
-    {["mix", "do", "run", "-e", @enable_ansi_eval, "," | task], final_env}
+    {["mix", "do", "run", "--no-start", "-e", @enable_ansi_eval, "," | task], final_env}
   end
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
