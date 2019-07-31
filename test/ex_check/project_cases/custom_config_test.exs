@@ -1,42 +1,47 @@
 defmodule ExCheck.ProjectCases.CustomConfigTest do
   use ExCheck.ProjectCase, async: true
 
-  test "custom config", %{project_dir: project_dir} do
-    elixir_with_release? = Version.match?(System.version(), ">= 1.9.0")
+  @config """
+  [
+    parallel: false,
+    skipped: false,
 
-    maybe_release_tool =
-      if elixir_with_release?,
-        do: ~S'{:release, order: 1, command: "mix release", env: %{"MIX_ENV" => "prod"}},',
-        else: ""
-
-    config = """
-    [
-      parallel: false,
-      skipped: false,
-
-      tools: [
-        {:compiler, false},
-        {:formatter, false},
-        {:ex_unit, order: 2, command: ~w[mix test --cover]},
-        #{maybe_release_tool}
-        {:my_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
-      ]
+    tools: [
+      {:compiler, false},
+      {:formatter, false},
+      {:ex_unit, order: 2, command: ~w[mix test --cover]},
+      {:my_task, order: 1, command: "mix my_task", env: %{"MIX_ENV" => "prod"}},
+      {:my_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
     ]
-    """
+  ]
+  """
 
+  @task ~S"""
+  defmodule Mix.Tasks.MyTask do
+    use Mix.Task
+
+    def run(_) do
+      IO.puts("my task #{Mix.env}")
+    end
+  end
+  """
+
+  @script """
+  #!/bin/bash
+  echo $1 $SOME
+  """
+
+  test "custom config", %{project_dir: project_dir} do
     config_path = Path.join(project_dir, ".check.exs")
-    File.write!(config_path, config)
+    File.write!(config_path, @config)
 
-    scripts_path = Path.join(project_dir, "scripts")
-    File.mkdir_p!(scripts_path)
+    task_path = Path.join([project_dir, "lib", "mix", "tasks", "my_task.ex"])
+    File.mkdir_p!(Path.dirname(task_path))
+    File.write!(task_path, @task)
 
-    script = """
-    #!/bin/bash
-    echo $1 $SOME
-    """
-
-    script_path = Path.join(scripts_path, "script.sh")
-    File.write!(script_path, script)
+    script_path = Path.join([project_dir, "scripts", "script.sh"])
+    File.mkdir_p!(Path.dirname(script_path))
+    File.write!(script_path, @script)
     File.chmod!(script_path, 0o755)
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir, stderr_to_stdout: true)
@@ -45,15 +50,13 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
     refute String.contains?(output, "formatter success")
     assert String.contains?(output, "ex_unit success")
     refute String.contains?(output, "credo skipped due to missing dependency credo")
+    assert String.contains?(output, "my_task success")
     assert String.contains?(output, "my_script success")
 
     assert String.contains?(output, "Generated HTML coverage results")
+    assert String.contains?(output, "my task prod")
     assert String.contains?(output, "a b xyz")
 
-    if elixir_with_release? do
-      assert String.contains?(output, "release success")
-      assert String.contains?(output, "Release created at _build/prod/rel/test_project")
-      assert String.match?(output, ~r/running release.*running ex_unit/s)
-    end
+    assert String.match?(output, ~r/running my_script.*running my_task.*running ex_unit/s)
   end
 end

@@ -2,8 +2,6 @@ defmodule ExCheck.ProjectCases.BaseTest do
   use ExCheck.ProjectCase, async: true
 
   test "base", %{project_dir: project_dir} do
-    set_mix_deps(project_dir, [:ex_check])
-
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
 
     assert String.contains?(output, "compiler success")

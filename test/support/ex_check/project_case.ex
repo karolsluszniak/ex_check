@@ -76,7 +76,28 @@ defmodule ExCheck.ProjectCase do
     File.write!(config_path, new_config)
     {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
     {_, 0} = System.cmd("mix", ~w[deps.get], cd: project_dir)
+  end
 
-    project_dir
+  def set_mix_app_mod(project_dir, mod) do
+    config_path = "#{project_dir}/mix.exs"
+    app_from = ~r/ *def application.*end\n/Us
+
+    app_to = """
+      def application do
+        [
+          mod: {#{mod}, []}
+        ]
+      end
+    """
+
+    new_config =
+      config_path
+      |> File.read!()
+      |> String.replace(app_from, app_to)
+
+    unless String.contains?(new_config, mod), do: raise("unable to set #{mod} app mod")
+
+    File.write!(config_path, new_config)
+    {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
   end
 end
