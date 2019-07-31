@@ -22,7 +22,7 @@ defmodule ExCheck.Check do
 
     reprint_errors(failed_results)
     print_summary(all_results, total_duration, opts)
-    maybe_halt_with_exit_status(failed_results, opts)
+    maybe_set_exit_status(failed_results)
   end
 
   defp run_compiler(tools, opts) do
@@ -235,10 +235,9 @@ defmodule ExCheck.Check do
     "#{min}:#{sec_str}"
   end
 
-  defp maybe_halt_with_exit_status(failed_tools, opts) do
-    if Keyword.get(opts, :exit_status, true) do
-      System.halt(length(failed_tools))
-      Process.sleep(:infinity)
+  defp maybe_set_exit_status(failed_tools) do
+    if Enum.any?(failed_tools) do
+      System.at_exit(fn _ -> exit({:shutdown, 1}) end)
     end
   end
 end

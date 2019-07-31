@@ -43,15 +43,16 @@ defmodule Mix.Tasks.Check do
   4. Summary is presented with a list of all tools that have failed, succeeded or were skipped due
      to missing files or project dependencies.
 
-  5. Task halts the VM with exit code that equals to the number of failed tools. This means non-zero
-     exit code if at least one tool has failed.
+  5. If any of the tools have failed, the Erlang system gets requested to emit exit status 1 upon
+     shutdown in order to make the CI build fail.
 
   ## Tool execution
 
   Tools are run in separate processes. This has following benefits:
 
   - allows to run tools in parallel & stream their output
-  - catches exit codes in order to detect failures
+  - catches exit statuses in order to detect failures
+  - enables running Mix tasks in multiple envs
   - enables including non-Elixir scripts and tools in the check
 
   The downside is that tools will be run without TTY which will usually result in tools disabling
@@ -70,7 +71,6 @@ defmodule Mix.Tasks.Check do
 
   Configuration file should evaluate to keyword list with following options:
 
-  - `:exit_status` - toggles halting EVM to return non-zero exit status (default: `true`)
   - `:parallel` - toggles running tools in parallel (default: `true`)
   - `:skipped` - toggles printing skipped tools in summary (default: `true`)
   - `:tools` - a list of tools to run (default: curated tools)
@@ -92,7 +92,6 @@ defmodule Mix.Tasks.Check do
 
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
-  - `--no-exit-status` - don't halt EVM to return non-zero exit status
   - `--no-parallel` - don't run tools in parallel
   - `--no-skipped` - don't print skipped tools in summary
 

@@ -11,9 +11,8 @@ defmodule ExCheck.ProjectCases.CustomConfigTest do
 
     config = """
     [
-      skipped: false,
-      exit_status: false,
       parallel: false,
+      skipped: false,
 
       tools: [
         {:compiler, false},

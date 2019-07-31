@@ -15,12 +15,11 @@ defmodule ExCheck.Config do
 
   @default_config [
     parallel: true,
-    exit_status: true,
     skipped: true,
     tools: @curated_tools
   ]
 
-  @option_list [:parallel, :exit_status, :skipped]
+  @option_list [:parallel, :skipped]
 
   @config_filename ".check.exs"
 
@@ -96,9 +95,8 @@ defmodule ExCheck.Config do
   @generated_config """
   [
     ## all available options with default values (see `mix check` docs for description)
-    # skipped: true,
-    # exit_status: true,
     # parallel: true,
+    # skipped: true,
 
     ## list of tools (see `mix check` docs for defaults)
     tools: [
