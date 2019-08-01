@@ -76,7 +76,7 @@ defmodule Mix.Tasks.Check do
   - `:skipped` - toggles printing skipped tools in summary (default: `true`)
   - `:tools` - a list of tools to run (default: curated tools)
 
-  Each tool is a`{:tool_name, opts}` tuple where `opts` is a keyword list with following options:
+  Each tool is a `{:tool_name, opts}` tuple where `opts` is a keyword list with following options:
 
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
@@ -86,6 +86,11 @@ defmodule Mix.Tasks.Check do
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:require_deps` - list of package atoms that must be present or tool will be skipped
   - `:require_files` - list of file name strings that must be present or tool will be skipped
+
+  You may also use one of the shorthand tool tuple forms:
+
+  - `{:tool_name, enabled}` where `enabled` is a boolean that translates into the `:enabled` option
+  - `{:tool_name, command}` where `command` is a binary that translates into the `:command` option
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 

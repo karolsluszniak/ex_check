@@ -38,7 +38,9 @@ defmodule ExCheck.Config do
     project_dirs = Project.get_mix_parent_dirs()
     dirs = user_dirs ++ project_dirs
 
-    Enum.reduce(dirs, @default_config, fn next_config_dir, config ->
+    default_config_normalized = normalize_config(@default_config)
+
+    Enum.reduce(dirs, default_config_normalized, fn next_config_dir, config ->
       next_config_filename =
         next_config_dir
         |> Path.join(@config_filename)
@@ -46,10 +48,22 @@ defmodule ExCheck.Config do
 
       if File.exists?(next_config_filename) do
         {next_config, _} = Code.eval_file(next_config_filename)
-        merge_config(config, next_config)
+        next_config_normalized = normalize_config(next_config)
+
+        merge_config(config, next_config_normalized)
       else
         config
       end
+    end)
+  end
+
+  defp normalize_config(config) do
+    Keyword.update(config, :tools, [], fn tools ->
+      Enum.map(tools, fn
+        {name, enabled} when is_boolean(enabled) -> {name, enabled: enabled}
+        {name, command} when is_binary(command) -> {name, command: command}
+        {name, opts} when is_list(opts) -> {name, opts}
+      end)
     end)
   end
 
@@ -74,9 +88,7 @@ defmodule ExCheck.Config do
   end
 
   defp merge_tool(tool, next_tool)
-  defp merge_tool(nil, {name, false}), do: raise("cannot disable undefined tool #{inspect(name)}")
   defp merge_tool(nil, next_tool), do: next_tool
-  defp merge_tool({name, opts}, {name, false}), do: {name, merge_tool_opts(opts, enabled: false)}
   defp merge_tool({name, opts}, {name, next_opts}), do: {name, merge_tool_opts(opts, next_opts)}
 
   defp merge_tool_opts(opts, next_opts) do
@@ -101,13 +113,13 @@ defmodule ExCheck.Config do
     ## list of tools (see `mix check` docs for defaults)
     tools: [
       ## curated tools may be disabled (e.g. the check for compilation warnings)
-      # {:compiler, enabled: false},
+      # {:compiler, false},
 
       ## ...or adjusted (e.g. use one-line formatter for more compact credo output)
-      # {:credo, command: "mix credo --format oneline"},
+      # {:credo, "mix credo --format oneline"},
 
       ## ...or reordered (e.g. to see output from ex_unit before others)
-      {:ex_unit, order: -1}
+      # {:ex_unit, order: -1},
 
       ## custom new tools may be added (mix tasks or arbitrary commands)
       # {:my_mix_task, command: "mix release", env: %{"MIX_ENV" => "prod"}},
