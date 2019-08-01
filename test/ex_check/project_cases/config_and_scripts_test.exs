@@ -51,6 +51,8 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     File.write!(shell_script_path, @shell_script)
     File.chmod!(shell_script_path, 0o755)
 
+    supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
+
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir, stderr_to_stdout: true)
 
     assert String.contains?(output, "compiler success")
@@ -63,7 +65,13 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
 
     assert String.contains?(output, "Generated HTML coverage results")
     assert String.contains?(output, IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod")
-    assert String.contains?(output, IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a")
+
+    if supports_erl_config do
+      assert String.contains?(output, IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a")
+    else
+      assert String.contains?(output, "my elixir script a")
+    end
+
     assert String.contains?(output, "my shell script a b xyz")
 
     assert String.match?(output, ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s)

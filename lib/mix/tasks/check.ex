@@ -55,10 +55,13 @@ defmodule Mix.Tasks.Check do
   - enables running Mix tasks in multiple envs
   - enables including non-Elixir scripts and tools in the check
 
-  The downside is that tools will be run outside of TTY which will usually result in tools disabling
-  ANSI formatting. This issue is fixed for Elixir commands (which often use `IO.ANSI.format/1` for
-  output formatting) by extending them with `--erl-config` option to load the Erlang configuration
-  provided by `ex_check` that sets the `ansi_enabled` flag.
+  The downside is that tools will be run outside of TTY which will usually result in disabling ANSI
+  formatting. This issue is fixed in different ways depending on Elixir version:
+
+  - **Elixir 1.9 and newer**: patches all Elixir commands and Mix tasks with `--erl-config` option
+    to load the Erlang configuration provided by `ex_check` that sets the `ansi_enabled` flag
+
+  - **older versions**: patches Mix tasks with `--eval` option to set the `ansi_enabled` flag
 
   ## Configuration file
 

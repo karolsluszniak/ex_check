@@ -137,7 +137,8 @@ defmodule ExCheck.Check do
 
   defp prepare_tool_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do
-      enable_ansi(cmd)
+      supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
+      enable_ansi(cmd, supports_erl_config)
     else
       cmd
     end
@@ -146,9 +147,17 @@ defmodule ExCheck.Check do
   # Elixir commands executed by `mix check` are not run in a TTY and will by default not print ANSI
   # characters in their output - which means no colors, no bold etc. This makes the tool output
   # (e.g. assertion diffs from ex_unit) less useful. We explicitly enable ANSI to fix that.
-  defp enable_ansi(["mix" | arg]), do: ["elixir", "--erl-config", erl_cfg_path(), "-S", "mix" | arg]
-  defp enable_ansi(["elixir" | arg]), do: ["elixir", "--erl-config", erl_cfg_path() | arg]
-  defp enable_ansi(cmd), do: cmd
+  defp enable_ansi(["mix" | arg], true),
+    do: ["elixir", "--erl-config", erl_cfg_path(), "-S", "mix" | arg]
+
+  defp enable_ansi(["elixir" | arg], true),
+    do: ["elixir", "--erl-config", erl_cfg_path() | arg]
+
+  defp enable_ansi(["mix" | arg], false),
+    do: ["elixir", "-e", "Application.put_env(:elixir, :ansi_enabled, true)", "-S", "mix" | arg]
+
+  defp enable_ansi(cmd, _),
+    do: cmd
 
   defp erl_cfg_path, do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
 
