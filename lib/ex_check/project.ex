@@ -11,17 +11,6 @@ defmodule ExCheck.Project do
     |> List.keymember?(name, 0)
   end
 
-  # sobelow_skip ["DOS.StringToAtom"]
-  def get_task_env(task) when is_binary(task) do
-    task
-    |> String.to_atom()
-    |> get_task_env()
-  end
-
-  def get_task_env(task) do
-    config()[:preferred_cli_env][task] || Mix.Task.preferred_cli_env(task) || :dev
-  end
-
   def get_mix_root_dir do
     if in_umbrella?() do
       "../.."

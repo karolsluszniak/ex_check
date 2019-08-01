@@ -118,8 +118,8 @@ defmodule ExCheck.Check do
     end
 
     env = Keyword.get(opts, :env, %{})
-    {final_cmd, final_env} = prepare_tool_cmd(cmd, env, opts)
-    final_opts = Keyword.merge(opts, stream: stream, silenced: true, env: final_env)
+    final_cmd = prepare_tool_cmd(cmd, opts)
+    final_opts = Keyword.merge(opts, stream: stream, env: env, silenced: true)
     task = Command.async(final_cmd, final_opts)
 
     {:running, {name, cmd, opts}, task}
@@ -129,39 +129,28 @@ defmodule ExCheck.Check do
     inactive_tool
   end
 
-  defp prepare_tool_cmd(cmd, env, opts) when is_binary(cmd) do
+  defp prepare_tool_cmd(cmd, opts) when is_binary(cmd) do
     cmd
     |> String.split(" ")
-    |> prepare_tool_cmd(env, opts)
+    |> prepare_tool_cmd(opts)
   end
 
-  defp prepare_tool_cmd(cmd = ["mix" | task], env, opts) do
+  defp prepare_tool_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do
-      enable_ansi(task, env)
+      enable_ansi(cmd)
     else
-      {cmd, env}
+      cmd
     end
   end
 
-  defp prepare_tool_cmd(cmd, env, _opts) do
-    {cmd, env}
-  end
-
-  @enable_ansi_eval ~S"""
-  Application.put_env(:elixir, :ansi_enabled, true, persistent: true)
-  Mix.Task.reenable("app.start")
-  """
-
-  # Mix tasks executed by `mix check` are not run in a TTY and will by default not print ANSI
+  # Elixir commands executed by `mix check` are not run in a TTY and will by default not print ANSI
   # characters in their output - which means no colors, no bold etc. This makes the tool output
   # (e.g. assertion diffs from ex_unit) less useful. We explicitly enable ANSI to fix that.
-  defp enable_ansi(task = [task_name | _], env) do
-    # In order to enable ANSI, we must wrap the original mix task in `mix do` which will mean that
-    # its preferred CLI env won't be respected by default. We explicitly set MIX_ENV to fix that.
-    final_env = Map.put_new_lazy(env, "MIX_ENV", fn -> "#{Project.get_task_env(task_name)}" end)
+  defp enable_ansi(["mix" | arg]), do: ["elixir", "--erl-config", erl_cfg_path(), "-S", "mix" | arg]
+  defp enable_ansi(["elixir" | arg]), do: ["elixir", "--erl-config", erl_cfg_path() | arg]
+  defp enable_ansi(cmd), do: cmd
 
-    {["mix", "do", "run", "--no-start", "-e", @enable_ansi_eval, "," | task], final_env}
-  end
+  defp erl_cfg_path, do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
     Printer.info([:magenta, "=> running ", :bright, to_string(name)])

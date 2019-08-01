@@ -55,9 +55,10 @@ defmodule Mix.Tasks.Check do
   - enables running Mix tasks in multiple envs
   - enables including non-Elixir scripts and tools in the check
 
-  The downside is that tools will be run without TTY which will usually result in tools disabling
-  ANSI formatting. This issue is fixed for mix tasks (which often depend on `IO.ANSI.format/1` for
-  output formatting) by wrapping them in `mix do` that explicitly enables ANSI.
+  The downside is that tools will be run outside of TTY which will usually result in tools disabling
+  ANSI formatting. This issue is fixed for Elixir commands (which often use `IO.ANSI.format/1` for
+  output formatting) by extending them with `--erl-config` option to load the Erlang configuration
+  provided by `ex_check` that sets the `ansi_enabled` flag.
 
   ## Configuration file
 
@@ -80,7 +81,7 @@ defmodule Mix.Tasks.Check do
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:enable_ansi` - toggles wrapping mix tasks to have ANSI enabled (default: `true`)
+  - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
   - `:enabled` - toggles including already defined tools in the check (default: `true`)
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:require_deps` - list of package atoms that must be present or tool will be skipped

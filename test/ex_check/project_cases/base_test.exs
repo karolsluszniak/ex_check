@@ -13,7 +13,5 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert String.contains?(output, "ex_doc skipped due to missing dependency ex_doc")
 
     assert String.contains?(output, "Randomized with seed")
-
-    assert String.contains?(output, IO.ANSI.green())
   end
 end
