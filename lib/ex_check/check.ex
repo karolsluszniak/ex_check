@@ -147,7 +147,10 @@ defmodule ExCheck.Check do
     {cmd, env}
   end
 
-  @enable_ansi_eval "Application.put_env(:elixir, :ansi_enabled, true, persistent: true)"
+  @enable_ansi_eval ~S"""
+  Application.put_env(:elixir, :ansi_enabled, true, persistent: true)
+  Mix.Task.reenable("app.start")
+  """
 
   # Mix tasks executed by `mix check` are not run in a TTY and will by default not print ANSI
   # characters in their output - which means no colors, no bold etc. This makes the tool output
