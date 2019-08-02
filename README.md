@@ -53,6 +53,16 @@ Optionally generate config to adjust the check:
 mix check.gen.config
 ```
 
+## Documentation
+
+Learn more about curated tools, workflow, tool execution, configuration file and command line options:
+
+```
+mix help check
+```
+
+Or [read docs on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html).
+
 ## Continuous Integration
 
 With `mix check` you can consistently run the same set of checks locally and on the CI. CI
@@ -81,12 +91,10 @@ cache:
     - deps
 ```
 
-## Documentation
+## Changelog
 
-Learn more about the task workflow, included tools, configuration and options:
+See [CHANGELOG.md](https://github.com/karolsluszniak/ex_check/blob/master/CHANGELOG.md).
 
-```
-mix help check
-```
+## License
 
-Read docs for `mix check` on HexDocs: [latest version](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html).
+See [LICENSE.md](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md).
