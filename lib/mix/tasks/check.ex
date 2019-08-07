@@ -46,7 +46,7 @@ defmodule Mix.Tasks.Check do
   5. If any of the tools have failed, the Erlang system gets requested to emit exit status 1 upon
      shutdown in order to make the CI build fail.
 
-  ## Tool execution
+  ### ANSI formatting
 
   Tools are run in separate processes. This has following benefits:
 
@@ -61,7 +61,11 @@ defmodule Mix.Tasks.Check do
   - **Elixir 1.9 and newer**: patches all Elixir commands and Mix tasks with `--erl-config` option
     to load the Erlang configuration provided by `ex_check` that sets the `ansi_enabled` flag
 
-  - **older versions**: patches Mix tasks with `--eval` option to set the `ansi_enabled` flag
+  - **older versions**: patches Mix tasks with `--eval` option to run `Application.put_env/3` that
+    sets the `ansi_enabled` flag
+
+  Take a look at the `:enable_ansi` tool option if you need to keep your Elixir commands unaffected.
+  It's ignored for non-Elixir tools for which you'll have to enforce ANSI on your own.
 
   ## Configuration file
 
@@ -87,8 +91,9 @@ defmodule Mix.Tasks.Check do
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
   - `:enabled` - toggles including already defined tools in the check (default: `true`)
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
-  - `:require_deps` - list of package atoms that must be present or tool will be skipped
-  - `:require_files` - list of file name strings that must be present or tool will be skipped
+  - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
+  - `:require_deps` - list of package names (atoms) that must be present or tool will be skipped
+  - `:require_files` - list of filenames (strings) that must be present or tool will be skipped
 
   You may also use one of the shorthand tool tuple forms:
 

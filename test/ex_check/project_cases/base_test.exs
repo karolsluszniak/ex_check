@@ -7,10 +7,10 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert String.contains?(output, "compiler success")
     assert String.contains?(output, "formatter success")
     assert String.contains?(output, "ex_unit success")
-    assert String.contains?(output, "credo skipped due to missing dependency credo")
-    assert String.contains?(output, "sobelow skipped due to missing dependency sobelow")
-    assert String.contains?(output, "dialyzer skipped due to missing dependency dialyxir")
-    assert String.contains?(output, "ex_doc skipped due to missing dependency ex_doc")
+    assert String.contains?(output, "credo skipped due to missing package credo")
+    assert String.contains?(output, "sobelow skipped due to missing package sobelow")
+    assert String.contains?(output, "dialyzer skipped due to missing package dialyxir")
+    assert String.contains?(output, "ex_doc skipped due to missing package ex_doc")
 
     assert String.contains?(output, "Randomized with seed")
   end

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Added** `:run_after` tool coonfiguration option (introducing powerful tool dependency system)
+
 ## v0.9.0
 
 - **Added** automatic ANSI enabling for arbitrary Elixir commands (and not just Mix tasks)

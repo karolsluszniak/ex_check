@@ -1,7 +1,7 @@
 defmodule ExCheck.Check do
   @moduledoc false
 
-  alias ExCheck.{Command, Config, Printer, Project}
+  alias ExCheck.{Command, Config, GraphExecutor, Printer, Project}
 
   def run(opts) do
     config = Config.load()
@@ -14,10 +14,11 @@ defmodule ExCheck.Check do
 
   defp compile_and_run_tools(tools, opts) do
     start_time = DateTime.utc_now()
-    compiler_result = run_compiler(tools, opts)
-    other_results = if run_others?(compiler_result), do: run_others(tools, opts), else: []
+    compiler = run_compiler(tools, opts)
+    finished = if run_others?(compiler), do: run_others(tools, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
-    all_results = [compiler_result | other_results]
+
+    all_results = [compiler | finished]
     failed_results = Enum.filter(all_results, &match?({:error, _, _}, &1))
 
     reprint_errors(failed_results)
@@ -40,25 +41,56 @@ defmodule ExCheck.Check do
   end
 
   defp run_others(tools, opts) do
-    tools =
+    {pending, skipped} =
       tools
       |> List.keydelete(:compiler, 0)
       |> Enum.sort_by(&get_tool_order/1)
       |> Enum.map(&prepare_tool(&1, opts))
       |> Enum.reject(&match?({:disabled, _}, &1))
+      |> Enum.split_with(&match?({:pending, _}, &1))
 
-    if Keyword.get(opts, :parallel, true) do
-      tools
-      |> Enum.map(&start_tool/1)
-      |> Enum.map(&await_tool/1)
-    else
-      Enum.map(tools, &run_tool/1)
-    end
+    {finished, broken} = run_tools(pending, opts)
+
+    new_skipped =
+      Enum.map(broken, fn {name, [unresolved_dep | _], _} ->
+        {:skipped, name, ["broken tool dependency ", :bright, to_string(unresolved_dep), :normal]}
+      end)
+
+    finished ++ skipped ++ new_skipped
+  end
+
+  # To better understand what's happening here and what exactly `GraphExecutor` does consider that
+  # if we wouldn't care about tool dependencies we could use following `run_tools` implementation:
+  #
+  #     defp run_tools(tools, opts) do
+  #       if Keyword.get(opts, :parallel, true) do
+  #         {tools |> Enum.map(&start_tool/1) |> Enum.map(&await_tool/1), []}
+  #       else
+  #         {Enum.map(tools, &run_tool/1), []}
+  #       end
+  #     end
+  #
+  # Refer to `GraphExecutor` code comments for more info.
+  defp run_tools(tools, opts) do
+    parallel = Keyword.get(opts, :parallel, true)
+
+    tool_deps =
+      Enum.map(tools, fn tool = {:pending, {name, _, opts}} ->
+        deps = Keyword.get(opts, :run_after, [])
+        {name, deps, tool}
+      end)
+
+    GraphExecutor.run(
+      tool_deps,
+      parallel: parallel,
+      start_fn: &start_tool/1,
+      collect_fn: &await_tool/1
+    )
   end
 
   defp prepare_tool({name, config}, opts) do
     command = Keyword.fetch!(config, :command)
-    command_opts = Keyword.take(config, [:cd, :env, :enable_ansi])
+    command_opts = Keyword.take(config, [:cd, :env, :enable_ansi, :run_after])
     require_deps = Keyword.get(config, :require_deps, [])
     require_files = Keyword.get(config, :require_files, [])
 
@@ -73,7 +105,7 @@ defmodule ExCheck.Check do
         {:disabled, name}
 
       missing_dep = find_missing_dep(require_deps) ->
-        {:skipped, name, ["missing dependency ", :bright, to_string(missing_dep), :normal]}
+        {:skipped, name, ["missing package ", :bright, to_string(missing_dep), :normal]}
 
       missing_file = find_missing_file(require_files) ->
         {:skipped, name, ["missing file ", :bright, missing_file, :normal]}
@@ -100,7 +132,6 @@ defmodule ExCheck.Check do
   end
 
   defp get_tool_order({_, opts}), do: Keyword.get(opts, :order, 0)
-  defp get_tool_order(_), do: 0
 
   defp run_tool(tool) do
     tool
@@ -123,10 +154,6 @@ defmodule ExCheck.Check do
     task = Command.async(final_cmd, final_opts)
 
     {:running, {name, cmd, opts}, task}
-  end
-
-  defp start_tool(inactive_tool) do
-    inactive_tool
   end
 
   defp prepare_tool_cmd(cmd, opts) when is_binary(cmd) do
@@ -177,10 +204,6 @@ defmodule ExCheck.Check do
     status = if code == 0, do: :ok, else: :error
 
     {status, {name, cmd, opts}, {code, output, duration}}
-  end
-
-  defp await_tool(inactive_tool) do
-    inactive_tool
   end
 
   defp output_needs_padding?(output) do

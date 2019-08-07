@@ -11,7 +11,7 @@ defmodule ExCheck.ProjectCases.ExternalToolsTest do
     assert String.contains?(output, "ex_unit success")
     assert String.contains?(output, "credo success")
     assert String.contains?(output, "sobelow success")
-    assert String.contains?(output, "dialyzer skipped due to missing dependency dialyxir")
+    assert String.contains?(output, "dialyzer skipped due to missing package dialyxir")
     assert String.contains?(output, "ex_doc success")
   end
 end

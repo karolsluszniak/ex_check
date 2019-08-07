@@ -58,7 +58,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     assert String.contains?(output, "compiler success")
     refute String.contains?(output, "formatter success")
     assert String.contains?(output, "ex_unit success")
-    refute String.contains?(output, "credo skipped due to missing dependency credo")
+    refute String.contains?(output, "credo skipped due to missing package credo")
     assert String.contains?(output, "my_mix_task success")
     assert String.contains?(output, "my_elixir_script success")
     assert String.contains?(output, "my_shell_script success")

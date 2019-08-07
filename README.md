@@ -12,6 +12,7 @@
 - Facilitates custom mix tasks and scripts acting as project checks
 - Delivers results faster by running & streaming tools in parallel
 - Identifies all project issues in one go by always running all tools
+- Supports cross-tool deps for ultimate control over check workflow
 - Takes care of the little details (compile once, enable ANSI etc)
 
 Read more and see demo on [Cloudless Studio blog](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools).
