@@ -111,8 +111,6 @@ defmodule Mix.Tasks.Check do
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
-  - `:require_deps` - list of package names (atoms) that must be present or tool will be skipped
-  - `:require_files` - list of filenames (strings) that must be present or tool will be skipped
 
   You may also use one of the shorthand tool tuple forms:
 

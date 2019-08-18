@@ -7,12 +7,12 @@ defmodule ExCheck.Config do
   # streaming to display as many outputs as possible as soon as possible.
   @curated_tools [
     {:compiler, command: "mix compile --warnings-as-errors --force"},
-    {:formatter, command: "mix format --check-formatted", require_files: [".formatter.exs"]},
-    {:credo, command: "mix credo", require_deps: [:credo]},
-    {:sobelow, command: "mix sobelow --exit --skip", require_deps: [:sobelow]},
-    {:ex_doc, command: "mix docs", require_deps: [:ex_doc]},
-    {:ex_unit, command: "mix test", require_files: ["test/test_helper.exs"]},
-    {:dialyzer, command: "mix dialyzer --halt-exit-status", require_deps: [:dialyxir]}
+    {:formatter, command: "mix format --check-formatted", detect: [{:file, ".formatter.exs"}]},
+    {:credo, command: "mix credo", detect: [{:package, :credo}]},
+    {:sobelow, command: "mix sobelow --exit --skip", detect: [{:package, :sobelow}]},
+    {:ex_doc, command: "mix docs", detect: [{:package, :ex_doc}]},
+    {:ex_unit, command: "mix test", detect: [{:file, "test/test_helper.exs"}]},
+    {:dialyzer, command: "mix dialyzer --halt-exit-status", detect: [{:package, :dialyxir}]}
   ]
 
   @default_config [

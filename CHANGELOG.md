@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Changed** tool autodetection to support detection order and disabling instead of skipping
+- **Removed** `:require_files` and `:require_deps` tool configuration options
+
 ## v0.10.0
 
 - **Added** `:run_after` tool coonfiguration option (introducing powerful tool dependency system)

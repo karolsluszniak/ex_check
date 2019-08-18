@@ -88,47 +88,64 @@ defmodule ExCheck.Check do
     )
   end
 
-  defp prepare_tool({name, config}, opts) do
-    command = Keyword.fetch!(config, :command)
-    command_opts = Keyword.take(config, [:cd, :env, :enable_ansi, :run_after])
-    require_deps = Keyword.get(config, :require_deps, [])
-    require_files = Keyword.get(config, :require_files, [])
-
+  defp prepare_tool({name, tool_opts}, opts) do
     cond do
-      Keyword.get(config, :enabled, true) == false ->
+      tool_disabled?(name, tool_opts, opts) ->
         {:disabled, name}
 
-      Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name})) ->
-        {:disabled, name}
+      failed_detection = find_failed_detection(tool_opts) ->
+        {base, opts} = failed_detection
 
-      Enum.any?(opts, fn i -> i == {:except, name} end) ->
-        {:disabled, name}
-
-      missing_dep = find_missing_dep(require_deps) ->
-        {:skipped, name, ["missing package ", :bright, to_string(missing_dep), :normal]}
-
-      missing_file = find_missing_file(require_files) ->
-        {:skipped, name, ["missing file ", :bright, missing_file, :normal]}
+        if Keyword.get(opts, :disable, false),
+          do: {:disabled, name},
+          else: {:skipped, name, get_failed_detection_message(base)}
 
       true ->
+        command = Keyword.fetch!(tool_opts, :command)
+        command_opts = Keyword.take(tool_opts, [:cd, :env, :enable_ansi, :run_after])
+
         {:pending, {name, command, command_opts}}
     end
   end
 
-  defp find_missing_dep(require_deps) do
-    Enum.find(require_deps, &(not Project.has_dep?(&1)))
+  defp tool_disabled?(name, tool_opts, opts) do
+    Keyword.get(tool_opts, :enabled, true) == false ||
+      (Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name}))) ||
+      Enum.any?(opts, fn i -> i == {:except, name} end)
   end
 
-  defp find_missing_file(require_files) do
+  defp find_failed_detection(tool_opts) do
+    tool_opts
+    |> Keyword.get(:detect, [])
+    |> Enum.map(&split_detection_opts/1)
+    |> Enum.find(fn {base, _} -> failed_detection?(base) end)
+  end
+
+  defp split_detection_opts({:package, name, opts}), do: {{:package, name}, opts}
+  defp split_detection_opts({:package, name}), do: {{:package, name}, []}
+  defp split_detection_opts({:file, name, opts}), do: {{:file, name}, opts}
+  defp split_detection_opts({:file, name}), do: {{:file, name}, []}
+
+  defp failed_detection?({:package, name}) do
+    not Project.has_dep?(name)
+  end
+
+  defp failed_detection?({:file, name}) do
     dirs = Project.get_mix_child_dirs()
 
-    Enum.find(require_files, fn file ->
-      not Enum.any?(dirs, fn dir ->
-        dir
-        |> Path.join(file)
-        |> File.exists?()
-      end)
+    not Enum.any?(dirs, fn dir ->
+      dir
+      |> Path.join(name)
+      |> File.exists?()
     end)
+  end
+
+  defp get_failed_detection_message({:package, name}) do
+    ["missing package ", :bright, to_string(name), :normal]
+  end
+
+  defp get_failed_detection_message({:file, name}) do
+    ["missing file ", :bright, name, :normal]
   end
 
   defp get_tool_order({_, opts}), do: Keyword.get(opts, :order, 0)
