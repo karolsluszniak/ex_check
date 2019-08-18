@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.10.0
 
 - **Added** `:run_after` tool coonfiguration option (introducing powerful tool dependency system)
 
