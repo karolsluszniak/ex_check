@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- **Added** tool skipping if `cd` tool option points to non-existing directory
 - **Changed** tool autodetection to support detection order and disabling instead of skipping
 - **Removed** `:require_files` and `:require_deps` tool configuration options
 

@@ -9,7 +9,7 @@ defmodule ExCheck.ProjectCases.DetectTest do
   ]
   """
 
-  test "config and scripts", %{project_dir: project_dir} do
+  test "detect", %{project_dir: project_dir} do
     config_path = Path.join(project_dir, ".check.exs")
     File.write!(config_path, @config)
 

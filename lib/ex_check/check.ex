@@ -100,6 +100,9 @@ defmodule ExCheck.Check do
           do: {:disabled, name},
           else: {:skipped, name, get_failed_detection_message(base)}
 
+      tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
+        {:skipped, name, ["missing directory ", :bright, tool_opts[:cd], :normal]}
+
       true ->
         command = Keyword.fetch!(tool_opts, :command)
         command_opts = Keyword.take(tool_opts, [:cd, :env, :enable_ansi, :run_after])
