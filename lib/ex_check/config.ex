@@ -3,14 +3,16 @@ defmodule ExCheck.Config do
 
   alias ExCheck.{Printer, Project}
 
+  # Default tool order tries to put short-running tools first in order for sequential output
+  # streaming to display as many outputs as possible as soon as possible.
   @curated_tools [
     {:compiler, command: "mix compile --warnings-as-errors --force"},
     {:formatter, command: "mix format --check-formatted", require_files: [".formatter.exs"]},
-    {:ex_unit, command: "mix test", require_files: ["test/test_helper.exs"]},
     {:credo, command: "mix credo", require_deps: [:credo]},
     {:sobelow, command: "mix sobelow --exit --skip", require_deps: [:sobelow]},
-    {:dialyzer, command: "mix dialyzer --halt-exit-status", require_deps: [:dialyxir]},
-    {:ex_doc, command: "mix docs", require_deps: [:ex_doc]}
+    {:ex_doc, command: "mix docs", require_deps: [:ex_doc]},
+    {:ex_unit, command: "mix test", require_files: ["test/test_helper.exs"]},
+    {:dialyzer, command: "mix dialyzer --halt-exit-status", require_deps: [:dialyxir]}
   ]
 
   @default_config [

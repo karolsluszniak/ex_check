@@ -46,7 +46,15 @@ defmodule Mix.Tasks.Check do
   5. If any of the tools have failed, the Erlang system gets requested to emit exit status 1 upon
      shutdown in order to make the CI build fail.
 
-  ### ANSI formatting
+  ### Tool order
+
+  Tools are run in parallel, but their output is presented one by one in order to avoid mixing it
+  up. You can control the order in which the output is presented for tools that have started at the
+  same time via the `:order` tool option. You'll probably want to put tools that run quicker and
+  fail more often before the others in order to get useful feedback as soon as possible. Curated
+  tools are ordered in such a way out of the box.
+
+  ### Tool processes and ANSI formatting
 
   Tools are run in separate processes. This has following benefits:
 
@@ -64,8 +72,19 @@ defmodule Mix.Tasks.Check do
   - **older versions**: patches Mix tasks with `--eval` option to run `Application.put_env/3` that
     sets the `ansi_enabled` flag
 
-  Take a look at the `:enable_ansi` tool option if you need to keep your Elixir commands unaffected.
-  It's ignored for non-Elixir tools for which you'll have to enforce ANSI on your own.
+  You may keep your Elixir commands unaffected via the `:enable_ansi` tool option. It's ignored for
+  non-Elixir tools for which you'll have to enforce ANSI on your own.
+
+  ### Cross-tool dependencies
+
+  Even though tools are run in parallel, it's possible to make sure that specific tool will be run
+  only after other(s) are completed via the `:run_after` tool option. This enables defining complex
+  workflows in which tools may reuse artifacts from ones executed earlier or they may be forced not
+  to run at the same time without giving up on entire parallel execution.
+
+  Note that tools will be run regardless of the exit status of their `:run_after` dependencies, but
+  they'll be skipped if their dependencies won't be run at all e.g. due to using `--except` command
+  line option or a missing/circular dependency.
 
   ## Configuration file
 
@@ -85,13 +104,13 @@ defmodule Mix.Tasks.Check do
 
   Each tool is a `{:tool_name, opts}` tuple where `opts` is a keyword list with following options:
 
+  - `:enabled` - enables/disables already defined tools (default: `true`)
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
-  - `:enabled` - toggles including already defined tools in the check (default: `true`)
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
+  - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
   - `:require_deps` - list of package names (atoms) that must be present or tool will be skipped
   - `:require_files` - list of filenames (strings) that must be present or tool will be skipped
 
