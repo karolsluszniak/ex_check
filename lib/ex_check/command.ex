@@ -69,6 +69,11 @@ defmodule ExCheck.Command do
   defp handle_port(port, stream_fn, output, silenced, start_time) do
     receive do
       {^port, {:data, data}} ->
+        data =
+          if output == "",
+            do: String.replace(data, ~r/^\s*/, ""),
+            else: data
+
         unless silenced, do: stream_fn.(data)
         handle_port(port, stream_fn, output <> data, silenced, start_time)
 

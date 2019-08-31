@@ -44,6 +44,9 @@ defmodule ExCheck.Check do
     {pending, skipped} =
       tools
       |> List.keydelete(:compiler, 0)
+      |> filter_apps_in_umbrella()
+      |> unwrap_recursive_tools()
+      |> map_recursive_tool_dependents()
       |> Enum.sort_by(&get_tool_order/1)
       |> Enum.map(&prepare_tool(&1, opts))
       |> Enum.reject(&match?({:disabled, _}, &1))
@@ -52,12 +55,186 @@ defmodule ExCheck.Check do
     {finished, broken} = run_tools(pending, opts)
 
     new_skipped =
-      Enum.map(broken, fn {name, [unresolved_dep | _], _} ->
-        {:skipped, name, ["broken tool dependency ", :bright, to_string(unresolved_dep), :normal]}
+      Enum.map(broken, fn {name, [dep | _], _} ->
+        {:skipped, name, {:run_after, dep}}
       end)
 
     finished ++ skipped ++ new_skipped
   end
+
+  defp filter_apps_in_umbrella(tools) do
+    app = Project.config()[:app]
+
+    if Project.in_umbrella?() do
+      Enum.filter(tools, fn {_, tool_opts} ->
+        enabled_apps = get_in(tool_opts, [:umbrella, :apps])
+        !enabled_apps || Enum.member?(enabled_apps, app)
+      end)
+    else
+      tools
+    end
+  end
+
+  defp unwrap_recursive_tools(tools) do
+    Enum.reduce(tools, [], fn tool = {tool_name, tool_opts}, final_tools ->
+      recursive = tool_recursive?(tool_opts)
+
+      if recursive and Project.umbrella?() do
+        actual_apps_paths = Project.apps_paths()
+        enabled_apps = get_in(tool_opts, [:umbrella, :apps])
+
+        apps_paths =
+          if enabled_apps,
+            do: Map.take(actual_apps_paths, enabled_apps),
+            else: actual_apps_paths
+
+        tool_instances =
+          Enum.map(apps_paths, fn {app_name, app_dir} ->
+            final_tool_opts = Keyword.update(tool_opts, :cd, app_dir, &Path.join(app_dir, &1))
+            {{tool_name, app_name}, final_tool_opts}
+          end)
+
+        final_tools ++ tool_instances
+      else
+        final_tools ++ [tool]
+      end
+    end)
+  end
+
+  defp map_recursive_tool_dependents(tools) do
+    recursive_tools =
+      tools
+      |> Enum.filter(&match?({{_, _}, _}, &1))
+      |> Enum.group_by(fn {{name, _}, _} -> name end)
+
+    Enum.reduce(recursive_tools, tools, fn recursive_tool, dependent_tools ->
+      Enum.map(dependent_tools, fn {name, opts} ->
+        opts =
+          Keyword.update(opts, :run_after, [], fn deps ->
+            map_recursive_tool_dependent(name, deps, recursive_tool)
+          end)
+
+        {name, opts}
+      end)
+    end)
+  end
+
+  defp map_recursive_tool_dependent(name, deps, {recursive_name, recursive_instances}) do
+    deps
+    |> Enum.map(fn dep ->
+      if dep == recursive_name do
+        case name do
+          {_, app} ->
+            {recursive_name, app}
+
+          _ ->
+            Enum.map(recursive_instances, &elem(&1, 0))
+        end
+      else
+        dep
+      end
+    end)
+    |> List.flatten()
+  end
+
+  defp tool_recursive?(tool_opts) do
+    case get_in(tool_opts, [:umbrella, :recursive]) do
+      nil ->
+        tool_opts
+        |> Keyword.fetch!(:command)
+        |> command_to_array()
+        |> mix_task_recursive?()
+
+      recursive ->
+        recursive
+    end
+  end
+
+  defp command_to_array(cmd) when is_list(cmd), do: cmd
+  defp command_to_array(cmd), do: String.split(cmd, " ")
+
+  defp mix_task_recursive?(["mix", task | _]) do
+    case Mix.Task.get(task) do
+      nil -> false
+      task_module -> Mix.Task.recursive(task_module)
+    end
+  end
+
+  defp mix_task_recursive?(_) do
+    true
+  end
+
+  defp prepare_tool({name, tool_opts}, opts) do
+    cond do
+      tool_disabled?(name, tool_opts, opts) ->
+        {:disabled, name}
+
+      failed_detection = find_failed_detection(name, tool_opts) ->
+        {base, opts} = failed_detection
+
+        if Keyword.get(opts, :disable, false),
+          do: {:disabled, name},
+          else: {:skipped, name, base}
+
+      tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
+        {:skipped, name, {:cd, tool_opts[:cd]}}
+
+      true ->
+        command = Keyword.fetch!(tool_opts, :command)
+        command_opts = Keyword.take(tool_opts, [:cd, :env, :enable_ansi, :run_after])
+
+        {:pending, {name, command, command_opts}}
+    end
+  end
+
+  defp tool_disabled?({name, _}, tool_opts, opts) do
+    tool_disabled?(name, tool_opts, opts)
+  end
+
+  defp tool_disabled?(name, tool_opts, opts) do
+    Keyword.get(tool_opts, :enabled, true) == false ||
+      (Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name}))) ||
+      Enum.any?(opts, fn i -> i == {:except, name} end)
+  end
+
+  defp find_failed_detection(name, tool_opts) do
+    tool_opts
+    |> Keyword.get(:detect, [])
+    |> Enum.map(&split_detection_opts/1)
+    |> Enum.map(fn {base, opts} -> {prepare_detection_base(base, name, tool_opts), opts} end)
+    |> Enum.find(fn {base, _} -> failed_detection?(base) end)
+  end
+
+  defp split_detection_opts({:package, name, opts}), do: {{:package, name}, opts}
+  defp split_detection_opts({:package, name}), do: {{:package, name}, []}
+  defp split_detection_opts({:file, name, opts}), do: {{:file, name}, opts}
+  defp split_detection_opts({:file, name}), do: {{:file, name}, []}
+
+  defp prepare_detection_base({:package, name}, {_, app}, _), do: {:package, name, app}
+  defp prepare_detection_base({:package, name}, _, _), do: {:package, name}
+
+  defp prepare_detection_base({:file, name}, _, tool_opts) do
+    filename =
+      tool_opts
+      |> Keyword.get(:cd, ".")
+      |> Path.join(name)
+
+    {:file, filename}
+  end
+
+  defp failed_detection?({:package, name, app}) do
+    not Project.has_dep_in_app?(name, app)
+  end
+
+  defp failed_detection?({:package, name}) do
+    not Project.has_dep?(name)
+  end
+
+  defp failed_detection?({:file, name}) do
+    not File.exists?(name)
+  end
+
+  defp get_tool_order({_, opts}), do: Keyword.get(opts, :order, 0)
 
   # To better understand what's happening here and what exactly `GraphExecutor` does consider that
   # if we wouldn't care about tool dependencies we could use following `run_tools` implementation:
@@ -88,71 +265,6 @@ defmodule ExCheck.Check do
     )
   end
 
-  defp prepare_tool({name, tool_opts}, opts) do
-    cond do
-      tool_disabled?(name, tool_opts, opts) ->
-        {:disabled, name}
-
-      failed_detection = find_failed_detection(tool_opts) ->
-        {base, opts} = failed_detection
-
-        if Keyword.get(opts, :disable, false),
-          do: {:disabled, name},
-          else: {:skipped, name, get_failed_detection_message(base)}
-
-      tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
-        {:skipped, name, ["missing directory ", :bright, tool_opts[:cd], :normal]}
-
-      true ->
-        command = Keyword.fetch!(tool_opts, :command)
-        command_opts = Keyword.take(tool_opts, [:cd, :env, :enable_ansi, :run_after])
-
-        {:pending, {name, command, command_opts}}
-    end
-  end
-
-  defp tool_disabled?(name, tool_opts, opts) do
-    Keyword.get(tool_opts, :enabled, true) == false ||
-      (Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name}))) ||
-      Enum.any?(opts, fn i -> i == {:except, name} end)
-  end
-
-  defp find_failed_detection(tool_opts) do
-    tool_opts
-    |> Keyword.get(:detect, [])
-    |> Enum.map(&split_detection_opts/1)
-    |> Enum.find(fn {base, _} -> failed_detection?(base) end)
-  end
-
-  defp split_detection_opts({:package, name, opts}), do: {{:package, name}, opts}
-  defp split_detection_opts({:package, name}), do: {{:package, name}, []}
-  defp split_detection_opts({:file, name, opts}), do: {{:file, name}, opts}
-  defp split_detection_opts({:file, name}), do: {{:file, name}, []}
-
-  defp failed_detection?({:package, name}) do
-    not Project.has_dep?(name)
-  end
-
-  defp failed_detection?({:file, name}) do
-    dirs = Project.get_mix_child_dirs()
-
-    not Enum.any?(dirs, fn dir ->
-      dir
-      |> Path.join(name)
-      |> File.exists?()
-    end)
-  end
-
-  defp get_failed_detection_message({:package, name}) do
-    ["missing package ", :bright, to_string(name), :normal]
-  end
-
-  defp get_failed_detection_message({:file, name}) do
-    ["missing file ", :bright, name, :normal]
-  end
-
-  defp get_tool_order({_, opts}), do: Keyword.get(opts, :order, 0)
-
   defp run_tool(tool) do
     tool
     |> start_tool()
@@ -176,16 +288,13 @@ defmodule ExCheck.Check do
     {:running, {name, cmd, opts}, task}
   end
 
-  defp prepare_tool_cmd(cmd, opts) when is_binary(cmd) do
-    cmd
-    |> String.split(" ")
-    |> prepare_tool_cmd(opts)
-  end
-
   defp prepare_tool_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do
       supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
-      enable_ansi(cmd, supports_erl_config)
+
+      cmd
+      |> command_to_array()
+      |> enable_ansi(supports_erl_config)
     else
       cmd
     end
@@ -209,7 +318,7 @@ defmodule ExCheck.Check do
   defp erl_cfg_path, do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
-    Printer.info([:magenta, "=> running ", :bright, to_string(name)])
+    Printer.info([:magenta, "=> running "] ++ format_tool_name(name))
     Printer.info()
     IO.write(IO.ANSI.faint())
 
@@ -232,7 +341,7 @@ defmodule ExCheck.Check do
 
   defp reprint_errors(failed_tools) do
     Enum.each(failed_tools, fn {_, {name, _, _}, {_, output, _}} ->
-      Printer.info([:red, "=> reprinting errors from ", :bright, to_string(name)])
+      Printer.info([:red, "=> reprinting errors from "] ++ format_tool_name(name))
       Printer.info()
       IO.write(output)
       if output_needs_padding?(output), do: Printer.info()
@@ -244,31 +353,69 @@ defmodule ExCheck.Check do
     Printer.info()
 
     items
-    |> Enum.sort()
+    |> Enum.sort_by(&get_summary_item_order/1)
     |> Enum.each(&print_summary_item(&1, opts))
 
     Printer.info()
   end
 
+  defp get_summary_item_order({:ok, {name, _, _}, _}), do: {0, normalize_tool_name(name)}
+  defp get_summary_item_order({:error, {name, _, _}, _}), do: {1, normalize_tool_name(name)}
+  defp get_summary_item_order({:skipped, name, _}), do: {2, normalize_tool_name(name)}
+
+  defp normalize_tool_name(name = {_, _}), do: name
+  defp normalize_tool_name(name), do: {name, 0}
+
   defp print_summary_item({:ok, {name, _, _}, {_, _, duration}}, _) do
+    name = format_tool_name(name)
     took = format_duration(duration)
-    name = to_string(name)
-    Printer.info([:green, " ✓ ", :bright, name, :normal, " success in ", :bright, took])
+    Printer.info([:green, " ✓ ", name, " success in ", b(took)])
   end
 
   defp print_summary_item({:error, {name, _, _}, {code, _, duration}}, _) do
-    n = :normal
-    b = :bright
-    name = to_string(name)
-    code_string = to_string(code)
+    name = format_tool_name(name)
     took = format_duration(duration)
-    Printer.info([:red, " ✕ ", b, name, n, " error code ", b, code_string, n, " in ", b, took])
+    Printer.info([:red, " ✕ ", name, " error code ", b(code), " in ", b(took)])
   end
 
   defp print_summary_item({:skipped, name, reason}, opts) do
     if Keyword.get(opts, :skipped, true) do
-      Printer.info([:cyan, "   ", :bright, to_string(name), :normal, " skipped due to "] ++ reason)
+      name = format_tool_name(name)
+      reason = format_skip_reason(reason)
+      Printer.info([:cyan, "   ", name, " skipped due to ", reason])
     end
+  end
+
+  defp format_skip_reason({:run_after, name}) do
+    ["broken tool dependency ", :bright, format_tool_name(name), :normal]
+  end
+
+  defp format_skip_reason({:package, name}) do
+    ["missing package ", :bright, to_string(name), :normal]
+  end
+
+  defp format_skip_reason({:package, name, app}) do
+    ["missing package ", b(name), " in ", b(app)]
+  end
+
+  defp format_skip_reason({:file, name}) do
+    ["missing file ", b(name)]
+  end
+
+  defp format_skip_reason({:cd, cd}) do
+    ["missing directory ", b(cd)]
+  end
+
+  defp format_tool_name(name) when is_atom(name) do
+    b(name)
+  end
+
+  defp format_tool_name({name, app}) when is_atom(name) do
+    [b(name), " in ", b(app)]
+  end
+
+  defp b(inner) do
+    [:bright, to_string(inner), :normal]
   end
 
   defp format_duration(secs) do

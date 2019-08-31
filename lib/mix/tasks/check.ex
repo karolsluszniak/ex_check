@@ -93,8 +93,7 @@ defmodule Mix.Tasks.Check do
 
   1. Default stock configuration.
   2. `.check.exs` in user home directory.
-  3. `.check.exs` in umbrella root directory when called from sub-project.
-  4. `.check.exs` in current project directory.
+  3. `.check.exs` in current project directory (or umbrella root for an umbrella project).
 
   Configuration file should evaluate to keyword list with following options:
 
@@ -111,11 +110,19 @@ defmodule Mix.Tasks.Check do
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
+  - `:umbrella` - configures the tool behaviour in an umbrella project (more info below)
+
+  `:umbrella` is a keyword list with following options:
+
+  - `:recursive` - toggles running the tool on each child app (default: `true` except non-recursive
+    Mix tasks)
+  - `:apps` - list of umbrella child apps targeted by the tool (default: all apps)
 
   You may also use one of the shorthand tool tuple forms:
 
-  - `{:tool_name, enabled}` where `enabled` is a boolean that translates into the `:enabled` option
-  - `{:tool_name, command}` where `command` is a binary that translates into the `:command` option
+  - `{:tool_name, enabled}` where `enabled` is a boolean with the `:enabled` option
+  - `{:tool_name, command}` where `command` is a binary with the `:command` option
+  - `{:tool_name, command, opts}` where `command` is a binary with the `:command` option
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 

@@ -6,13 +6,14 @@ defmodule ExCheck.Config do
   # Default tool order tries to put short-running tools first in order for sequential output
   # streaming to display as many outputs as possible as soon as possible.
   @curated_tools [
-    {:compiler, command: "mix compile --warnings-as-errors --force"},
-    {:formatter, command: "mix format --check-formatted", detect: [{:file, ".formatter.exs"}]},
-    {:credo, command: "mix credo", detect: [{:package, :credo}]},
-    {:sobelow, command: "mix sobelow --exit --skip", detect: [{:package, :sobelow}]},
-    {:ex_doc, command: "mix docs", detect: [{:package, :ex_doc}]},
-    {:ex_unit, command: "mix test", detect: [{:file, "test/test_helper.exs"}]},
-    {:dialyzer, command: "mix dialyzer --halt-exit-status", detect: [{:package, :dialyxir}]}
+    {:compiler, "mix compile --warnings-as-errors --force"},
+    {:formatter, "mix format --check-formatted", detect: [{:file, ".formatter.exs"}]},
+    {:credo, "mix credo", detect: [{:package, :credo}]},
+    {:sobelow, "mix sobelow --exit", umbrella: [recursive: true], detect: [{:package, :sobelow}]},
+    {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
+    {:ex_unit, "mix test", detect: [{:file, "test/test_helper.exs"}]},
+    {:dialyzer, "mix dialyzer --halt-exit-status", detect: [{:package, :dialyxir}]},
+    {:js_test, "npm test", cd: "assets", detect: [{:file, "package.json", disable: true}]}
   ]
 
   @default_config [
@@ -37,8 +38,8 @@ defmodule ExCheck.Config do
   def load do
     user_home_dir = System.user_home()
     user_dirs = if user_home_dir, do: [user_home_dir], else: []
-    project_dirs = Project.get_mix_parent_dirs()
-    dirs = user_dirs ++ project_dirs
+    project_root_dir = Project.get_mix_root_dir()
+    dirs = user_dirs ++ [project_root_dir]
 
     default_config_normalized = normalize_config(@default_config)
 
@@ -62,9 +63,17 @@ defmodule ExCheck.Config do
   defp normalize_config(config) do
     Keyword.update(config, :tools, [], fn tools ->
       Enum.map(tools, fn
-        {name, enabled} when is_boolean(enabled) -> {name, enabled: enabled}
-        {name, command} when is_binary(command) -> {name, command: command}
-        {name, opts} when is_list(opts) -> {name, opts}
+        {name, opts} when is_list(opts) ->
+          {name, opts}
+
+        {name, enabled} when is_boolean(enabled) ->
+          {name, enabled: enabled}
+
+        {name, command} when is_binary(command) ->
+          {name, command: command}
+
+        {name, command, opts} when is_binary(command) and is_list(opts) ->
+          {name, Keyword.put(opts, :command, command)}
       end)
     end)
   end
