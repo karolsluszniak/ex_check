@@ -1,0 +1,243 @@
+defmodule ExCheck.Check.Compiler do
+  @moduledoc false
+
+  alias ExCheck.Project
+
+  def compile(tools, opts) do
+    {
+      process_compiler(tools, opts),
+      process_others(tools, opts)
+    }
+  end
+
+  defp process_compiler(tools, opts) do
+    compiler = List.keyfind(tools, :compiler, 0) || raise("compiler tool definition missing")
+    compiler = prepare(compiler, opts)
+
+    with {:disabled, _} <- compiler do
+      {:pending, {:compiler, ["mix", "compile"], []}}
+    end
+  end
+
+  defp process_others(tools, opts) do
+    tools
+    |> List.keydelete(:compiler, 0)
+    |> filter_apps_in_umbrella()
+    |> unwrap_recursive()
+    |> map_recursive_dependents()
+    |> Enum.sort_by(&get_order/1)
+    |> Enum.map(&prepare(&1, opts))
+    |> Enum.reject(&match?({:disabled, _}, &1))
+  end
+
+  defp filter_apps_in_umbrella(tools) do
+    app = Project.config()[:app]
+
+    if Project.in_umbrella?() do
+      Enum.filter(tools, fn {_, tool_opts} ->
+        enabled_apps = get_in(tool_opts, [:umbrella, :apps])
+        !enabled_apps || Enum.member?(enabled_apps, app)
+      end)
+    else
+      tools
+    end
+  end
+
+  defp unwrap_recursive(tools) do
+    Enum.reduce(tools, [], fn tool = {tool_name, tool_opts}, final_tools ->
+      recursive = recursive?(tool_opts)
+
+      if recursive and Project.umbrella?() do
+        actual_apps_paths = Project.apps_paths()
+        enabled_apps = get_in(tool_opts, [:umbrella, :apps])
+
+        apps_paths =
+          if enabled_apps,
+            do: Map.take(actual_apps_paths, enabled_apps),
+            else: actual_apps_paths
+
+        tool_instances =
+          Enum.map(apps_paths, fn {app_name, app_dir} ->
+            final_tool_opts = Keyword.update(tool_opts, :cd, app_dir, &Path.join(app_dir, &1))
+            {{tool_name, app_name}, final_tool_opts}
+          end)
+
+        final_tools ++ tool_instances
+      else
+        final_tools ++ [tool]
+      end
+    end)
+  end
+
+  defp map_recursive_dependents(tools) do
+    recursive_tools =
+      tools
+      |> Enum.filter(&match?({{_, _}, _}, &1))
+      |> Enum.group_by(fn {{name, _}, _} -> name end)
+
+    Enum.reduce(recursive_tools, tools, fn recursive_tool, tools ->
+      Enum.map(tools, fn {name, opts} ->
+        opts = map_recursive_dependent(name, opts, recursive_tool)
+        {name, opts}
+      end)
+    end)
+  end
+
+  defp map_recursive_dependent(name, opts, recursive_tool) do
+    Keyword.update(opts, :run_after, [], fn deps ->
+      do_map_recursive_dependent(name, deps, recursive_tool)
+    end)
+  end
+
+  defp do_map_recursive_dependent(name, deps, {recursive_name, recursive_instances}) do
+    deps
+    |> Enum.map(fn dep ->
+      if dep == recursive_name do
+        case name do
+          {_, app} ->
+            {recursive_name, app}
+
+          _ ->
+            Enum.map(recursive_instances, &elem(&1, 0))
+        end
+      else
+        dep
+      end
+    end)
+    |> List.flatten()
+  end
+
+  defp recursive?(tool_opts) do
+    case get_in(tool_opts, [:umbrella, :recursive]) do
+      nil ->
+        tool_opts
+        |> Keyword.fetch!(:command)
+        |> command_to_array()
+        |> mix_task_recursive?()
+
+      recursive ->
+        recursive
+    end
+  end
+
+  defp command_to_array(cmd) when is_list(cmd), do: cmd
+  defp command_to_array(cmd), do: String.split(cmd, " ")
+
+  defp mix_task_recursive?(["mix", task | _]) do
+    case Mix.Task.get(task) do
+      nil -> false
+      task_module -> Mix.Task.recursive(task_module)
+    end
+  end
+
+  defp mix_task_recursive?(_) do
+    true
+  end
+
+  defp prepare({name, tool_opts}, opts) do
+    cond do
+      disabled?(name, tool_opts, opts) ->
+        {:disabled, name}
+
+      failed_detection = find_failed_detection(name, tool_opts) ->
+        {base, opts} = failed_detection
+
+        if Keyword.get(opts, :disable, false),
+          do: {:disabled, name},
+          else: {:skipped, name, base}
+
+      tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
+        {:skipped, name, {:cd, tool_opts[:cd]}}
+
+      true ->
+        command =
+          tool_opts
+          |> Keyword.fetch!(:command)
+          |> prepare_cmd(tool_opts)
+
+        command_opts = Keyword.take(tool_opts, [:cd, :env, :run_after])
+
+        {:pending, {name, command, command_opts}}
+    end
+  end
+
+  defp disabled?({name, _}, tool_opts, opts) do
+    disabled?(name, tool_opts, opts)
+  end
+
+  defp disabled?(name, tool_opts, opts) do
+    Keyword.get(tool_opts, :enabled, true) == false ||
+      (Keyword.has_key?(opts, :only) && !Enum.any?(opts, &(&1 == {:only, name}))) ||
+      Enum.any?(opts, fn i -> i == {:except, name} end)
+  end
+
+  defp find_failed_detection(name, tool_opts) do
+    tool_opts
+    |> Keyword.get(:detect, [])
+    |> Enum.map(&split_detection_opts/1)
+    |> Enum.map(fn {base, opts} -> {prepare_detection_base(base, name, tool_opts), opts} end)
+    |> Enum.find(fn {base, _} -> failed_detection?(base) end)
+  end
+
+  defp split_detection_opts({:package, name, opts}), do: {{:package, name}, opts}
+  defp split_detection_opts({:package, name}), do: {{:package, name}, []}
+  defp split_detection_opts({:file, name, opts}), do: {{:file, name}, opts}
+  defp split_detection_opts({:file, name}), do: {{:file, name}, []}
+
+  defp prepare_detection_base({:package, name}, {_, app}, _), do: {:package, name, app}
+  defp prepare_detection_base({:package, name}, _, _), do: {:package, name}
+
+  defp prepare_detection_base({:file, name}, _, tool_opts) do
+    filename =
+      tool_opts
+      |> Keyword.get(:cd, ".")
+      |> Path.join(name)
+
+    {:file, filename}
+  end
+
+  defp failed_detection?({:package, name, app}) do
+    not Project.has_dep_in_app?(name, app)
+  end
+
+  defp failed_detection?({:package, name}) do
+    not Project.has_dep?(name)
+  end
+
+  defp failed_detection?({:file, name}) do
+    not File.exists?(name)
+  end
+
+  defp prepare_cmd(cmd, opts) do
+    if Keyword.get(opts, :enable_ansi, true) do
+      supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
+
+      cmd
+      |> command_to_array()
+      |> enable_ansi(supports_erl_config)
+    else
+      cmd
+      |> command_to_array()
+    end
+  end
+
+  # Elixir commands executed by `mix check` are not run in a TTY and will by default not print ANSI
+  # characters in their output - which means no colors, no bold etc. This makes the tool output
+  # (e.g. assertion diffs from ex_unit) less useful. We explicitly enable ANSI to fix that.
+  defp enable_ansi(["mix" | arg], true),
+    do: ["elixir", "--erl-config", enable_ansi_erl_cfg_path(), "-S", "mix" | arg]
+
+  defp enable_ansi(["elixir" | arg], true),
+    do: ["elixir", "--erl-config", enable_ansi_erl_cfg_path() | arg]
+
+  defp enable_ansi(["mix" | arg], false),
+    do: ["elixir", "-e", "Application.put_env(:elixir, :ansi_enabled, true)", "-S", "mix" | arg]
+
+  defp enable_ansi(cmd, _),
+    do: cmd
+
+  defp enable_ansi_erl_cfg_path,
+    do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
+
+  defp get_order({_, opts}), do: Keyword.get(opts, :order, 0)
+end

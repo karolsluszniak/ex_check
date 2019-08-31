@@ -1,4 +1,4 @@
-defmodule ExCheck.GraphExecutor do
+defmodule ExCheck.Check.Pipeline do
   @moduledoc false
 
   # This function takes `graph` in a form of list of tuples `{:a, [:b, :c], payload}` where:
@@ -18,6 +18,7 @@ defmodule ExCheck.GraphExecutor do
   # - a list of results of finished calls to `opts[:collect_fn]`
   # - a list of nodes that were never reached e.g. due to missing nodes or circular dependencies in
   #   form of tuples `{:a, [:b], payload}` where `[:b]` is a list of remaining dependencies
+
   def run(graph, opts) do
     loop({graph, [], nil, []}, opts)
   end

@@ -7,8 +7,6 @@ defmodule ExCheck.Command do
     |> await()
   end
 
-  def async(command, opts \\ [])
-
   def async([exec | args], opts) do
     stream_fn = parse_stream_option(opts)
     cd = Keyword.get(opts, :cd, ".")
@@ -49,11 +47,26 @@ defmodule ExCheck.Command do
     {output, status, duration}
   end
 
+  @ansi_code_regex ~r/(\x1b\[[0-9;]*m)/
+
   defp parse_stream_option(opts) do
     case Keyword.get(opts, :stream) do
-      true -> &IO.write/1
-      falsy when falsy in [nil, false] -> fn _ -> nil end
-      func when is_function(func) -> func
+      true ->
+        if Keyword.get(opts, :tint) && IO.ANSI.enabled?() do
+          fn output ->
+            output
+            |> String.replace(@ansi_code_regex, "\\1" <> IO.ANSI.faint())
+            |> IO.write()
+          end
+        else
+          &IO.write/1
+        end
+
+      falsy when falsy in [nil, false] ->
+        fn _ -> nil end
+
+      func when is_function(func) ->
+        func
     end
   end
 

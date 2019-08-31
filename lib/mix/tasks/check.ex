@@ -110,19 +110,19 @@ defmodule Mix.Tasks.Check do
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
   - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
-  - `:umbrella` - configures the tool behaviour in an umbrella project (more info below)
+  - `:umbrella` - configures the tool behaviour in an umbrella project
 
-  `:umbrella` is a keyword list with following options:
+  Umbrella configuration in `:umbrella` key is a keyword list with following options:
 
-  - `:recursive` - toggles running the tool on each child app (default: `true` except non-recursive
-    Mix tasks)
+  - `:recursive` - toggles running the tool on each child app separately as opposed to running it
+    once from umbrella root (default: `true` except for non-recursive Mix tasks)
   - `:apps` - list of umbrella child apps targeted by the tool (default: all apps)
 
   You may also use one of the shorthand tool tuple forms:
 
-  - `{:tool_name, enabled}` where `enabled` is a boolean with the `:enabled` option
-  - `{:tool_name, command}` where `command` is a binary with the `:command` option
-  - `{:tool_name, command, opts}` where `command` is a binary with the `:command` option
+  - `{:tool_name, enabled}` where `enabled` corresponds to the `:enabled` option
+  - `{:tool_name, command}` where `command` corresponds to the `:command` option
+  - `{:tool_name, command, opts}` where `command` corresponds to the `:command` option
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 

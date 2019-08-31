@@ -1,5 +1,6 @@
 [
   tools: [
-    {:dialyzer, enabled: false}
+    {:dialyzer, enabled: false},
+    {:sobelow, "mix sobelow --exit --skip"}
   ]
 ]
