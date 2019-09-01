@@ -5,6 +5,7 @@ defmodule ExCheck.Config.Loader do
   alias ExCheck.Project
 
   @config_filename ".check.exs"
+  @option_list [:parallel, :skipped]
 
   # sobelow_skip ["RCE.CodeModule"]
   def load do
@@ -13,9 +14,16 @@ defmodule ExCheck.Config.Loader do
     project_root_dir = Project.get_mix_root_dir()
     dirs = user_dirs ++ [project_root_dir]
 
-    default_config_normalized = normalize_config(DefaultConfig.get())
+    default_config = normalize_config(DefaultConfig.get())
+    config = load_from_dirs(dirs, default_config)
+    tools = Keyword.fetch!(config, :tools)
+    opts = Keyword.take(config, @option_list)
 
-    Enum.reduce(dirs, default_config_normalized, fn next_config_dir, config ->
+    {tools, opts}
+  end
+
+  defp load_from_dirs(dirs, default_config) do
+    Enum.reduce(dirs, default_config, fn next_config_dir, config ->
       next_config_filename =
         next_config_dir
         |> Path.join(@config_filename)
@@ -23,9 +31,9 @@ defmodule ExCheck.Config.Loader do
 
       if File.exists?(next_config_filename) do
         {next_config, _} = Code.eval_file(next_config_filename)
-        next_config_normalized = normalize_config(next_config)
+        next_config = normalize_config(next_config)
 
-        merge_config(config, next_config_normalized)
+        merge_config(config, next_config)
       else
         config
       end
@@ -35,7 +43,7 @@ defmodule ExCheck.Config.Loader do
   defp normalize_config(config) do
     Keyword.update(config, :tools, [], fn tools ->
       Enum.map(tools, fn
-        {name, opts} when is_list(opts) ->
+        {name, opts = [{_, _} | _]} ->
           {name, opts}
 
         {name, enabled} when is_boolean(enabled) ->
@@ -47,16 +55,14 @@ defmodule ExCheck.Config.Loader do
         {name, command = [arg | _]} when is_binary(arg) ->
           {name, command: command}
 
-        {name, command, opts} when is_binary(command) and is_list(opts) ->
+        {name, command, opts = [{_, _} | _]} when is_binary(command) ->
           {name, Keyword.put(opts, :command, command)}
 
-        {name, command = [arg | _], opts} when is_binary(arg) and is_list(opts) ->
+        {name, command = [arg | _], opts = [{_, _} | _]} when is_binary(arg) ->
           {name, Keyword.put(opts, :command, command)}
       end)
     end)
   end
-
-  @option_list [:parallel, :skipped]
 
   defp merge_config(config, next_config) do
     config_opts = Keyword.take(config, @option_list)

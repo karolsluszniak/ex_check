@@ -196,17 +196,9 @@ defmodule ExCheck.Check.Compiler do
     {:file, filename}
   end
 
-  defp failed_detection?({:package, name, app}) do
-    not Project.has_dep_in_app?(name, app)
-  end
-
-  defp failed_detection?({:package, name}) do
-    not Project.has_dep?(name)
-  end
-
-  defp failed_detection?({:file, name}) do
-    not File.exists?(name)
-  end
+  defp failed_detection?({:package, name, app}), do: not Project.has_dep_in_app?(name, app)
+  defp failed_detection?({:package, name}), do: not Project.has_dep?(name)
+  defp failed_detection?({:file, name}), do: not File.exists?(name)
 
   defp prepare_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do

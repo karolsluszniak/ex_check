@@ -5,17 +5,16 @@ defmodule ExCheck.Check do
   alias __MODULE__.{Compiler, Pipeline}
 
   def run(opts) do
-    config = Config.load()
-    tools_from_config = Config.get_tools(config)
-    opts_from_config = Config.get_opts(config)
-    opts_merged = Keyword.merge(opts_from_config, opts)
+    {tools, config_opts} = Config.load()
+    opts = Keyword.merge(config_opts, opts)
 
-    compile_and_run_tools(tools_from_config, opts_merged)
+    compile_and_run_tools(tools, opts)
   end
 
   defp compile_and_run_tools(tools, opts) do
-    start_time = DateTime.utc_now()
     {compiler, others} = Compiler.compile(tools, opts)
+
+    start_time = DateTime.utc_now()
     compiler_result = run_compiler(compiler)
     others_results = if run_others?(compiler_result), do: run_others(others, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
@@ -150,11 +149,11 @@ defmodule ExCheck.Check do
   end
 
   defp format_skip_reason({:run_after, name}) do
-    ["broken tool dependency ", :bright, format_tool_name(name), :normal]
+    ["broken tool dependency ", format_tool_name(name)]
   end
 
   defp format_skip_reason({:package, name}) do
-    ["missing package ", :bright, to_string(name), :normal]
+    ["missing package ", b(name)]
   end
 
   defp format_skip_reason({:package, name, app}) do
