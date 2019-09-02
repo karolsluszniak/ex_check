@@ -45,8 +45,6 @@ defmodule ExCheck.Check do
   end
 
   defp run_tools(tools, opts) do
-    parallel = Keyword.get(opts, :parallel, true)
-
     tool_deps =
       Enum.map(tools, fn tool = {:pending, {name, _, opts}} ->
         deps = Keyword.get(opts, :run_after, [])
@@ -56,7 +54,7 @@ defmodule ExCheck.Check do
     {finished, broken} =
       Pipeline.run(
         tool_deps,
-        parallel: parallel,
+        throttle_fn: &throttle_tools(&1, &2, opts),
         start_fn: &start_tool/1,
         collect_fn: &await_tool/1
       )
@@ -71,6 +69,41 @@ defmodule ExCheck.Check do
     |> start_tool()
     |> await_tool()
   end
+
+  defp throttle_tools(selected, running, opts) do
+    parallel = Keyword.get(opts, :parallel, true)
+
+    selected
+    |> throttle_parallel(running, parallel)
+    |> throttle_umbrella_parallel(running)
+  end
+
+  defp throttle_parallel(selected, _, true), do: selected
+  defp throttle_parallel([first_selected | _], [], false), do: [first_selected]
+  defp throttle_parallel(_, _, false), do: []
+
+  defp throttle_umbrella_parallel(selected, running) do
+    running_names = Enum.map(running, &elem(&1, 0))
+
+    Enum.reduce(selected, [], fn next = {name, _, {:pending, {_, _, opts}}}, approved ->
+      approved_names = Enum.map(approved, &elem(&1, 0))
+
+      if opts[:umbrella_parallel] == false &&
+           (includes_umbrella_instance_from_same_app?(running_names, name) ||
+              includes_umbrella_instance_from_same_app?(approved_names, name)) do
+        approved
+      else
+        approved ++ [next]
+      end
+    end)
+  end
+
+  defp includes_umbrella_instance_from_same_app?(names, match_name) do
+    Enum.any?(names, &umbrella_instance_from_same_app?(&1, match_name))
+  end
+
+  defp umbrella_instance_from_same_app?({name, _}, {name, _}), do: true
+  defp umbrella_instance_from_same_app?(_, _), do: false
 
   defp start_tool({:pending, {name, cmd, opts}}) do
     opts = Keyword.merge(opts, stream: true, silenced: true, tint: IO.ANSI.faint())

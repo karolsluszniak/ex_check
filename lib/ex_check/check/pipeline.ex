@@ -6,8 +6,8 @@ defmodule ExCheck.Check.Pipeline do
   # - `[:b, :c]` are names of nodes that `:a` depends on
   # - `payload` is arbitrary data used to call `opts[:start_fn]`
   #
-  # It executes `opts[:start_fn]` with `payload` for nodes without uncollected dependencies. This is
-  # done in parallel unless `opts[:parallel]` is false.
+  # It executes `opts[:start_fn]` with `payload` for nodes without uncollected dependencies that
+  # have passed through `opts[:throttle_fn]` (which can be used to throttle the parallel execution).
   #
   # At the same time `opts[:collect_fn]` is called with result of `opts[:start_fn]`. This is done
   # sequentially in the order in which `opts[:start_fn]` were called. Each time `opts[:collect_fn]`
@@ -39,29 +39,20 @@ defmodule ExCheck.Check.Pipeline do
   end
 
   defp run_next(pending, running, opts) do
-    parallel = Keyword.fetch!(opts, :parallel)
+    throttle_fn = Keyword.fetch!(opts, :throttle_fn)
     start_fn = Keyword.fetch!(opts, :start_fn)
     collect_fn = Keyword.fetch!(opts, :collect_fn)
 
-    {next_for_running, pending} = prepare_next(pending, running, parallel)
-    new_running = start_next(next_for_running, start_fn, collect_fn)
-    {pending, running ++ new_running}
+    selected = select_next(pending, running, throttle_fn)
+    new_running = start_next(selected, start_fn, collect_fn)
+
+    {pending -- selected, running ++ new_running}
   end
 
-  defp prepare_next(pending, _, true) do
-    Enum.split_with(pending, fn {_, deps, _} -> deps == [] end)
-  end
+  defp select_next(pending, running, throttle_fn) do
+    selected_no_deps = Enum.filter(pending, fn {_, deps, _} -> deps == [] end)
 
-  defp prepare_next(pending, [], false) do
-    new_running = Enum.find(pending, fn {_, deps, _} -> deps == [] end)
-
-    if new_running,
-      do: {[new_running], List.delete(pending, new_running)},
-      else: {[], pending}
-  end
-
-  defp prepare_next(pending, _, false) do
-    {[], pending}
+    throttle_fn.(selected_no_deps, running)
   end
 
   defp start_next(new_running, start_fn, collect_fn) do

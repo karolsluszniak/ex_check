@@ -27,6 +27,9 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
+  - [`:js_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
+    directory and `package.json` in it (default for Phoenix apps)
+
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
   ## Workflow
@@ -112,10 +115,11 @@ defmodule Mix.Tasks.Check do
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
   - `:umbrella` - configures the tool behaviour in an umbrella project
 
-  Umbrella configuration in `:umbrella` key is a keyword list with following options:
+  Umbrella configuration under `:umbrella` key is a keyword list with following options:
 
   - `:recursive` - toggles running the tool on each child app separately as opposed to running it
     once from umbrella root (default: `true` except for non-recursive Mix tasks)
+  - `:parallel` - toggles running tool in parallel on all child apps (default: `true`)
   - `:apps` - list of umbrella child apps targeted by the tool (default: all apps)
 
   You may also use one of the shorthand tool tuple forms:
@@ -140,6 +144,7 @@ defmodule Mix.Tasks.Check do
   [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:dialyzer`]: https://hexdocs.pm/dialyxir
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
+  [`:js_test`]: https://docs.npmjs.com/cli/test.html
   """
 
   use Mix.Task

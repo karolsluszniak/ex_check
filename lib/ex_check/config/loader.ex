@@ -7,7 +7,6 @@ defmodule ExCheck.Config.Loader do
   @config_filename ".check.exs"
   @option_list [:parallel, :skipped]
 
-  # sobelow_skip ["RCE.CodeModule"]
   def load do
     user_home_dir = System.user_home()
     user_dirs = if user_home_dir, do: [user_home_dir], else: []
@@ -22,6 +21,7 @@ defmodule ExCheck.Config.Loader do
     {tools, opts}
   end
 
+  # sobelow_skip ["RCE.CodeModule"]
   defp load_from_dirs(dirs, default_config) do
     Enum.reduce(dirs, default_config, fn next_config_dir, config ->
       next_config_filename =

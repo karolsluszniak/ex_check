@@ -153,9 +153,13 @@ defmodule ExCheck.Check.Compiler do
         command =
           tool_opts
           |> Keyword.fetch!(:command)
-          |> prepare_cmd(tool_opts)
+          |> command_to_array()
+          |> postprocess_cmd(tool_opts)
 
-        command_opts = Keyword.take(tool_opts, [:cd, :env, :run_after])
+        command_opts =
+          tool_opts
+          |> Keyword.take([:cd, :env, :run_after])
+          |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
 
         {:pending, {name, command, command_opts}}
     end
@@ -200,16 +204,13 @@ defmodule ExCheck.Check.Compiler do
   defp failed_detection?({:package, name}), do: not Project.has_dep?(name)
   defp failed_detection?({:file, name}), do: not File.exists?(name)
 
-  defp prepare_cmd(cmd, opts) do
+  defp postprocess_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do
       supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
 
-      cmd
-      |> command_to_array()
-      |> enable_ansi(supports_erl_config)
+      enable_ansi(cmd, supports_erl_config)
     else
       cmd
-      |> command_to_array()
     end
   end
 
