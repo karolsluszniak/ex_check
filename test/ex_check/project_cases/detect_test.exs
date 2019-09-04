@@ -4,7 +4,7 @@ defmodule ExCheck.ProjectCases.DetectTest do
   @config """
   [
     tools: [
-      {:dialyzer, detect: [{:package, :dialyxir, disable: true}]}
+      {:dialyzer, detect: [{:package, :dialyxir, else: :disable}]}
     ]
   ]
   """

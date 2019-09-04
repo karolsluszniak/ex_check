@@ -142,9 +142,10 @@ defmodule ExCheck.Check.Compiler do
       failed_detection = find_failed_detection(name, tool_opts) ->
         {base, opts} = failed_detection
 
-        if Keyword.get(opts, :disable, false),
-          do: {:disabled, name},
-          else: {:skipped, name, base}
+        case Keyword.get(opts, :else, :skip) do
+          :disable -> {:disabled, name}
+          :skip -> {:skipped, name, base}
+        end
 
       tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
         {:skipped, name, {:cd, tool_opts[:cd]}}
