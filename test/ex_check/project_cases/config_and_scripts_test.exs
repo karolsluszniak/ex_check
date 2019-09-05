@@ -12,7 +12,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
       {:ex_unit, order: 2, command: ~w[mix test --cover]},
       {:my_mix_task, order: 1, command: "mix my_task a", env: %{"MIX_ENV" => "prod"}},
       {:my_elixir_script, "elixir priv/scripts/script.exs a"},
-      {:my_shell_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
+      {:my_shell_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}},
     ]
   ]
   """

@@ -4,7 +4,8 @@ defmodule ExCheck.ProjectCases.DetectTest do
   @config """
   [
     tools: [
-      {:dialyzer, detect: [{:package, :dialyxir, else: :disable}]}
+      {:dialyzer, detect: [{:package, :dialyxir, else: :disable}]},
+      {:bad_dir, ["my", "command"], cd: "bad_directory"}
     ]
   ]
   """
@@ -16,6 +17,7 @@ defmodule ExCheck.ProjectCases.DetectTest do
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
 
     assert String.contains?(output, "credo skipped due to missing package credo")
+    assert String.contains?(output, "bad_dir skipped due to missing directory bad_directory")
     refute String.contains?(output, "dialyzer skipped")
   end
 end
