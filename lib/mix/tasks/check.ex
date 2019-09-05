@@ -27,7 +27,7 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
-  - [`:js_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
+  - [`:npm_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
     directory and `package.json` in it (default for Phoenix apps)
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
@@ -144,7 +144,7 @@ defmodule Mix.Tasks.Check do
   [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:dialyzer`]: https://hexdocs.pm/dialyxir
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
-  [`:js_test`]: https://docs.npmjs.com/cli/test.html
+  [`:npm_test`]: https://docs.npmjs.com/cli/test.html
   """
 
   use Mix.Task
