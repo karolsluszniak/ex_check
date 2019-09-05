@@ -89,6 +89,28 @@ defmodule Mix.Tasks.Check do
   they'll be skipped if their dependencies won't be run at all e.g. due to using `--except` command
   line option or a missing/circular dependency.
 
+  ### Umbrella projects
+
+  Task comes with extensive support for umbrella projects. The most notable feature is the ability
+  to run tools recursively for each child app separately. It's similar to flagging Mix tasks as
+  recursive but empowered with following extra benefits:
+
+  - runs recursively not just Mix tasks, but also arbitrary scripts & commands
+  - runs tools on child apps in parallel
+  - allows tools to target only specific child apps
+  - presents failures & run durations for each child app separately
+  - detects if curated tools should run for each child app separately
+  - builds separate cross-tool dependency chains for each child app
+
+  You may want to disable parallel execution of the tool on child apps (`parallel: false` under
+  `:umbrella` tool option) if it uses the same resources across tool runs against different child
+  apps. An example of that could be `ex_unit` that, depending on a project and test dependencies,
+  may involve mutating the same database in test suites belonging to separate child apps.
+
+  You may have the tool run *only* at the root level of the umbrella by disabling the recursive
+  execution (`recursive: false` under `:umbrella` tool option) and targeting an empty list of child
+  apps (`apps: []` under `:umbrella` tool option).
+
   ## Configuration file
 
   Check configuration may be adjusted with the optional `.check.exs` file. Task will load the
@@ -120,7 +142,7 @@ defmodule Mix.Tasks.Check do
   - `:recursive` - toggles running the tool on each child app separately as opposed to running it
     once from umbrella root (default: `true` except for non-recursive Mix tasks)
   - `:parallel` - toggles running tool in parallel on all child apps (default: `true`)
-  - `:apps` - list of umbrella child apps targeted by the tool (default: all apps)
+  - `:apps` - list of umbrella child app names targeted by the tool (default: all apps)
 
   You may also use one of the shorthand tool tuple forms:
 
