@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **Added** support for parallel & sequential recursive tool execution in umbrella projects
+- **Added** support for tool to target only specific umbrella child app(s)
+- **Added** `:npm_test` tool for seamless integration of testing assets in Phoenix projects
+- **Added** tool skipping if `cd` tool option points to non-existing directory
+- **Added** `{:tool_name, command, opts}` shorthand tool tuples
+- **Changed** tool autodetection to support detection order and disabling instead of skipping
+- **Fixed** `{:tool_name, command}` tool tuples to support lists of strings for commands
+- **Removed** `:require_files` and `:require_deps` tool configuration options
+- **Removed** `--skip` option from default configuration for tool `sobelow`
+
 ## v0.10.0
 
 - **Added** `:run_after` tool coonfiguration option (introducing powerful tool dependency system)

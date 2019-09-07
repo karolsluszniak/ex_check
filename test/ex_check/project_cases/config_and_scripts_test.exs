@@ -12,7 +12,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
       {:ex_unit, order: 2, command: ~w[mix test --cover]},
       {:my_mix_task, order: 1, command: "mix my_task a", env: %{"MIX_ENV" => "prod"}},
       {:my_elixir_script, "elixir priv/scripts/script.exs a"},
-      {:my_shell_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}}
+      {:my_shell_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}},
     ]
   ]
   """
@@ -34,6 +34,8 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
   echo my shell script $1 $SOME
   """
 
+  @ansi_code_regex ~r/(\x1b\[[0-9;]*m)/
+
   test "config and scripts", %{project_dir: project_dir} do
     config_path = Path.join(project_dir, ".check.exs")
     File.write!(config_path, @config)
@@ -53,15 +55,23 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
 
     supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir, stderr_to_stdout: true)
+    assert {output, 0} =
+             System.cmd(
+               "elixir",
+               ["-e", "Application.put_env(:elixir, :ansi_enabled, true)", "-S", "mix", "check"],
+               cd: project_dir,
+               stderr_to_stdout: true
+             )
 
-    assert String.contains?(output, "compiler success")
-    refute String.contains?(output, "formatter success")
-    assert String.contains?(output, "ex_unit success")
-    refute String.contains?(output, "credo skipped due to missing package credo")
-    assert String.contains?(output, "my_mix_task success")
-    assert String.contains?(output, "my_elixir_script success")
-    assert String.contains?(output, "my_shell_script success")
+    plain_output = String.replace(output, @ansi_code_regex, "")
+
+    assert String.contains?(plain_output, "compiler success")
+    refute String.contains?(plain_output, "formatter success")
+    assert String.contains?(plain_output, "ex_unit success")
+    refute String.contains?(plain_output, "credo skipped due to missing package credo")
+    assert String.contains?(plain_output, "my_mix_task success")
+    assert String.contains?(plain_output, "my_elixir_script success")
+    assert String.contains?(plain_output, "my_shell_script success")
 
     assert String.contains?(output, "Generated HTML coverage results")
     assert String.contains?(output, IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod")
@@ -74,6 +84,9 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
 
     assert String.contains?(output, "my shell script a b xyz")
 
-    assert String.match?(output, ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s)
+    assert String.match?(
+             plain_output,
+             ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s
+           )
   end
 end
