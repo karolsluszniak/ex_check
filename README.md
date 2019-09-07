@@ -9,9 +9,10 @@
 - Runs all tools with a single convenient `mix check` command
 - Comes out of the box with a predefined set of curated tools
 - Checks the project consistently for all developers & on the CI
-- Facilitates custom mix tasks and scripts acting as project checks
 - Delivers results faster by running & streaming tools in parallel
 - Identifies all project issues in one go by always running all tools
+- Empowers umbrella projects with parallel recursion over child apps
+- Facilitates custom mix tasks and scripts acting as project checks
 - Enables complex parallel workflows via support for cross-tool deps
 - Takes care of the little details (compile once, enable ANSI etc)
 

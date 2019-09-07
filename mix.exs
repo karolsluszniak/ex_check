@@ -13,7 +13,6 @@ defmodule ExCheck.MixProject do
       start_permanent: Mix.env() == :prod,
       description: @description,
       deps: deps(),
-      dialyzer: dialyzer(),
       docs: docs(),
       package: package()
     ]
@@ -36,12 +35,6 @@ defmodule ExCheck.MixProject do
     ]
   end
 
-  defp dialyzer do
-    [
-      plt_add_apps: [:mix]
-    ]
-  end
-
   defp docs do
     [
       main: "readme",
@@ -55,7 +48,8 @@ defmodule ExCheck.MixProject do
       maintainers: ["Karol Słuszniak"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => @github_url
+        "GitHub repository" => @github_url,
+        "Changelog" => @github_url <> "/blob/master/CHANGELOG.md"
       }
     ]
   end
