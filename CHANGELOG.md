@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.11.0
 
 - **Added** support for parallel & sequential recursive tool execution in umbrella projects
 - **Added** support for tool to target only specific umbrella child app(s)
