@@ -11,6 +11,7 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert String.contains?(output, "sobelow skipped due to missing package sobelow")
     assert String.contains?(output, "dialyzer skipped due to missing package dialyxir")
     assert String.contains?(output, "ex_doc skipped due to missing package ex_doc")
+    refute String.contains?(output, "npm_test")
 
     assert String.contains?(output, "Randomized with seed")
   end

@@ -4,6 +4,10 @@ defmodule Mix.Tasks.Check do
 
   ## Tools
 
+  Task comes out of the box with a rich predefined set of curated tools that are considered to be
+  reasonable additions for most Elixir and Phoenix projects which care about having bug-free,
+  maintainable and secure code.
+
   Following curated tools are configured by default:
 
   - [`:compiler`] - produces compilation warnings that allow to early detect bugs & typos in the
