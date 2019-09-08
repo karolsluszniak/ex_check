@@ -16,7 +16,9 @@
 - Enables complex parallel workflows via support for cross-tool deps
 - Takes care of the little details (compile once, enable ANSI etc)
 
-Read more and see demo on [Cloudless Studio blog](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools).
+Read more and see demo in the introductory ["One task to rule all Elixir analysis & testing
+tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools)
+article.
 
 ## Getting started
 
@@ -57,13 +59,11 @@ mix check.gen.config
 
 ## Documentation
 
-Learn more about the tools included in the check as well as its workflow, configuration and options:
+Learn more about the tools included in the check as well as its workflow, configuration and options
+[on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
 
-```
-mix help check
-```
-
-Or [read docs on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html).
+Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir
+code check"](http://cloudless.studio/articles/50-writing-your-first-elixir-code-check) article.
 
 ## Continuous Integration
 
