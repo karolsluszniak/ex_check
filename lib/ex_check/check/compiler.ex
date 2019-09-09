@@ -197,6 +197,7 @@ defmodule ExCheck.Check.Compiler do
       tool_opts
       |> Keyword.get(:cd, ".")
       |> Path.join(name)
+      |> Path.relative_to(".")
 
     {:file, filename}
   end
