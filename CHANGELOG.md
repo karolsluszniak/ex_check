@@ -7,6 +7,7 @@
 - **Added** `:npm_test` tool for seamless integration of testing assets in Phoenix projects
 - **Added** tool skipping if `cd` tool option points to non-existing directory
 - **Added** `{:tool_name, command, opts}` shorthand tool tuples
+- **Added** umbrella recursive flag to tool `sobelow` (fixing it for umbrella projects)
 - **Changed** tool autodetection to support detection order and disabling instead of skipping
 - **Fixed** `{:tool_name, command}` tool tuples to support lists of strings for commands
 - **Removed** `:require_files` and `:require_deps` tool configuration options
