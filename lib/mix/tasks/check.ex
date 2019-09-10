@@ -85,13 +85,13 @@ defmodule Mix.Tasks.Check do
   ### Cross-tool dependencies
 
   Even though tools are run in parallel, it's possible to make sure that specific tool will be run
-  only after other(s) are completed via the `:run_after` tool option. This enables defining complex
+  only after other(s) are completed via the `:deps` tool option. This enables defining complex
   workflows in which tools may reuse artifacts from ones executed earlier or they may be forced not
   to run at the same time without giving up on entire parallel execution.
 
-  Note that tools will be run regardless of the exit status of their `:run_after` dependencies, but
-  they'll be skipped if their dependencies won't be run at all e.g. due to using `--except` command
-  line option or a missing/circular dependency.
+  Note that tools will be run regardless of the exit status of their dependencies, but they'll be
+  skipped if their dependencies won't be run at all e.g. due to using `--except` command line option
+  or a missing/circular dependency.
 
   ### Umbrella projects
 
@@ -137,7 +137,7 @@ defmodule Mix.Tasks.Check do
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
   - `:order` - integer that controls the order in which tool output is presented (default: `0`)
-  - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
+  - `:deps` - list of tool names (atoms) that the given tool depends on
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
   - `:umbrella` - configures the tool behaviour in an umbrella project
 

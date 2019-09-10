@@ -45,21 +45,19 @@ defmodule ExCheck.Check do
   end
 
   defp run_tools(tools, opts) do
-    tool_deps =
-      Enum.map(tools, fn tool = {:pending, {name, _, opts}} ->
-        deps = Keyword.get(opts, :run_after, [])
-        {name, deps, tool}
-      end)
-
     {finished, broken} =
       Pipeline.run(
-        tool_deps,
-        throttle_fn: &throttle_tools(&1, &2, opts),
+        tools,
+        throttle_fn: &throttle_tools(&1, &2, &3, opts),
         start_fn: &start_tool/1,
         collect_fn: &await_tool/1
       )
 
-    broken = for {name, [dep | _], _} <- broken, do: {:skipped, name, {:run_after, dep}}
+    broken =
+      for tool = {:pending, {name, _, _}} <- broken do
+        [dep | _] = get_unsatisfied_deps(tool, finished)
+        {:skipped, name, {:dep, dep}}
+      end
 
     {finished, broken}
   end
@@ -70,12 +68,26 @@ defmodule ExCheck.Check do
     |> await_tool()
   end
 
-  defp throttle_tools(selected, running, opts) do
+  defp throttle_tools(pending, running, finished, opts) do
     parallel = Keyword.get(opts, :parallel, true)
 
-    selected
+    pending
+    |> filter_no_deps(finished)
     |> throttle_parallel(running, parallel)
     |> throttle_umbrella_parallel(running)
+  end
+
+  defp filter_no_deps(pending, finished) do
+    Enum.filter(pending, fn tool ->
+      get_unsatisfied_deps(tool, finished) == []
+    end)
+  end
+
+  defp get_unsatisfied_deps({:pending, {_, _, opts}}, finished) do
+    all_deps = Keyword.get(opts, :deps, [])
+    finished_deps = Enum.map(finished, fn {_, {name, _, _}, _} -> name end)
+
+    all_deps -- finished_deps
   end
 
   defp throttle_parallel(selected, _, true), do: selected
@@ -83,10 +95,10 @@ defmodule ExCheck.Check do
   defp throttle_parallel(_, _, false), do: []
 
   defp throttle_umbrella_parallel(selected, running) do
-    running_names = Enum.map(running, &elem(&1, 0))
+    running_names = Enum.map(running, &extract_tool_name/1)
 
-    Enum.reduce(selected, [], fn next = {name, _, {:pending, {_, _, opts}}}, approved ->
-      approved_names = Enum.map(approved, &elem(&1, 0))
+    Enum.reduce(selected, [], fn next = {:pending, {name, _, opts}}, approved ->
+      approved_names = Enum.map(approved, &extract_tool_name/1)
 
       if opts[:umbrella_parallel] == false &&
            (includes_umbrella_instance_from_same_app?(running_names, name) ||
@@ -97,6 +109,8 @@ defmodule ExCheck.Check do
       end
     end)
   end
+
+  defp extract_tool_name({:pending, {name, _, _}}), do: name
 
   defp includes_umbrella_instance_from_same_app?(names, match_name) do
     Enum.any?(names, &umbrella_instance_from_same_app?(&1, match_name))
@@ -181,8 +195,8 @@ defmodule ExCheck.Check do
     end
   end
 
-  defp format_skip_reason({:run_after, name}) do
-    ["broken tool dependency ", format_tool_name(name)]
+  defp format_skip_reason({:dep, name}) do
+    ["unsatisfied dependency ", format_tool_name(name)]
   end
 
   defp format_skip_reason({:package, name}) do

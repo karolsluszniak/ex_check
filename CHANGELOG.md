@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Fixed** merging tool umbrella opts with those set in ancestor config
+- **Removed** `:run_after` tool configuration options (please use `:deps` option instead)
 
 ## v0.11.0
 

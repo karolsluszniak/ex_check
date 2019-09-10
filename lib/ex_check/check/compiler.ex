@@ -84,7 +84,7 @@ defmodule ExCheck.Check.Compiler do
   end
 
   defp map_recursive_dependent(name, opts, recursive_tool) do
-    Keyword.update(opts, :run_after, [], fn deps ->
+    Keyword.update(opts, :deps, [], fn deps ->
       do_map_recursive_dependent(name, deps, recursive_tool)
     end)
   end
@@ -159,7 +159,7 @@ defmodule ExCheck.Check.Compiler do
 
         command_opts =
           tool_opts
-          |> Keyword.take([:cd, :env, :run_after])
+          |> Keyword.take([:cd, :env, :deps])
           |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
 
         {:pending, {name, command, command_opts}}
