@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed** merging tool umbrella opts with those set in ancestor config
+
 ## v0.11.0
 
 - **Added** support for parallel & sequential recursive tool execution in umbrella projects

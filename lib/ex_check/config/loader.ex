@@ -89,15 +89,9 @@ defmodule ExCheck.Config.Loader do
   defp merge_tool({name, opts}, {name, next_opts}), do: {name, merge_tool_opts(opts, next_opts)}
 
   defp merge_tool_opts(opts, next_opts) do
-    merged_opts = Keyword.merge(opts, next_opts)
-
-    env = opts[:env]
-    next_env = next_opts[:env]
-
-    if env && next_env do
-      Keyword.put(merged_opts, :env, Map.merge(env, next_env))
-    else
-      merged_opts
-    end
+    opts
+    |> Keyword.merge(next_opts)
+    |> Keyword.put(:env, Map.merge(opts[:env] || %{}, next_opts[:env] || %{}))
+    |> Keyword.put(:umbrella, Keyword.merge(opts[:umbrella] || [], next_opts[:umbrella] || []))
   end
 end
