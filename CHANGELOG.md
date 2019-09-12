@@ -2,8 +2,9 @@
 
 ## Unreleased
 
+- **Added** `:deps` tool option with support for depending on specific exit status
 - **Fixed** merging tool umbrella opts with those set in ancestor config
-- **Removed** `:run_after` tool configuration options (please use `:deps` option instead)
+- **Removed** `:run_after` tool option (please use `:deps` tool option instead)
 
 ## v0.11.0
 
