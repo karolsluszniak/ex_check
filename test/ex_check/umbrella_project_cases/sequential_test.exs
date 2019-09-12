@@ -30,8 +30,8 @@ defmodule ExCheck.UmbrellaProjectCases.SequentialTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
-    assert String.contains?(output, "seq in child_a success")
-    assert String.contains?(output, "seq in child_b success")
-    assert String.contains?(output, "a_out")
+    assert output =~ "seq in child_a success"
+    assert output =~ "seq in child_b success"
+    assert output =~ "a_out"
   end
 end

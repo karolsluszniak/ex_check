@@ -33,14 +33,14 @@ defmodule ExCheck.ProjectCases.DepsTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
 
-    assert String.contains?(output, "a success")
-    assert String.contains?(output, "b success")
-    assert String.contains?(output, "c success")
-    assert String.contains?(output, "d skipped due to unsatisfied dependency e")
-    assert String.contains?(output, "e skipped due to unsatisfied dependency d")
-    assert String.contains?(output, "a_out-b_out")
+    assert output =~ "a success"
+    assert output =~ "b success"
+    assert output =~ "c success"
+    assert output =~ "d skipped due to unsatisfied dependency e"
+    assert output =~ "e skipped due to unsatisfied dependency d"
+    assert output =~ "a_out-b_out"
 
-    assert String.match?(output, ~r/running b.*running a.*running c/s)
+    assert output =~ ~r/running b.*running a.*running c/s
   end
 
   test "deps (no parallel)", %{project_dir: project_dir} do
@@ -49,13 +49,13 @@ defmodule ExCheck.ProjectCases.DepsTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check --no-parallel], cd: project_dir)
 
-    assert String.contains?(output, "a success")
-    assert String.contains?(output, "b success")
-    assert String.contains?(output, "c success")
-    assert String.contains?(output, "d skipped due to unsatisfied dependency e")
-    assert String.contains?(output, "e skipped due to unsatisfied dependency d")
-    assert String.contains?(output, "a_out-b_out")
+    assert output =~ "a success"
+    assert output =~ "b success"
+    assert output =~ "c success"
+    assert output =~ "d skipped due to unsatisfied dependency e"
+    assert output =~ "e skipped due to unsatisfied dependency d"
+    assert output =~ "a_out-b_out"
 
-    assert String.match?(output, ~r/running b.*running a.*running c/s)
+    assert output =~ ~r/running b.*running a.*running c/s
   end
 end

@@ -16,7 +16,7 @@ defmodule ExCheck.UmbrellaProjectCases.AssetTestingTest do
 
     assert({output, 1} = System.cmd("mix", ~w[check], cd: project_root_dir))
 
-    assert String.contains?(output, "npm_test in child_a error code 1")
-    refute String.contains?(output, "npm_test in child_b")
+    assert output =~ "npm_test in child_a error code 1"
+    refute output =~ "npm_test in child_b"
   end
 end

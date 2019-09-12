@@ -11,12 +11,12 @@ defmodule ExCheck.ProjectCases.MissingTestHelperTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
 
-    assert String.contains?(output, "compiler success")
-    assert String.contains?(output, "formatter success")
-    assert String.contains?(output, "ex_unit skipped due to missing file test/test_helper.exs")
-    assert String.contains?(output, "credo skipped due to missing package credo")
-    assert String.contains?(output, "sobelow skipped due to missing package sobelow")
-    assert String.contains?(output, "dialyzer skipped due to missing package dialyxir")
-    assert String.contains?(output, "ex_doc skipped due to missing package ex_doc")
+    assert output =~ "compiler success"
+    assert output =~ "formatter success"
+    assert output =~ "ex_unit skipped due to missing file test/test_helper.exs"
+    assert output =~ "credo skipped due to missing package credo"
+    assert output =~ "sobelow skipped due to missing package sobelow"
+    assert output =~ "dialyzer skipped due to missing package dialyxir"
+    assert output =~ "ex_doc skipped due to missing package ex_doc"
   end
 end

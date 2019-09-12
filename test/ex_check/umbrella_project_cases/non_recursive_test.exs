@@ -15,8 +15,8 @@ defmodule ExCheck.UmbrellaProjectCases.NonRecursiveTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
-    assert String.contains?(output, "ex_unit success")
-    refute String.contains?(output, "ex_unit in child_a success")
-    refute String.contains?(output, "ex_unit in child_b success")
+    assert output =~ "ex_unit success"
+    refute output =~ "ex_unit in child_a success"
+    refute output =~ "ex_unit in child_b success"
   end
 end
