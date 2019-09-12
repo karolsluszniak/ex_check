@@ -117,7 +117,7 @@ defmodule ExCheck.Check do
 
   defp satisfied_dep_status?(:any, _), do: true
   defp satisfied_dep_status?(:ok, {:ok, _, _}), do: true
-  defp satisfied_dep_status?(:error, {:failed, _, _}), do: true
+  defp satisfied_dep_status?(:error, {:error, _, _}), do: true
   defp satisfied_dep_status?(code, {_, _, {actual, _, _}}) when is_integer(code), do: code == actual
   defp satisfied_dep_status?(_, _), do: false
 
