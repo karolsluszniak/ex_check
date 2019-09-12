@@ -42,24 +42,33 @@ defmodule ExCheck.Config.Loader do
 
   defp normalize_config(config) do
     Keyword.update(config, :tools, [], fn tools ->
-      Enum.map(tools, fn
-        {name, opts = [{_, _} | _]} ->
-          {name, opts}
+      Enum.map(tools, fn tool ->
+        {name, opts} = normalize_tool(tool)
+        opts = normalize_tool_opts(opts)
 
-        {name, enabled} when is_boolean(enabled) ->
-          {name, enabled: enabled}
+        {name, opts}
+      end)
+    end)
+  end
 
-        {name, command} when is_binary(command) ->
-          {name, command: command}
+  defp normalize_tool({name, opts = [{_, _} | _]}), do: {name, opts}
+  defp normalize_tool({name, enabled}) when is_boolean(enabled), do: {name, enabled: enabled}
+  defp normalize_tool({name, command}) when is_binary(command), do: {name, command: command}
+  defp normalize_tool({name, command = [arg | _]}) when is_binary(arg), do: {name, command: command}
 
-        {name, command = [arg | _]} when is_binary(arg) ->
-          {name, command: command}
+  defp normalize_tool({name, command, opts = [{_, _} | _]}) when is_binary(command) do
+    {name, Keyword.put(opts, :command, command)}
+  end
 
-        {name, command, opts = [{_, _} | _]} when is_binary(command) ->
-          {name, Keyword.put(opts, :command, command)}
+  defp normalize_tool({name, command = [arg | _], opts = [{_, _} | _]}) when is_binary(arg) do
+    {name, Keyword.put(opts, :command, command)}
+  end
 
-        {name, command = [arg | _], opts = [{_, _} | _]} when is_binary(arg) ->
-          {name, Keyword.put(opts, :command, command)}
+  defp normalize_tool_opts(opts) do
+    Keyword.update(opts, :deps, [], fn deps ->
+      Enum.map(deps, fn
+        dep = {_, opts} when is_list(opts) -> dep
+        name -> {name, []}
       end)
     end)
   end

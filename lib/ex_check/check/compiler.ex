@@ -91,17 +91,14 @@ defmodule ExCheck.Check.Compiler do
 
   defp do_map_recursive_dependent(name, deps, {recursive_name, recursive_instances}) do
     deps
-    |> Enum.map(fn dep ->
+    |> Enum.map(fn {dep, opts} ->
       if dep == recursive_name do
         case name do
-          {_, app} ->
-            {recursive_name, app}
-
-          _ ->
-            Enum.map(recursive_instances, &elem(&1, 0))
+          {_, app} -> {{recursive_name, app}, opts}
+          _ -> Enum.map(recursive_instances, &{elem(&1, 0), opts})
         end
       else
-        dep
+        {dep, opts}
       end
     end)
     |> List.flatten()

@@ -39,9 +39,9 @@ defmodule ExCheck.Check do
 
   defp run_others(tools, opts) do
     {pending, skipped} = Enum.split_with(tools, &match?({:pending, _}, &1))
-    {finished, broken} = run_tools(pending, opts)
+    {finished, skipped_runtime} = run_tools(pending, opts)
 
-    finished ++ skipped ++ broken
+    finished ++ skipped ++ skipped_runtime
   end
 
   defp run_tools(tools, opts) do
@@ -53,13 +53,24 @@ defmodule ExCheck.Check do
         collect_fn: &await_tool/1
       )
 
-    broken =
-      for tool = {:pending, {name, _, _}} <- broken do
-        [dep | _] = get_unsatisfied_deps(tool, finished)
-        {:skipped, name, {:dep, dep}}
-      end
+    skipped = filter_broken_skipped(broken, finished)
 
-    {finished, broken}
+    {finished, skipped}
+  end
+
+  defp filter_broken_skipped(broken, finished) do
+    broken
+    |> Enum.map(fn tool = {:pending, {name, _, _}} ->
+      deps = get_unsatisfied_deps(tool, finished)
+
+      dep_names =
+        deps
+        |> Enum.filter(fn {_, opts} -> opts[:else] != :disable end)
+        |> Enum.map(&elem(&1, 0))
+
+      Enum.any?(dep_names) && {:skipped, name, {:deps, dep_names}}
+    end)
+    |> Enum.filter(& &1)
   end
 
   defp run_tool(tool) do
@@ -84,11 +95,31 @@ defmodule ExCheck.Check do
   end
 
   defp get_unsatisfied_deps({:pending, {_, _, opts}}, finished) do
-    all_deps = Keyword.get(opts, :deps, [])
-    finished_deps = Enum.map(finished, fn {_, {name, _, _}, _} -> name end)
-
-    all_deps -- finished_deps
+    opts
+    |> Keyword.get(:deps, [])
+    |> Enum.map(fn
+      dep = {_, opts} when is_list(opts) -> dep
+      name -> {name, []}
+    end)
+    |> Enum.reject(&satisfied_dep?(&1, finished))
   end
+
+  defp satisfied_dep?({name, opts}, finished) do
+    status = Keyword.get(opts, :status, :any)
+    finished_match = Enum.find(finished, fn {_, {fin_name, _, _}, _} -> fin_name == name end)
+
+    finished_match && satisfied_dep_status?(status, finished_match)
+  end
+
+  defp satisfied_dep_status?(list, finished) when is_list(list) do
+    Enum.any?(list, &satisfied_dep_status?(&1, finished))
+  end
+
+  defp satisfied_dep_status?(:any, _), do: true
+  defp satisfied_dep_status?(:ok, {:ok, _, _}), do: true
+  defp satisfied_dep_status?(:error, {:failed, _, _}), do: true
+  defp satisfied_dep_status?(code, {_, _, {actual, _, _}}) when is_integer(code), do: code == actual
+  defp satisfied_dep_status?(_, _), do: false
 
   defp throttle_parallel(selected, _, true), do: selected
   defp throttle_parallel([first_selected | _], [], false), do: [first_selected]
@@ -195,7 +226,7 @@ defmodule ExCheck.Check do
     end
   end
 
-  defp format_skip_reason({:dep, name}) do
+  defp format_skip_reason({:deps, [name | _]}) do
     ["unsatisfied dependency ", format_tool_name(name)]
   end
 
