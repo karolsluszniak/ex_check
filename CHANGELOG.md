@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **Fixed** merging tool umbrella opts with those set in ancestor config
+- **Fixed** command output streaming & reprinting to trim leading & trailing whitespace
 
 ## v0.11.0
 
