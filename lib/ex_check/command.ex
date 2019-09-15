@@ -32,7 +32,7 @@ defmodule ExCheck.Command do
     Task.async(fn ->
       start_time = DateTime.utc_now()
       port = Port.open({:spawn_executable, exec_path}, spawn_opts)
-      handle_port(port, stream_fn, "", opts[:silenced], start_time)
+      handle_port(port, stream_fn, "", "", opts[:silenced], start_time)
     end)
   end
 
@@ -79,24 +79,40 @@ defmodule ExCheck.Command do
     end
   end
 
-  defp handle_port(port, stream_fn, output, silenced, start_time) do
+  defp handle_port(port, stream_fn, out, trail_ws, silenced, start_time) do
     receive do
-      {^port, {:data, data}} ->
-        data =
-          if output == "",
-            do: String.replace(data, ~r/^\s*/, ""),
-            else: data
+      {^port, {:data, new_out}} ->
+        new_out = trim_lead_ws(new_out, out)
+        {new_out, new_trail_ws} = split_trail_ws(new_out)
+        {new_out, trail_ws} = drain_prev_trail_ws(new_out, trail_ws)
 
-        unless silenced, do: stream_fn.(data)
-        handle_port(port, stream_fn, output <> data, silenced, start_time)
+        unless silenced, do: stream_fn.(new_out)
+
+        handle_port(port, stream_fn, out <> new_out, trail_ws <> new_trail_ws, silenced, start_time)
 
       {^port, {:exit_status, status}} ->
         duration = DateTime.diff(DateTime.utc_now(), start_time)
-        {output, status, stream_fn, silenced, duration}
+
+        {out, status, stream_fn, silenced, duration}
 
       :unsilence ->
-        stream_fn.(output)
-        handle_port(port, stream_fn, output, false, start_time)
+        stream_fn.(out)
+
+        handle_port(port, stream_fn, out, trail_ws, false, start_time)
     end
   end
+
+  defp trim_lead_ws(new_out, ""), do: String.replace(new_out, ~r/^\s*/, "")
+  defp trim_lead_ws(new_out, _), do: new_out
+
+  @trail_ws_regex ~r/(?<out>.*?)(?<trail_ws>(\s|\x1b\[[0-9;]*m)*)$/s
+
+  defp split_trail_ws(new_out) do
+    [[new_out, new_trail_ws] | _] = Regex.scan(@trail_ws_regex, new_out, capture: :all_names)
+    {new_out, new_trail_ws}
+  end
+
+  defp drain_prev_trail_ws(new_out = "", trail_ws), do: {new_out, trail_ws}
+  defp drain_prev_trail_ws(new_out, trail_ws = ""), do: {new_out, trail_ws}
+  defp drain_prev_trail_ws(new_out, trail_ws), do: {trail_ws <> new_out, ""}
 end

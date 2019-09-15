@@ -122,16 +122,19 @@ defmodule ExCheck.Check do
       |> Command.unsilence()
       |> Command.await()
 
-    if output_needs_padding?(output), do: Printer.info()
     IO.write(IO.ANSI.reset())
+    print_padding(output)
 
     status = if code == 0, do: :ok, else: :error
 
     {status, {name, cmd, opts}, {code, output, duration}}
   end
 
-  defp output_needs_padding?(output) do
-    not (String.match?(output, ~r/\n{2,}$/) or output == "")
+  defp print_padding(""), do: :ok
+
+  defp print_padding(_) do
+    Printer.info()
+    Printer.info()
   end
 
   defp reprint_errors(failed_tools) do
@@ -139,7 +142,8 @@ defmodule ExCheck.Check do
       Printer.info([:red, "=> reprinting errors from "] ++ format_tool_name(name))
       Printer.info()
       IO.write(output)
-      if output_needs_padding?(output), do: Printer.info()
+      IO.write(IO.ANSI.reset())
+      print_padding(output)
     end)
   end
 
