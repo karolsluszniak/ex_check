@@ -10,7 +10,7 @@ defmodule ExCheck.Config.Default do
     {:sobelow, "mix sobelow --exit", umbrella: [recursive: true], detect: [{:package, :sobelow}]},
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
     {:ex_unit, "mix test", detect: [{:file, "test/test_helper.exs"}]},
-    {:dialyzer, "mix dialyzer --halt-exit-status", detect: [{:package, :dialyxir}]},
+    {:dialyzer, "mix dialyzer", detect: [{:package, :dialyxir}]},
     {:npm_test, "npm test", cd: "assets", detect: [{:file, "package.json", else: :disable}]}
   ]
 
