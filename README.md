@@ -28,7 +28,7 @@ Add `ex_check` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_check, ">= 0.0.0", only: :dev, runtime: false}
+    {:ex_check, "~> 0.12.0", only: :dev, runtime: false}
   ]
 end
 ```

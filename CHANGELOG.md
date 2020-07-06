@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.12.0-dev
+## v0.12.0
 
 - **Added** `:deps` tool option with support for depending on specific exit status
 - **Removed** `:run_after` tool option (please use `:deps` tool option instead)
