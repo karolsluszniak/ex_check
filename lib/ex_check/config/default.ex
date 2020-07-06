@@ -9,7 +9,7 @@ defmodule ExCheck.Config.Default do
     {:credo, "mix credo", detect: [{:package, :credo}]},
     {:sobelow, "mix sobelow --exit", umbrella: [recursive: true], detect: [{:package, :sobelow}]},
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
-    {:ex_unit, "mix test", detect: [{:file, "test/test_helper.exs"}]},
+    {:ex_unit, "mix test", detect: [{:file, "test"}]},
     {:dialyzer, "mix dialyzer", detect: [{:package, :dialyxir}]},
     {:npm_test, "npm test", cd: "assets", detect: [{:file, "package.json", else: :disable}]}
   ]
