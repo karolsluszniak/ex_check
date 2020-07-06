@@ -65,28 +65,24 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
 
     plain_output = String.replace(output, @ansi_code_regex, "")
 
-    assert String.contains?(plain_output, "compiler success")
-    refute String.contains?(plain_output, "formatter success")
-    assert String.contains?(plain_output, "ex_unit success")
-    refute String.contains?(plain_output, "credo skipped due to missing package credo")
-    assert String.contains?(plain_output, "my_mix_task success")
-    assert String.contains?(plain_output, "my_elixir_script success")
-    assert String.contains?(plain_output, "my_shell_script success")
+    assert plain_output =~ "compiler success"
+    refute plain_output =~ "formatter success"
+    assert plain_output =~ "ex_unit success"
+    refute plain_output =~ "credo skipped due to missing package credo"
+    assert plain_output =~ "my_mix_task success"
+    assert plain_output =~ "my_elixir_script success"
+    assert plain_output =~ "my_shell_script success"
 
-    assert String.contains?(output, "Generated HTML coverage results")
-    assert String.contains?(output, IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod")
+    assert output =~ "Generated HTML coverage results"
+    assert output =~ IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod"
 
     if supports_erl_config do
-      assert String.contains?(output, IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a")
+      assert output =~ IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a"
     else
-      assert String.contains?(output, "my elixir script a")
+      assert output =~ "my elixir script a"
     end
 
-    assert String.contains?(output, "my shell script a b xyz")
-
-    assert String.match?(
-             plain_output,
-             ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s
-           )
+    assert output =~ "my shell script a b xyz"
+    assert plain_output =~ ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s
   end
 end

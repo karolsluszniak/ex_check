@@ -48,8 +48,8 @@ defmodule ExCheck.ProjectCases.ApplicationModTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
 
-    assert String.contains?(output, "compiler success")
-    assert String.contains?(output, "formatter success")
-    assert String.contains?(output, "ex_unit success")
+    assert output =~ "compiler success"
+    assert output =~ "formatter success"
+    assert output =~ "ex_unit success"
   end
 end

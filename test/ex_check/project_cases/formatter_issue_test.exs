@@ -11,13 +11,13 @@ defmodule ExCheck.ProjectCases.FormatterIssueTest do
 
     assert {output, 1} = System.cmd("mix", ~w[check], cd: project_dir)
 
-    assert String.contains?(output, "compiler success")
-    assert String.contains?(output, "formatter error code 1")
-    assert String.contains?(output, "ex_unit success")
-    assert String.contains?(output, "credo skipped due to missing package credo")
-    assert String.contains?(output, "sobelow skipped due to missing package sobelow")
-    assert String.contains?(output, "dialyzer skipped due to missing package dialyxir")
-    assert String.contains?(output, "ex_doc skipped due to missing package ex_doc")
+    assert output =~ "compiler success"
+    assert output =~ "formatter error code 1"
+    assert output =~ "ex_unit success"
+    assert output =~ "credo skipped due to missing package credo"
+    assert output =~ "sobelow skipped due to missing package sobelow"
+    assert output =~ "dialyzer skipped due to missing package dialyxir"
+    assert output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert String.contains?(output, """
            ** (Mix) mix format failed due to --check-formatted.

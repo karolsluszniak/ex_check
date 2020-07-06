@@ -84,24 +84,21 @@ defmodule ExCheck.Check.Compiler do
   end
 
   defp map_recursive_dependent(name, opts, recursive_tool) do
-    Keyword.update(opts, :run_after, [], fn deps ->
+    Keyword.update(opts, :deps, [], fn deps ->
       do_map_recursive_dependent(name, deps, recursive_tool)
     end)
   end
 
   defp do_map_recursive_dependent(name, deps, {recursive_name, recursive_instances}) do
     deps
-    |> Enum.map(fn dep ->
+    |> Enum.map(fn {dep, opts} ->
       if dep == recursive_name do
         case name do
-          {_, app} ->
-            {recursive_name, app}
-
-          _ ->
-            Enum.map(recursive_instances, &elem(&1, 0))
+          {_, app} -> {{recursive_name, app}, opts}
+          _ -> Enum.map(recursive_instances, &{elem(&1, 0), opts})
         end
       else
-        dep
+        {dep, opts}
       end
     end)
     |> List.flatten()
@@ -159,7 +156,7 @@ defmodule ExCheck.Check.Compiler do
 
         command_opts =
           tool_opts
-          |> Keyword.take([:cd, :env, :run_after])
+          |> Keyword.take([:cd, :env, :deps])
           |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
 
         {:pending, {name, command, command_opts}}

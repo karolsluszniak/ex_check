@@ -85,13 +85,17 @@ defmodule Mix.Tasks.Check do
   ### Cross-tool dependencies
 
   Even though tools are run in parallel, it's possible to make sure that specific tool will be run
-  only after other(s) are completed via the `:run_after` tool option. This enables defining complex
-  workflows in which tools may reuse artifacts from ones executed earlier or they may be forced not
-  to run at the same time without giving up on entire parallel execution.
+  only after other(s) are completed via the `:deps` tool option. This enables defining complex
+  workflows, such as the following:
 
-  Note that tools will be run regardless of the exit status of their `:run_after` dependencies, but
-  they'll be skipped if their dependencies won't be run at all e.g. due to using `--except` command
-  line option or a missing/circular dependency.
+  - tools may reuse artifacts from ones executed earlier
+  - tools may handle the success/failure of those they depend on
+  - tools may be forced not to run at the same time without giving up on entire parallel execution
+
+  By default tools will be run regardless of the exit status of their dependencies, but it's
+  possible to depend on specific exit status via the `:status` dependency option. Tools will not be
+  run if their dependencies won't get to run at all e.g. due to using `--except` command line option
+  or a missing/circular dependency.
 
   ### Umbrella projects
 
@@ -117,42 +121,52 @@ defmodule Mix.Tasks.Check do
 
   ## Configuration file
 
-  Check configuration may be adjusted with the optional `.check.exs` file. Task will load the
-  configuration in following order:
-
-  1. Default stock configuration.
-  2. `.check.exs` in user home directory.
-  3. `.check.exs` in current project directory (or umbrella root for an umbrella project).
+  Check configuration may be adjusted with the optional `.check.exs` file.
 
   Configuration file should evaluate to keyword list with following options:
 
-  - `:parallel` - toggles running tools in parallel (default: `true`)
-  - `:skipped` - toggles printing skipped tools in summary (default: `true`)
-  - `:tools` - a list of tools to run (default: curated tools)
+  - `:parallel` - toggles running tools in parallel; default: `true`
+  - `:skipped` - toggles printing skipped tools in summary; default: `true`
+  - `:tools` - a list of tools to run; default: curated tools; more info below
 
-  Each tool is a `{:tool_name, opts}` tuple where `opts` is a keyword list with following options:
+  Tool list under `:tools` key may contain following tool tuples:
 
-  - `:enabled` - enables/disables already defined tools (default: `true`)
+  - `{:tool_name, opts}`
+  - `{:tool_name, enabled}` where `enabled` corresponds to the `:enabled` option
+  - `{:tool_name, command}` where `command` corresponds to the `:command` option
+  - `{:tool_name, command, opts}` where `command` corresponds to the `:command` option
+
+  Tool options (`opts` above) is a keyword list with following options:
+
+  - `:enabled` - enables/disables already defined tools; default: `true`
   - `:command` - command as string or list of strings (executable + arguments)
   - `:cd` - directory (relative to cwd) to change to before running the command
   - `:env` - environment variables as map with string keys & values
-  - `:order` - integer that controls the order in which tool output is presented (default: `0`)
-  - `:run_after` - list of tool names (atoms) as deps that must finish running before tool start
-  - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled (default: `true`)
-  - `:umbrella` - configures the tool behaviour in an umbrella project
+  - `:order` - integer that controls the order in which tool output is presented; default: `0`
+  - `:deps` - list of tools that the given tool depends on; more info below
+  - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled; default: `true`
+  - `:umbrella` - configures the tool behaviour in an umbrella project; more info below
+
+  Dependency list under `:deps` key may contain `:tool_name` atoms or `{:tool_name, opts}` tuples
+  where `opts` is a keyword list with following options:
+
+  - `:status` - depends on specific exit status; one of `:ok`, `:error`, exit code integer or a list
+    with any of the above; default: any exit status
+  - `:else` -  specifies the behaviour upon dependency being unsatisfied; one of `:skip` (show the
+    tool among skipped ones), `:disable` (disable the tool without notice); default: `:skip`
 
   Umbrella configuration under `:umbrella` key is a keyword list with following options:
 
   - `:recursive` - toggles running the tool on each child app separately as opposed to running it
-    once from umbrella root (default: `true` except for non-recursive Mix tasks)
-  - `:parallel` - toggles running tool in parallel on all child apps (default: `true`)
-  - `:apps` - list of umbrella child app names targeted by the tool (default: all apps)
+    once from umbrella root; default: `true` except for non-recursive Mix tasks
+  - `:parallel` - toggles running tool in parallel on all child apps; default: `true`
+  - `:apps` - list of umbrella child app names targeted by the tool; default: all apps
 
-  You may also use one of the shorthand tool tuple forms:
+  Task will load the configuration in following order:
 
-  - `{:tool_name, enabled}` where `enabled` corresponds to the `:enabled` option
-  - `{:tool_name, command}` where `command` corresponds to the `:command` option
-  - `{:tool_name, command, opts}` where `command` corresponds to the `:command` option
+  1. Default stock configuration.
+  2. `.check.exs` in user home directory.
+  3. `.check.exs` in current project directory (or umbrella root for an umbrella project).
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 

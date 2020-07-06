@@ -15,16 +15,16 @@ defmodule ExCheck.UmbrellaProjectCases.OnlySpecificAppsTest do
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
-    refute String.contains?(output, "ex_unit success")
-    assert String.contains?(output, "ex_unit in child_a success")
-    refute String.contains?(output, "ex_unit in child_b success")
+    refute output =~ "ex_unit success"
+    assert output =~ "ex_unit in child_a success"
+    refute output =~ "ex_unit in child_b success"
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: child_a_dir)
 
-    assert String.contains?(output, "ex_unit success")
+    assert output =~ "ex_unit success"
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: child_b_dir)
 
-    refute String.contains?(output, "ex_unit")
+    refute output =~ "ex_unit"
   end
 end
