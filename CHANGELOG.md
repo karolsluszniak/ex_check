@@ -5,6 +5,7 @@
 - **Fixed** merging tool umbrella opts with those set in ancestor config
 - **Updated** default dialyxir config to no longer include `--halt-exit-status` deprecated in
   [1.0.0-rc.7](https://github.com/jeremyjh/dialyxir/blob/master/CHANGELOG.md#100-rc7---2019-09-21)
+- **Improved** test suite detection to only check for `test` directory instead of `test_helper.exs`
 
 ## v0.11.0
 
