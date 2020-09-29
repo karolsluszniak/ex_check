@@ -6,19 +6,27 @@
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 
-**One task to efficiently run all code analysis & testing tools in an Elixir project.**
+**Run all code checking tools with a single convenient `mix check` command.**
 
-- Runs all tools with a single convenient `mix check` command
-- Comes out of the box with a predefined set of curated tools
-- Checks the project consistently for all developers & on the CI
-- Delivers results faster by running & streaming tools in parallel
-- Identifies all project issues in one go by always running all tools
-- Empowers umbrella projects with parallel recursion over child apps
-- Facilitates custom mix tasks and scripts acting as project checks
-- Enables complex parallel workflows via support for cross-tool deps
-- Takes care of the little details (compile once, enable ANSI etc)
+<p align="center">
+  <img width="600" src="https://raw.githubusercontent.com/karolsluszniak/ex_check/master/demo-67x16.svg">
+</p>
 
-Read more and see demo in the introductory ["One task to rule all Elixir analysis & testing
+Takes seconds to setup, saves hours in the long term.
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including `npm` integration for Phoenix apps
+- Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
+- Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
+
+Sports powerful features to enable ultimate flexibility.
+- Empowers umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
+- Allows to add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
+- Enables complex parallel workflows via support for [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+
+Takes care of the little details, so you don't have to.
+- Compiles the project and collects compilation warnings in one go
+- Ensures that output from tools is still [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+
+Read more in the introductory ["One task to rule all Elixir analysis & testing
 tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools)
 article.
 
@@ -138,7 +146,7 @@ With `mix check` you can consistently run the same set of checks locally and on 
 configuration also becomes trivial and comes out of the box with parallelism and error output from
 all checks at once regardless of which ones have failed.
 
-This repo features working CI configs for following providers:
+Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
 
 - GitHub Actions - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
 - Travis CI - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
