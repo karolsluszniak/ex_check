@@ -44,6 +44,7 @@ defmodule ExCheck.MixProject do
   defp docs do
     [
       main: "readme",
+      logo: "logo.svg",
       source_url: @github_url,
       extras: ["README.md"]
     ]
