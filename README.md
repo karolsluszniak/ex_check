@@ -29,7 +29,7 @@ Add `ex_check` dependency in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_check, "~> 0.12.0", only: [:dev, :test], runtime: false}
+    {:ex_check, "~> 0.12.0", only: [:dev], runtime: false}
   ]
 end
 ```
@@ -46,19 +46,19 @@ Run the check:
 mix check
 ```
 
-That's it - ex_check will automatically detect available tools and run them, skipping the rest.
+That's it - `mix check` will detect and run available tools.
 
----
+### Configuring tools
 
-If you want to take advantage of curated tools, you may add following dependencies in `mix.exs`:
+If you want to take advantage of curated tools, add following dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:credo, ">= 0.0.0", only: :dev, runtime: false},
-    {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
-    {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-    {:sobelow, ">= 0.0.0", only: :dev, runtime: false}
+    {:credo, ">= 0.0.0", only: [:dev], runtime: false},
+    {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
+    {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+    {:sobelow, ">= 0.0.0", only: [:dev], runtime: false}
   ]
 end
 ```
@@ -80,6 +80,50 @@ Among others, this allows to permamently disable specific tools and avoid the sk
 ]
 ```
 
+### Avoiding duplicate builds
+
+If, as suggested above, you've added `ex_check` and curated tools to `only: [:dev]`, you're keeping the test environment reserved for `ex_unit`. While a clean setup, it comes at the expense of Mix having to compile your app twice - in order to prepare `:test` build just for `ex_unit` and `:dev` build for other tools. This costs precious time both on local machine and on the CI. It may also cause issues if you set `MIX_ENV=test`, which is a common practice on the CI.
+
+You may avoid this issue by running `mix check` and all the tools it depends on in the test environment. In such case you may want to have the following config in `mix.exs`:
+
+```elixir
+def project do
+  [
+    # ...
+    preferred_cli_env: [
+      check: :test,
+      credo: :test,
+      dialyxir: :test,
+      sobelow: :test
+    ]
+  ]
+end
+
+def deps do
+  [
+    {:credo, ">= 0.0.0", only: [:test], runtime: false},
+    {:dialyxir, ">= 0.0.0", only: [:test], runtime: false},
+    {:ex_check, "~> 0.12.0", only: [:test], runtime: false},
+    {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
+    {:sobelow, ">= 0.0.0", only: [:test], runtime: false}
+  ]
+end
+```
+
+And the following in `.check.exs`:
+
+```elixir
+[
+  tools: [
+    {:compiler, env: %{"MIX_ENV" => "test"}},
+    {:formatter, env: %{"MIX_ENV" => "test"}},
+    {:ex_doc, env: %{"MIX_ENV" => "test"}}
+  ]
+]
+```
+
+Above setup will consistently check the project using just the test build, both locally and on the CI.
+
 ## Documentation
 
 Learn more about the tools included in the check as well as its workflow, configuration and options
@@ -94,10 +138,12 @@ With `mix check` you can consistently run the same set of checks locally and on 
 configuration also becomes trivial and comes out of the box with parallelism and error output from
 all checks at once regardless of which ones have failed.
 
-Since ex_check uses itself on the CI, you can find working CI configs for following providers:
+This repo features working CI configs for following providers:
 
 - GitHub Actions - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
 - Travis CI - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
+
+Yes, `ex_check` uses itself on the CI. Yay for recursion!
 
 ## Changelog
 
