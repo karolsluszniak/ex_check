@@ -4,19 +4,17 @@ on: [pull_request, push]
 
 jobs:
   mix_check:
-    runs-on: ${{ matrix.os }}
+    name: mix check (Elixir ${{matrix.elixir}}, OTP ${{matrix.otp}})
 
     strategy:
       matrix:
-        os: ['ubuntu-18.04']
         include:
           - elixir: '1.10.4'
-            otp: '22.3.3'
+            otp: '23.0.2'
           - elixir: '1.7.0'
             otp: '19.0'
 
-    env:
-      MIX_ENV: test
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -37,7 +35,7 @@ jobs:
             elixir-deps-${{ runner.os }}-
 
       - name: Fetch Elixir deps
-        run: mix deps.get --only $MIX_ENV
+        run: mix deps.get --only test
 
       - name: Cache Elixir build
         uses: actions/cache@v2
