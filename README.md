@@ -54,7 +54,7 @@ Run the check:
 mix check
 ```
 
-That's it - `mix check` will detect and run available tools.
+That's it - `mix check` will detect and run all the available tools.
 
 ### Configuring tools
 
