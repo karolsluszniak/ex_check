@@ -6,20 +6,20 @@
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 
+![Demo](https://raw.githubusercontent.com/karolsluszniak/ex_check/master/demo-67x16.svg)
+
 **Run all code checking tools with a single convenient `mix check` command.**
 
-<p align="center">
-  <img width="600" src="https://raw.githubusercontent.com/karolsluszniak/ex_check/master/demo-67x16.svg">
-</p>
+---
 
 Takes seconds to setup, saves hours in the long term.
-- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including `npm` integration for Phoenix apps
-- Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including NPM integration for Phoenix assets
 - Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
+- Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
 
 Sports powerful features to enable ultimate flexibility.
-- Empowers umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
 - Allows to add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
+- Empowers umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
 - Enables complex parallel workflows via support for [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
