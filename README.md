@@ -1,7 +1,8 @@
 # ex_check
 
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
-[![Build status](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg)](https://travis-ci.org/karolsluszniak/ex_check)
+[![Build status (GitHub Actions)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
+[![Build status (Travis CI)](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg?logo=travis)](https://travis-ci.org/karolsluszniak/ex_check)
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 
@@ -23,17 +24,33 @@ article.
 
 ## Getting started
 
-Add `ex_check` to your list of dependencies in `mix.exs`:
+Add `ex_check` dependency in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:ex_check, "~> 0.12.0", only: :dev, runtime: false}
+    {:ex_check, "~> 0.12.0", only: [:dev, :test], runtime: false}
   ]
 end
 ```
 
-Optionally add curated tools to your list of dependencies in `mix.exs`:
+Fetch the dependency:
+
+```
+mix deps.get
+```
+
+Run the check:
+
+```
+mix check
+```
+
+That's it - ex_check will automatically detect available tools and run them, skipping the rest.
+
+---
+
+If you want to take advantage of curated tools, you may add following dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -46,16 +63,21 @@ def deps do
 end
 ```
 
-Run the check:
-
-```
-mix check
-```
-
-Optionally generate config to adjust the check:
+You may also generate `.check.exs` to adjust the check:
 
 ```
 mix check.gen.config
+```
+
+Among others, this allows to permamently disable specific tools and avoid the skipped notices.
+
+```elixir
+[
+  tools: [
+    {:dialyzer, false},
+    {:sobelow, false}
+  ]
+]
 ```
 
 ## Documentation
@@ -70,29 +92,12 @@ code check"](http://cloudless.studio/articles/50-writing-your-first-elixir-code-
 
 With `mix check` you can consistently run the same set of checks locally and on the CI. CI
 configuration also becomes trivial and comes out of the box with parallelism and error output from
-all checks at once regardless if previous one failed.
+all checks at once regardless of which ones have failed.
 
-Here's the minimal `.travis.yml` to get you started on [Travis CI](https://travis-ci.org):
+Since ex_check uses itself on the CI, you can find working CI configs for following providers:
 
-```yaml
-language: elixir
-
-script: mix check
-```
-
-If you use the `dialyzer` tool, you'll also want to cover PLT build timeouts and caching:
-
-```yaml
-# ...
-
-before_script:
-  - travis_wait mix dialyzer --plt
-
-cache:
-  directories:
-    - _build
-    - deps
-```
+- GitHub Actions - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
+- Travis CI - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
 
 ## Changelog
 
