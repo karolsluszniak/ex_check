@@ -192,6 +192,8 @@ defmodule Mix.Tasks.Check do
 
   @shortdoc "Runs all code analysis & testing tools in an Elixir project"
 
+  @preferred_cli_env :test
+
   @switches [
     only: :keep,
     except: :keep,

@@ -1,0 +1,53 @@
+name: check
+
+on: [pull_request, push]
+
+jobs:
+  mix_check:
+    name: mix check (Elixir ${{matrix.elixir}}, OTP ${{matrix.otp}})
+
+    strategy:
+      matrix:
+        include:
+          - elixir: '1.10.4'
+            otp: '23.0.2'
+          - elixir: '1.7.0'
+            otp: '19.0'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Elixir
+        uses: actions/setup-elixir@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - name: Cache Elixir deps
+        uses: actions/cache@v2
+        with:
+          path: deps
+          key: elixir-deps-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            elixir-deps-${{ runner.os }}-
+
+      - name: Fetch Elixir deps
+        run: mix deps.get --only test
+
+      - name: Cache Elixir build
+        uses: actions/cache@v2
+        with:
+          path: _build
+          key: elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}-${{ hashFiles('lib/**/*.ex', 'config/*.exs', 'mix.exs') }}
+          restore-keys: |
+            elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}-
+            elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-
+
+      - name: Compile Elixir deps
+        run: mix deps.compile
+
+      - name: Run check
+        run: mix check

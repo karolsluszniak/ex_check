@@ -14,7 +14,13 @@ defmodule ExCheck.MixProject do
       description: @description,
       deps: deps(),
       docs: docs(),
-      package: package()
+      package: package(),
+      preferred_cli_env: [
+        check: :test,
+        credo: :test,
+        dialyxir: :test,
+        sobelow: :test
+      ]
     ]
   end
 
@@ -29,9 +35,9 @@ defmodule ExCheck.MixProject do
 
   defp deps do
     [
-      {:credo, ">= 0.0.0", only: :dev, runtime: false},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:sobelow, ">= 0.0.0", only: :dev, runtime: false}
+      {:credo, ">= 0.0.0", only: [:test], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
+      {:sobelow, ">= 0.0.0", only: [:test], runtime: false}
     ]
   end
 
