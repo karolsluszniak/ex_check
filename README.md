@@ -101,7 +101,7 @@ def project do
     preferred_cli_env: [
       check: :test,
       credo: :test,
-      dialyxir: :test,
+      dialyzer: :test,
       sobelow: :test
     ]
   ]
