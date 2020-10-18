@@ -5,7 +5,7 @@ defmodule ExCheck.Check do
   alias __MODULE__.{Compiler, Pipeline}
 
   def run(opts) do
-    {tools, config_opts} = Config.load()
+    {tools, config_opts} = Config.load(opts)
     opts = Keyword.merge(config_opts, opts)
 
     compile_and_run_tools(tools, opts)

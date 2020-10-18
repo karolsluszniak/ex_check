@@ -7,11 +7,16 @@ defmodule ExCheck.Config.Loader do
   @config_filename ".check.exs"
   @option_list [:parallel, :skipped]
 
-  def load do
-    user_home_dir = System.user_home()
-    user_dirs = if user_home_dir, do: [user_home_dir], else: []
+  def load(user_opts) do
+    user_config_dir =
+      user_opts
+      |> Keyword.get(:config_directory)
+      |> List.wrap()
+
+    user_dirs = List.wrap(System.user_home())
     project_root_dir = Project.get_mix_root_dir()
-    dirs = user_dirs ++ [project_root_dir]
+
+    dirs = user_config_dir ++ user_dirs ++ [project_root_dir]
 
     default_config = normalize_config(DefaultConfig.get())
     config = load_from_dirs(dirs, default_config)

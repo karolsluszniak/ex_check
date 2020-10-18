@@ -1,8 +1,6 @@
 defmodule ExCheck.Config do
   @moduledoc false
 
-  alias __MODULE__.{Generator, Loader}
-
-  defdelegate generate, to: Generator
-  defdelegate load, to: Loader
+  defdelegate generate, to: ExCheck.Config.Generator
+  defdelegate load(opts), to: ExCheck.Config.Loader
 end
