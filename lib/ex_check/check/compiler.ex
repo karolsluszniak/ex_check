@@ -181,10 +181,13 @@ defmodule ExCheck.Check.Compiler do
     |> Enum.find(fn {base, _} -> failed_detection?(base) end)
   end
 
+  defp split_detection_opts({:elixir, version}), do: {{:elixir, version}, []}
   defp split_detection_opts({:package, name, opts}), do: {{:package, name}, opts}
   defp split_detection_opts({:package, name}), do: {{:package, name}, []}
   defp split_detection_opts({:file, name, opts}), do: {{:file, name}, opts}
   defp split_detection_opts({:file, name}), do: {{:file, name}, []}
+
+  defp prepare_detection_base({:elixir, version}, _, _), do: {:elixir, version}
 
   defp prepare_detection_base({:package, name}, {_, app}, _), do: {:package, name, app}
   defp prepare_detection_base({:package, name}, _, _), do: {:package, name}
@@ -201,6 +204,7 @@ defmodule ExCheck.Check.Compiler do
 
   defp failed_detection?({:package, name, app}), do: not Project.has_dep_in_app?(name, app)
   defp failed_detection?({:package, name}), do: not Project.has_dep?(name)
+  defp failed_detection?({:elixir, version}), do: not Version.match?(System.version(), version)
   defp failed_detection?({:file, name}), do: not File.exists?(name)
 
   defp postprocess_cmd(cmd, opts) do
