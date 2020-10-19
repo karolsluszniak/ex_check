@@ -5,6 +5,7 @@ defmodule ExCheck.ProjectCases.DetectTest do
   [
     tools: [
       {:dialyzer, detect: [{:package, :dialyxir, else: :disable}]},
+      {:version_detect, ["my", "command"], detect: [{:elixir, "<= 1.0.0"}]},
       {:bad_dir, ["my", "command"], cd: "bad_directory"}
     ]
   ]
@@ -18,6 +19,7 @@ defmodule ExCheck.ProjectCases.DetectTest do
 
     assert output =~ "credo skipped due to missing package credo"
     assert output =~ "bad_dir skipped due to missing directory bad_directory"
+    assert output =~ "version_detect skipped due to Elixir version = "
     refute output =~ "dialyzer skipped"
   end
 end
