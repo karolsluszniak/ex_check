@@ -226,6 +226,10 @@ defmodule ExCheck.Check do
     end
   end
 
+  defp format_skip_reason({:elixir, version}) do
+    ["Elixir version = ", System.version(), ", not ", version]
+  end
+
   defp format_skip_reason({:deps, [name | _]}) do
     ["unsatisfied dependency ", format_tool_name(name)]
   end
