@@ -11,6 +11,7 @@ defmodule ExCheck.Config.Default do
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
     {:ex_unit, "mix test", detect: [{:file, "test"}]},
     {:dialyzer, "mix dialyzer", detect: [{:package, :dialyxir}]},
+    {:unused_deps, "mix deps.unlock --check-unused", detect: [{:elixir, ">= 1.10.0"}]},
     {:npm_test, "npm test", cd: "assets", detect: [{:file, "package.json", else: :disable}]}
   ]
 

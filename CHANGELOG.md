@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.13.0-dev
+
+- **Added** `:unused_deps` tool
+
 ## v0.12.0
 
 - **Added** `:deps` tool option with support for depending on specific exit status

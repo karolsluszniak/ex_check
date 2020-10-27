@@ -13,6 +13,12 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "npm_test"
 
+    if Version.match?(System.version(), ">= 1.10.0") do
+      assert output =~ "unused_deps success"
+    else
+      assert output =~ "unused_deps skipped due to Elixir version ="
+    end
+
     assert output =~ "Randomized with seed"
   end
 end

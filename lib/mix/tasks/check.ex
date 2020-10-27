@@ -34,6 +34,9 @@ defmodule Mix.Tasks.Check do
   - [`:npm_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
     directory and `package.json` in it (default for Phoenix apps)
 
+  - [`:unused_deps`] - ensures that there are no unused dependencies in the project's `mix.lock`
+    file (e.g. after removing a previously used dependency)
+
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
   ## Workflow
@@ -185,6 +188,7 @@ defmodule Mix.Tasks.Check do
   [`:dialyzer`]: https://hexdocs.pm/dialyxir
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
+  [`:unused_deps`]: https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
   """
 
   use Mix.Task
