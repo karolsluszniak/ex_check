@@ -1,7 +1,8 @@
 defmodule ExCheck.Config.Generator do
   @moduledoc false
 
-  alias ExCheck.{Printer, Project}
+  alias ExCheck.Printer
+  alias ExCheck.Project
 
   @generated_config """
   [

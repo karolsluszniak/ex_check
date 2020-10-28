@@ -1,8 +1,11 @@
 defmodule ExCheck.Check do
   @moduledoc false
 
-  alias ExCheck.{Command, Config, Printer}
-  alias __MODULE__.{Compiler, Pipeline}
+  alias ExCheck.Check.Compiler
+  alias ExCheck.Check.Pipeline
+  alias ExCheck.Command
+  alias ExCheck.Config
+  alias ExCheck.Printer
 
   def run(opts) do
     {tools, config_opts} = Config.load(opts)
