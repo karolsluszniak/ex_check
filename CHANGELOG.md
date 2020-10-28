@@ -3,6 +3,7 @@
 ## v0.13.0-dev
 
 - **Added** `:unused_deps` tool
+- **Added** `--config-file` opt to point to arbitrary configuration file path
 
 ## v0.12.0
 

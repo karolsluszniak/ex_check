@@ -7,41 +7,40 @@ defmodule ExCheck.Config.Loader do
   @config_filename ".check.exs"
   @option_list [:parallel, :skipped]
 
-  def load(user_opts) do
-    user_config_dir =
-      user_opts
-      |> Keyword.get(:config_directory)
+  def load(opts) do
+    config_file =
+      opts
+      |> Keyword.get(:config_file)
       |> List.wrap()
 
-    user_dirs = List.wrap(System.user_home())
-    project_root_dir = Project.get_mix_root_dir()
+    user_dir_config = config_filename(System.user_home())
+    project_root_config = config_filename(Project.get_mix_root_dir())
 
-    dirs = user_config_dir ++ user_dirs ++ [project_root_dir]
+    dirs = config_file ++ [user_dir_config, project_root_config]
 
     default_config = normalize_config(DefaultConfig.get())
-    config = load_from_dirs(dirs, default_config)
+    config = load_from_files(dirs, default_config)
     tools = Keyword.fetch!(config, :tools)
     opts = Keyword.take(config, @option_list)
 
     {tools, opts}
   end
 
+  defp config_filename(directory) do
+    directory
+    |> Path.join(@config_filename)
+    |> Path.expand()
+  end
+
   # sobelow_skip ["RCE.CodeModule"]
-  defp load_from_dirs(dirs, default_config) do
-    Enum.reduce(dirs, default_config, fn next_config_dir, config ->
-      next_config_filename =
-        next_config_dir
-        |> Path.join(@config_filename)
-        |> Path.expand()
+  defp load_from_files(files, default_config) do
+    files
+    |> Enum.filter(&File.exists?/1)
+    |> Enum.reduce(default_config, fn next_config_filename, config ->
+      {next_config, _} = Code.eval_file(next_config_filename)
+      next_config = normalize_config(next_config)
 
-      if File.exists?(next_config_filename) do
-        {next_config, _} = Code.eval_file(next_config_filename)
-        next_config = normalize_config(next_config)
-
-        merge_config(config, next_config)
-      else
-        config
-      end
+      merge_config(config, next_config)
     end)
   end
 
