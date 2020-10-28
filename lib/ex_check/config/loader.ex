@@ -16,20 +16,23 @@ defmodule ExCheck.Config.Loader do
     user_dir_config = config_filename(System.user_home())
     project_root_config = config_filename(Project.get_mix_root_dir())
 
-    dirs = config_file ++ [user_dir_config, project_root_config]
+    files = config_file ++ user_dir_config ++ project_root_config
 
     default_config = normalize_config(DefaultConfig.get())
-    config = load_from_files(dirs, default_config)
+    config = load_from_files(files, default_config)
     tools = Keyword.fetch!(config, :tools)
     opts = Keyword.take(config, @option_list)
 
     {tools, opts}
   end
 
+  defp config_filename(nil), do: []
+
   defp config_filename(directory) do
     directory
     |> Path.join(@config_filename)
     |> Path.expand()
+    |> List.wrap()
   end
 
   # sobelow_skip ["RCE.CodeModule"]
