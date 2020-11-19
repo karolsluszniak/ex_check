@@ -10,7 +10,7 @@ defmodule ExCheck.Config.Loader do
   def load(opts) do
     config_file =
       opts
-      |> Keyword.get(:config_file)
+      |> Keyword.get(:file)
       |> List.wrap()
 
     user_dir_config = config_filename(System.user_home())
