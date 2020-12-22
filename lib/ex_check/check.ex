@@ -15,6 +15,7 @@ defmodule ExCheck.Check do
       |> Config.load()
 
     opts = Keyword.merge(config_opts, opts)
+    opts = convert_failed_to_only_with_manifest(opts)
 
     compile_and_run_tools(tools, opts)
   end
@@ -32,6 +33,7 @@ defmodule ExCheck.Check do
 
     reprint_errors(failed_results)
     print_summary(all_results, total_duration, opts)
+    save_manifest(failed_results, opts)
     maybe_set_exit_status(failed_results)
   end
 
@@ -276,6 +278,47 @@ defmodule ExCheck.Check do
     sec_str = if sec < 10, do: "0#{sec}", else: "#{sec}"
 
     "#{min}:#{sec_str}"
+  end
+
+  defp convert_failed_to_only_with_manifest(opts) do
+    with true <- Keyword.get(opts, :failed),
+         manifest_path = get_manifest_path(opts),
+         true <- File.exists?(manifest_path) do
+      only =
+        manifest_path
+        |> File.read!()
+        |> String.split("\n")
+        |> Enum.filter(fn
+          "" -> false
+          _check -> true
+        end)
+        |> Enum.map(&{:only, String.to_atom(&1)})
+        |> case do
+          [] -> [{:only, "-"}]
+          only -> only
+        end
+
+      opts ++ only
+    else
+      _ -> opts
+    end
+  end
+
+  defp save_manifest(failed_tools, opts) do
+    failed_tool_names = Enum.map(failed_tools, fn {:error, {name, _, _}, _} -> name end)
+    manifest_content = Enum.join(failed_tool_names, "\n") <> "\n"
+    manifest_path = get_manifest_path(opts)
+
+    File.write!(manifest_path, manifest_content)
+  end
+
+  @escape Enum.map(' [~#%&*{}\\:<>?/+|"]', &<<&1::utf8>>)
+
+  defp get_manifest_path(opts) do
+    Keyword.get_lazy(opts, :failure_manifest, fn ->
+      app_id = File.cwd!() |> String.replace(@escape, "_") |> String.replace(~r/^_+/, "")
+      Path.join([System.tmp_dir!(), "ex_check-failure_manifest-#{app_id}.txt"])
+    end)
   end
 
   defp maybe_set_exit_status(failed_tools) do

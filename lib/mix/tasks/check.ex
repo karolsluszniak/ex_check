@@ -16,6 +16,9 @@ defmodule Mix.Tasks.Check do
   - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
     maximum number of chars in a line or function indentation
 
+  - [`:unused_deps`] - ensures that there are no unused dependencies in the project's `mix.lock`
+    file (e.g. after removing a previously used dependency)
+
   - [`:ex_unit`] - starts the application in test mode and runs all runtime tests against it
     (defined as test modules or embedded in docs as doctests)
 
@@ -33,9 +36,6 @@ defmodule Mix.Tasks.Check do
 
   - [`:npm_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
     directory and `package.json` in it (default for Phoenix apps)
-
-  - [`:unused_deps`] - ensures that there are no unused dependencies in the project's `mix.lock`
-    file (e.g. after removing a previously used dependency)
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
@@ -176,9 +176,11 @@ defmodule Mix.Tasks.Check do
 
   ## Command line options
 
-  - `--config /some/file` - Override default config file
+  - `--config path/to/check.exs` - override default config file
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
+  - `--failed` - run only checks that have failed in the last run
+  - `--failure-manifest path/to/manifest` - specify path to file that holds last failures
   - `--no-parallel` - don't run tools in parallel
   - `--no-skipped` - don't print skipped tools in summary
 
@@ -202,6 +204,8 @@ defmodule Mix.Tasks.Check do
 
   @switches [
     only: :keep,
+    failed: :boolean,
+    failure_manifest: :string,
     except: :keep,
     skipped: :boolean,
     exit_status: :boolean,
