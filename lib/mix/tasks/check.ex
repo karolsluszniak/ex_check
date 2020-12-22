@@ -168,13 +168,15 @@ defmodule Mix.Tasks.Check do
   Task will load the configuration in following order:
 
   1. Default stock configuration.
-  2. `.check.exs` in user home directory.
-  3. `.check.exs` in current project directory (or umbrella root for an umbrella project).
+  2. `--config` file opt on command line.
+  3. `.check.exs` in user home directory.
+  4. `.check.exs` in current project directory (or umbrella root for an umbrella project).
 
   Use the `mix check.gen.config` task to generate sample configuration that comes with well-commented examples to help you get started.
 
   ## Command line options
 
+  - `--config /some/file` - Override default config file
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
   - `--no-parallel` - don't run tools in parallel
@@ -203,7 +205,8 @@ defmodule Mix.Tasks.Check do
     except: :keep,
     skipped: :boolean,
     exit_status: :boolean,
-    parallel: :boolean
+    parallel: :boolean,
+    config: :string
   ]
 
   @impl Mix.Task

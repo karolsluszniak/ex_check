@@ -8,7 +8,12 @@ defmodule ExCheck.Check do
   alias ExCheck.Printer
 
   def run(opts) do
-    {tools, config_opts} = Config.load()
+    {tools, config_opts} =
+      opts
+      |> Keyword.put(:file, opts[:config])
+      |> Keyword.delete(:config)
+      |> Config.load()
+
     opts = Keyword.merge(config_opts, opts)
 
     compile_and_run_tools(tools, opts)
