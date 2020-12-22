@@ -4,6 +4,8 @@
 
 - **Added** `:unused_deps` tool
 - **Added** `--config` opt to point to arbitrary configuration file path
+- **Added** `--failed` opt to only run checks that have failed in the last run
+- **Added** `--manifest` opt to specify path to file that holds last run results
 
 ## v0.12.0
 

@@ -53,7 +53,10 @@ defmodule Mix.Tasks.Check do
   4. Summary is presented with a list of all tools that have failed, succeeded or were skipped due
      to missing files or project dependencies.
 
-  5. If any of the tools have failed, the Erlang system gets requested to emit exit status 1 upon
+  5. Manifest is written to specified file or tmp directory in order to allow running only failed
+     checks and for sake of reporting to CI.
+
+  6. If any of the tools have failed, the Erlang system gets requested to emit exit status 1 upon
      shutdown in order to make the CI build fail.
 
   ### Tool order
@@ -122,6 +125,26 @@ defmodule Mix.Tasks.Check do
   execution (`recursive: false` under `:umbrella` tool option) and targeting an empty list of child
   apps (`apps: []` under `:umbrella` tool option).
 
+  ### Manifest file
+
+  After every run, task writes a list of tool statuses to manifest file specified with `--manifest`
+  command line option or to temp directory. This allows to run only failed tools in the next run by
+  passing the `--failed` command line option.
+
+  In addition, manifest file may be used for sake of reporting to CI. It's a simple plain text file
+  with following syntax that should play well with shell commands:
+
+  ```
+  PASS compiler
+  FAIL formatter
+  PASS ex_unit
+  PASS unused_deps
+  SKIP credo
+  SKIP sobelow
+  SKIP ex_doc
+  SKIP dialyzer
+  ```
+
   ## Configuration file
 
   Check configuration may be adjusted with the optional `.check.exs` file.
@@ -180,7 +203,7 @@ defmodule Mix.Tasks.Check do
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
   - `--failed` - run only checks that have failed in the last run
-  - `--failure-manifest path/to/manifest` - specify path to file that holds last failures
+  - `--manifest path/to/manifest` - specify path to file that holds last run results
   - `--no-parallel` - don't run tools in parallel
   - `--no-skipped` - don't print skipped tools in summary
 
@@ -205,7 +228,7 @@ defmodule Mix.Tasks.Check do
   @switches [
     only: :keep,
     failed: :boolean,
-    failure_manifest: :string,
+    manifest: :string,
     except: :keep,
     skipped: :boolean,
     exit_status: :boolean,

@@ -16,11 +16,13 @@ Takes seconds to setup, saves hours in the long term.
 - Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including NPM integration for Phoenix assets
 - Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
 - Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
+- Allows to re-run checks that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file)
 
 Sports powerful features to enable ultimate flexibility.
-- Allows to add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
-- Empowers umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
-- Enables complex parallel workflows via support for [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+- Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
+- Report status of each check to CI by using [manifest file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file)
+- Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
+- Design complex parallel workflows with [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
 - Compiles the project and collects compilation warnings in one go
