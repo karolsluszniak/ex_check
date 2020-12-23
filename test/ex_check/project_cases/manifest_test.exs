@@ -21,16 +21,29 @@ defmodule ExCheck.ProjectCases.ManifestTest do
 
     manifest = File.read!(Path.join(project_dir, "manifest.txt"))
 
-    assert manifest == """
-           PASS compiler
-           FAIL formatter
-           PASS ex_unit
-           PASS unused_deps
-           SKIP credo
-           SKIP sobelow
-           SKIP ex_doc
-           SKIP dialyzer
-           """
+    if Version.match?(System.version(), ">= 1.10.0") do
+      assert manifest == """
+             PASS compiler
+             FAIL formatter
+             PASS ex_unit
+             PASS unused_deps
+             SKIP credo
+             SKIP sobelow
+             SKIP ex_doc
+             SKIP dialyzer
+             """
+    else
+      assert manifest == """
+             PASS compiler
+             FAIL formatter
+             PASS ex_unit
+             SKIP credo
+             SKIP sobelow
+             SKIP ex_doc
+             SKIP dialyzer
+             SKIP unused_deps
+             """
+    end
 
     assert {output, 1} =
              System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
