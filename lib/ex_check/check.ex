@@ -5,6 +5,7 @@ defmodule ExCheck.Check do
   alias ExCheck.Check.Pipeline
   alias ExCheck.Command
   alias ExCheck.Config
+  alias ExCheck.Manifest
   alias ExCheck.Printer
 
   def run(opts) do
@@ -14,7 +15,10 @@ defmodule ExCheck.Check do
       |> Keyword.delete(:config)
       |> Config.load()
 
-    opts = Keyword.merge(config_opts, opts)
+    opts =
+      config_opts
+      |> Keyword.merge(opts)
+      |> Manifest.convert_failed_to_only()
 
     compile_and_run_tools(tools, opts)
   end
@@ -32,6 +36,7 @@ defmodule ExCheck.Check do
 
     reprint_errors(failed_results)
     print_summary(all_results, total_duration, opts)
+    Manifest.save(all_results, opts)
     maybe_set_exit_status(failed_results)
   end
 
