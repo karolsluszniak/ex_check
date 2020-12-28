@@ -134,6 +134,10 @@ And the following in `.check.exs`:
 
 Above setup will consistently check the project using just the test build, both locally and on the CI.
 
+### Avoiding false negatives of `unused_deps` check
+
+You may encounter an issue with the `unused_deps` check failing on the CI while passing locally, caused by fetching only dependencies for specific instead of all deps. If that happens, remove the `--only test` (or similar) from your `mix deps.get` invocation on the CI to fix the issue.
+
 ## Documentation
 
 Learn more about the tools included in the check as well as its workflow, configuration and options

@@ -35,7 +35,7 @@ jobs:
             elixir-deps-${{ runner.os }}-
 
       - name: Fetch Elixir deps
-        run: mix deps.get --only test
+        run: mix deps.get
 
       - name: Cache Elixir build
         uses: actions/cache@v2
