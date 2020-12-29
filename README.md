@@ -136,7 +136,7 @@ Above setup will consistently check the project using just the test build, both 
 
 ### Avoiding false negatives of `unused_deps` check
 
-You may encounter an issue with the `unused_deps` check failing on the CI while passing locally, caused by fetching only dependencies for specific instead of all deps. If that happens, remove the `--only test` (or similar) from your `mix deps.get` invocation on the CI to fix the issue.
+You may encounter an issue with the `unused_deps` check failing on the CI while passing locally, caused by fetching only dependencies for specific env. If that happens, remove the `--only test` (or similar) from your `mix deps.get` invocation on the CI to fix the issue.
 
 ## Documentation
 
@@ -154,8 +154,8 @@ all checks at once regardless of which ones have failed.
 
 Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
 
-- GitHub Actions - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
-- Travis CI - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
+- GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
+- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
 
 Yes, `ex_check` uses itself on the CI. Yay for recursion!
 
