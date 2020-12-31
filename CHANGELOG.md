@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.14.0-dev
+
+- **Added** `--fix` command line option that runs tools in fix mode in order to resolve issues automatically along with `:fix` tool option
+- **Added** capability to run tool command to retry after failure e.g. in order to run only failed tests or checks along with `:retry` tool option
+
 ## v0.13.0
 
 - **Added** `:unused_deps` tool

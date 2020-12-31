@@ -125,14 +125,35 @@ defmodule Mix.Tasks.Check do
   execution (`recursive: false` under `:umbrella` tool option) and targeting an empty list of child
   apps (`apps: []` under `:umbrella` tool option).
 
+  ### Retrying failed tools
+
+  You may only run failed tools in the next run by passing the `--failed` command line option in
+  order to avoid wasting time on checks that have already passed.
+
+  In addition, some tools offer the capability to do the same, i.e. run only failed tests or checks.
+  If the tool provides such capability, it will be automatically executed this way when the
+  `--failed` command line option is passed. This feature is provided out of the box for `ex_unit`
+  tool and may be provided for any tool via `:retry` tool option in config.
+
+  ### Fix mode
+
+  Some tools are capable of automatically resolving issues by running in the fix mode. You may take
+  advantage of this feature by passing the `--fix` command line option. This feature is provided out
+  of the box for `:formatter` and `:unused_deps` tools and may be provided for any tool via `:fix`
+  tool option in config.
+
+  You may combine `--fix` with `--failed` to only request tools that have failed to do the fixing.
+
+  Note that the fix mode will skip tools that don't provide this feature.
+
   ### Manifest file
 
   After every run, task writes a list of tool statuses to manifest file specified with `--manifest`
   command line option or to temp directory. This allows to run only failed tools in the next run by
-  passing the `--failed` command line option.
+  passing the `--failed` command line option, but manifest file may also be used for sake of
+  reporting to CI.
 
-  In addition, manifest file may be used for sake of reporting to CI. It's a simple plain text file
-  with following syntax that should play well with shell commands:
+  It's a simple plain text file with following syntax that should play well with shell commands:
 
   ```
   PASS compiler
@@ -172,6 +193,8 @@ defmodule Mix.Tasks.Check do
   - `:deps` - list of tools that the given tool depends on; more info below
   - `:enable_ansi` - toggles extending Elixir/Mix commands to have ANSI enabled; default: `true`
   - `:umbrella` - configures the tool behaviour in an umbrella project; more info below
+  - `:fix` - fix mode command as string or list of strings (executable + arguments)
+  - `:retry` - command to retry after failure as string or list of strings (executable + arguments)
 
   Dependency list under `:deps` key may contain `:tool_name` atoms or `{:tool_name, opts}` tuples
   where `opts` is a keyword list with following options:
@@ -203,6 +226,7 @@ defmodule Mix.Tasks.Check do
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
   - `--failed` - run only checks that have failed in the last run
+  - `--fix` - run tools in fix mode in order to resolve issues automatically
   - `--manifest path/to/manifest` - specify path to file that holds last run results
   - `--no-parallel` - don't run tools in parallel
   - `--no-skipped` - don't print skipped tools in summary
@@ -233,7 +257,8 @@ defmodule Mix.Tasks.Check do
     skipped: :boolean,
     exit_status: :boolean,
     parallel: :boolean,
-    config: :string
+    config: :string,
+    fix: :boolean
   ]
 
   @impl Mix.Task

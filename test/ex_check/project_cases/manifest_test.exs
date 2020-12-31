@@ -56,10 +56,8 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
 
-    File.rm!(invalid_file_path)
-
     assert {output, 0} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+             System.cmd("mix", ~w[check --manifest manifest.txt --failed --fix], cd: project_dir)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"

@@ -5,13 +5,15 @@ defmodule ExCheck.Config.Default do
   # streaming to display as many outputs as possible as soon as possible.
   @curated_tools [
     {:compiler, "mix compile --warnings-as-errors --force"},
-    {:formatter, "mix format --check-formatted", detect: [{:file, ".formatter.exs"}]},
+    {:formatter, "mix format --check-formatted",
+     detect: [{:file, ".formatter.exs"}], fix: "mix format"},
     {:credo, "mix credo", detect: [{:package, :credo}]},
     {:sobelow, "mix sobelow --exit", umbrella: [recursive: true], detect: [{:package, :sobelow}]},
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
-    {:ex_unit, "mix test", detect: [{:file, "test"}]},
+    {:ex_unit, "mix test", detect: [{:file, "test"}], retry: "mix test --failed"},
     {:dialyzer, "mix dialyzer", detect: [{:package, :dialyxir}]},
-    {:unused_deps, "mix deps.unlock --check-unused", detect: [{:elixir, ">= 1.10.0"}]},
+    {:unused_deps, "mix deps.unlock --check-unused",
+     detect: [{:elixir, ">= 1.10.0"}], fix: "mix deps.unlock --unused"},
     {:npm_test, "npm test", cd: "assets", detect: [{:file, "package.json", else: :disable}]}
   ]
 
