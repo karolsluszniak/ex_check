@@ -143,9 +143,6 @@ defmodule ExCheck.Check.Compiler do
       tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
         {:skipped, name, {:cd, tool_opts[:cd]}}
 
-      opts[:fix] && !tool_opts[:fix] ->
-        {:skipped, name, :no_fix}
-
       true ->
         prepare_pending(name, tool_opts, opts)
     end

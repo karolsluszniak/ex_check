@@ -263,10 +263,6 @@ defmodule ExCheck.Check do
     ["missing directory ", b(cd)]
   end
 
-  defp format_skip_reason(:no_fix) do
-    ["no fix"]
-  end
-
   defp format_tool_name(name) when is_atom(name) do
     b(name)
   end
