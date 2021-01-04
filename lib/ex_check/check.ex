@@ -9,16 +9,12 @@ defmodule ExCheck.Check do
   alias ExCheck.Printer
 
   def run(opts) do
-    {tools, config_opts} =
-      opts
-      |> maybe_toggle_retry_mode()
-      |> Keyword.put(:file, opts[:config])
-      |> Keyword.delete(:config)
-      |> Config.load()
+    {tools, config_opts} = Config.load(file: opts[:config])
 
     opts =
       config_opts
       |> Keyword.merge(opts)
+      |> maybe_toggle_retry_mode()
       |> Manifest.convert_failed_to_only()
 
     compile_and_run_tools(tools, opts)
