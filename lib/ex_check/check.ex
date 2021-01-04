@@ -11,6 +11,7 @@ defmodule ExCheck.Check do
   def run(opts) do
     {tools, config_opts} =
       opts
+      |> maybe_toggle_retry_mode()
       |> Keyword.put(:file, opts[:config])
       |> Keyword.delete(:config)
       |> Config.load()
@@ -21,6 +22,18 @@ defmodule ExCheck.Check do
       |> Manifest.convert_failed_to_only()
 
     compile_and_run_tools(tools, opts)
+  end
+
+  defp maybe_toggle_retry_mode(opts) do
+    with false <- Keyword.has_key?(opts, :failed),
+         tools = [_ | _] <- Manifest.get_failed_tools(opts) do
+      Printer.info([:cyan, "=> retrying automatically: "] ++ Enum.map(tools, &format_tool_name/1))
+      Printer.info()
+
+      opts ++ [{:failed, true}]
+    else
+      _ -> opts
+    end
   end
 
   defp compile_and_run_tools(tools, opts) do

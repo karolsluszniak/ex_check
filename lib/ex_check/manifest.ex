@@ -1,17 +1,11 @@
 defmodule ExCheck.Manifest do
   @moduledoc false
 
-  def any_failed?(opts) do
-    opts
-    |> get_failures()
-    |> Enum.any?()
-  end
-
   def convert_failed_to_only(opts) do
     if Keyword.get(opts, :failed) do
       only =
         opts
-        |> get_failures()
+        |> get_failed_tools()
         |> Enum.map(&{:only, &1})
         |> case do
           [] -> [{:only, "-"}]
@@ -25,7 +19,7 @@ defmodule ExCheck.Manifest do
   end
 
   # sobelow_skip ["Traversal.FileModule", "DOS.StringToAtom"]
-  defp get_failures(opts) do
+  def get_failed_tools(opts) do
     manifest_path = get_path(opts)
 
     if File.exists?(manifest_path) do

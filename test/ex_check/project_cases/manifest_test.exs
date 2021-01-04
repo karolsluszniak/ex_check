@@ -45,9 +45,9 @@ defmodule ExCheck.ProjectCases.ManifestTest do
              """
     end
 
-    assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+    assert {output, 1} = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir)
 
+    assert output =~ "retrying automatically"
     assert output =~ "compiler success"
     assert output =~ "formatter error code 1"
     refute output =~ "ex_unit success"
@@ -55,6 +55,30 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+
+    assert {output, 1} =
+             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+
+    refute output =~ "retrying automatically"
+    assert output =~ "compiler success"
+    assert output =~ "formatter error code 1"
+    refute output =~ "ex_unit success"
+    refute output =~ "credo skipped due to missing package credo"
+    refute output =~ "sobelow skipped due to missing package sobelow"
+    refute output =~ "dialyzer skipped due to missing package dialyxir"
+    refute output =~ "ex_doc skipped due to missing package ex_doc"
+
+    assert {output, 1} =
+             System.cmd("mix", ~w[check --manifest manifest.txt --no-failed], cd: project_dir)
+
+    refute output =~ "retrying automatically"
+    assert output =~ "compiler success"
+    assert output =~ "formatter error code 1"
+    assert output =~ "ex_unit success"
+    assert output =~ "credo skipped due to missing package credo"
+    assert output =~ "sobelow skipped due to missing package sobelow"
+    assert output =~ "dialyzer skipped due to missing package dialyxir"
+    assert output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert {output, 0} =
              System.cmd("mix", ~w[check --manifest manifest.txt --failed --fix], cd: project_dir)

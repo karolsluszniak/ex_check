@@ -16,8 +16,8 @@ Takes seconds to setup, saves hours in the long term.
 - Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including NPM integration for Phoenix assets
 - Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
 - Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
-- Allows to retry checks that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
-- Fixes issues automatically via support for [the fix mode](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-fix-mode)
+- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
+- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-fix-mode)
 
 Sports powerful features to enable ultimate flexibility.
 - Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)

@@ -135,6 +135,10 @@ defmodule Mix.Tasks.Check do
   `--failed` command line option is passed. This feature is provided out of the box for `ex_unit`
   tool and may be provided for any tool via `:retry` tool option in config.
 
+  Task will run in retry mode automatically even if `--failed` was not specified when a previous run
+  has resulted in any failures. You can change this behavior with `--no-failed` command line option
+  or by setting `failed: false` in config.
+
   ### Fix mode
 
   Some tools are capable of automatically resolving issues by running in the fix mode. You may take
@@ -224,13 +228,13 @@ defmodule Mix.Tasks.Check do
   ## Command line options
 
   - `--config path/to/check.exs` - override default config file
+  - `--manifest path/to/manifest` - specify path to file that holds last run results
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
-  - `--failed` - run only checks that have failed in the last run
-  - `--fix` - run tools in fix mode in order to resolve issues automatically
-  - `--manifest path/to/manifest` - specify path to file that holds last run results
-  - `--no-parallel` - don't run tools in parallel
-  - `--no-skipped` - don't print skipped tools in summary
+  - `--[no-]failed` - (don't) run only checks that have failed in the last run
+  - `--[no-]fix` - (don't) run tools in fix mode in order to resolve issues automatically
+  - `--[no-]parallel` - (don't) run tools in parallel
+  - `--[no-]skipped` - (don't) print skipped tools in summary
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
