@@ -69,7 +69,11 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     assert plain_output =~ "compiler success"
     refute plain_output =~ "formatter success"
     assert plain_output =~ "ex_unit success"
-    assert plain_output =~ "unused_deps fix success"
+
+    if Version.match?(System.version(), ">= 1.10.0") do
+      assert plain_output =~ "unused_deps fix success"
+    end
+
     refute plain_output =~ "credo skipped due to missing package credo"
     assert plain_output =~ "my_mix_task success"
     assert plain_output =~ "my_elixir_script success"
