@@ -163,8 +163,8 @@ Yes, `ex_check` uses itself on the CI. Yay for recursion!
 
 ### Autofixing
 
-You may automatically fix trivial issues by triggering the fix mode on the CI as well. In order to
-do so, you'll need a CI script or workflow similar to the example below:
+You may automatically fix and commit back trivial issues by triggering the fix mode on the CI as
+well. In order to do so, you'll need a CI script or workflow similar to the example below:
 
 ```bash
 mix check --fix && \
@@ -176,8 +176,8 @@ mix check --fix && \
   git push
 ```
 
-This script performs the fixing and, if no unfixable issues have occurred, checks whether any
-changes were actually made. If so, it commits and pushes these changes automatically.
+This script performs the check in fix mode and, if no unfixable issues have occurred, checks whether
+any fixes were actually made. If so, it proceeds to commit and push these fixes.
 
 Of course your CI will need to have write permissions to the source repository.
 
