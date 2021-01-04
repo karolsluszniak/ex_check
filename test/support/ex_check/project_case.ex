@@ -3,6 +3,12 @@ defmodule ExCheck.ProjectCase do
 
   use ExUnit.CaseTemplate
 
+  @default_config """
+  [
+    fix: false
+  ]
+  """
+
   using do
     quote do
       import ExCheck.ProjectCase
@@ -14,6 +20,7 @@ defmodule ExCheck.ProjectCase do
         project_dir = create_mix_project(tmp_dir)
 
         set_mix_deps(project_dir, [:ex_check])
+        write_default_config(project_dir)
         on_exit(fn -> remove_tmp_directory(tmp_dir) end)
 
         {:ok, project_dir: project_dir}
@@ -99,5 +106,10 @@ defmodule ExCheck.ProjectCase do
 
     File.write!(config_path, new_config)
     {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
+  end
+
+  def write_default_config(project_dir) do
+    config_path = Path.join(project_dir, ".check.exs")
+    File.write!(config_path, @default_config)
   end
 end
