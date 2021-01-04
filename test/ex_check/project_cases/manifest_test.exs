@@ -60,7 +60,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
              System.cmd("mix", ~w[check --manifest manifest.txt --failed --fix], cd: project_dir)
 
     assert output =~ "compiler success"
-    assert output =~ "formatter success"
+    assert output =~ "formatter fix success"
     refute output =~ "ex_unit success"
     refute output =~ "credo skipped due to missing package credo"
     refute output =~ "sobelow skipped due to missing package sobelow"

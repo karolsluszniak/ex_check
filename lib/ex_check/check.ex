@@ -171,7 +171,9 @@ defmodule ExCheck.Check do
   end
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
-    Printer.info([:magenta, "=> running "] ++ format_tool_name(name))
+    mode_suffix = if mode = opts[:mode], do: [" in ", b(mode), " mode"], else: []
+
+    Printer.info([:magenta, "=> running "] ++ format_tool_name(name) ++ mode_suffix)
     Printer.info()
     IO.write(IO.ANSI.faint())
 
@@ -219,10 +221,12 @@ defmodule ExCheck.Check do
   defp normalize_tool_name(name = {_, _}), do: name
   defp normalize_tool_name(name), do: {name, 0}
 
-  defp print_summary_item({:ok, {name, _, _}, {_, _, duration}}, _) do
+  defp print_summary_item({:ok, {name, _, opts}, {_, _, duration}}, _) do
     name = format_tool_name(name)
     took = format_duration(duration)
-    Printer.info([:green, " ✓ ", name, " success in ", b(took)])
+    mode = if mode = opts[:mode], do: [" ", to_string(mode)], else: []
+
+    Printer.info([:green, " ✓ ", name, mode, " success in ", b(took)])
   end
 
   defp print_summary_item({:error, {name, _, _}, {code, _, duration}}, _) do

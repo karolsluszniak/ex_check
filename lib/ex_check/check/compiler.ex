@@ -202,30 +202,32 @@ defmodule ExCheck.Check.Compiler do
   end
 
   defp prepare_pending(name, tool_opts, opts) do
+    {mode, command} = pick_mode_and_command(tool_opts, opts)
+
     command =
-      tool_opts
-      |> pick_input_cmd(opts)
+      command
       |> command_to_array()
       |> postprocess_cmd(tool_opts)
 
     command_opts =
       tool_opts
       |> Keyword.take([:cd, :env, :deps])
+      |> Keyword.put(:mode, mode)
       |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
 
     {:pending, {name, command, command_opts}}
   end
 
-  defp pick_input_cmd(tool_opts, opts) do
+  defp pick_mode_and_command(tool_opts, opts) do
     cond do
       opts[:fix] && tool_opts[:fix] ->
-        tool_opts[:fix]
+        {:fix, tool_opts[:fix]}
 
       opts[:failed] && tool_opts[:retry] ->
-        tool_opts[:retry]
+        {:retry, tool_opts[:retry]}
 
       true ->
-        Keyword.fetch!(tool_opts, :command)
+        {nil, Keyword.fetch!(tool_opts, :command)}
     end
   end
 
