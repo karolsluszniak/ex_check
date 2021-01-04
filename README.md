@@ -153,12 +153,45 @@ With `mix check` you can consistently run the same set of checks locally and on 
 configuration also becomes trivial and comes out of the box with parallelism and error output from
 all checks at once regardless of which ones have failed.
 
-Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
+Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check`
+instead of `mix test`. This repo features working CI configs for following providers:
 
 - GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
 - Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
 
 Yes, `ex_check` uses itself on the CI. Yay for recursion!
+
+### Autofixing
+
+You may automatically fix trivial issues by triggering the fix mode on the CI as well. In order to
+do so, you'll need a CI script or workflow similar to the example below:
+
+```bash
+mix check --fix && \
+  git diff-index --quiet HEAD -- && \
+  git config --global user.name 'Autofix' && \
+  git config --global user.email 'autofix@example.com' && \
+  git add --all && \
+  git commit --message "Autofix" && \
+  git push
+```
+
+This script performs the fixing and, if no unfixable issues have occurred, checks whether any
+changes were actually made. If so, it commits and pushes these changes automatically.
+
+Of course your CI will need to have write permissions to the source repository.
+
+### Random failues
+
+You may take advantage of the automatic retry feature to efficiently re-run failed tools & tests
+multiple times. For instance, following shell command runs check up to three times: `mix check ||
+mix check || mix check`. And here goes an alternative without the logical operators:
+
+```bash
+mix check
+mix check --failed
+mix check --failed
+```
 
 ## Changelog
 
