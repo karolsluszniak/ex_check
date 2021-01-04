@@ -144,7 +144,10 @@ defmodule Mix.Tasks.Check do
 
   You may combine `--fix` with `--failed` to only request tools that have failed to do the fixing.
 
-  Note that the fix mode will skip tools that don't provide this feature.
+  You may also consider adding `~/.check.exs` with `[fix: true]` on a local machine in order to
+  always run in the fix mode for convenience. You probably don't want this option in the project
+  config as that would trigger fix mode on CI as well - unless you want CI to perform & commit back
+  fixes.
 
   ### Manifest file
 
@@ -155,16 +158,14 @@ defmodule Mix.Tasks.Check do
 
   It's a simple plain text file with following syntax that should play well with shell commands:
 
-  ```
-  PASS compiler
-  FAIL formatter
-  PASS ex_unit
-  PASS unused_deps
-  SKIP credo
-  SKIP sobelow
-  SKIP ex_doc
-  SKIP dialyzer
-  ```
+      PASS compiler
+      FAIL formatter
+      PASS ex_unit
+      PASS unused_deps
+      SKIP credo
+      SKIP sobelow
+      SKIP ex_doc
+      SKIP dialyzer
 
   ## Configuration file
 
