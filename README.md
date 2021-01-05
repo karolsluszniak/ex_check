@@ -58,7 +58,7 @@ mix check
 
 That's it - `mix check` will detect and run all the available tools.
 
-### Configuring tools
+### Tool configuration
 
 If you want to take advantage of curated tools, add following dependencies in `mix.exs`:
 
@@ -89,6 +89,18 @@ Among others, this allows to permamently disable specific tools and avoid the sk
   ]
 ]
 ```
+
+### Local-only configuration
+
+You should keep local and CI configuration as consistent as possible by putting together the project-specific `.check.exs`. Still, you may introduce local-only config by creating the `~/.check.exs` file. This may be useful to enforce global flags on all local runs. For example, the following config will enable the fix mode in local (writeable) envirnoment:
+
+```elixir
+[
+  fix: true
+]
+```
+
+> You may also [enable the fix mode on the CI](#autofixing).
 
 ## Documentation
 
@@ -139,7 +151,7 @@ This will work as expected because the `--failed` flag will ensure that only fai
 
 ## Troubleshooting
 
-### Avoiding duplicate builds
+### Duplicate builds
 
 If, as suggested above, you've added `ex_check` and curated tools to `only: [:dev]`, you're keeping the test environment reserved for `ex_unit`. While a clean setup, it comes at the expense of Mix having to compile your app twice - in order to prepare `:test` build just for `ex_unit` and `:dev` build for other tools. This costs precious time both on local machine and on the CI. It may also cause issues if you set `MIX_ENV=test`, which is a common practice on the CI.
 
@@ -183,7 +195,7 @@ And the following in `.check.exs`:
 
 Above setup will consistently check the project using just the test build, both locally and on the CI.
 
-### Avoiding false negatives of `unused_deps` check
+### `unused_deps` false negatives
 
 You may encounter an issue with the `unused_deps` check failing on the CI while passing locally, caused by fetching only dependencies for specific env. If that happens, remove the `--only test` (or similar) from your `mix deps.get` invocation on the CI to fix the issue.
 
