@@ -28,7 +28,7 @@ Sports powerful features to enable ultimate flexibility.
 Takes care of the little details, so you don't have to.
 - Compiles the project and collects compilation warnings in one go
 - Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
-- Retries `ex_unit` with the `--failed` flag
+- Retries ExUnit with the `--failed` flag
 
 Read more in the introductory ["One task to rule all Elixir analysis & testing
 tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools)
