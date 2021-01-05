@@ -5,7 +5,7 @@
         transform: scale(0.35);
         transform-box: fill-box;
         transform-origin: 50% 50%;
-        fill: hsla(135, 80%, 80%);
+        fill: hsl(117, 55%, 65%);
       }
 
       .bottle {

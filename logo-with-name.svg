@@ -13,7 +13,7 @@
         transform: scale(0.35);
         transform-box: fill-box;
         transform-origin: 50% 50%;
-        fill: hsla(135, 80%, 80%);
+        fill: hsl(117, 55%, 65%);
       }
 
       .bottle {
@@ -24,12 +24,12 @@
         font-size: 200px;
         font-family: Courier;
         font-weight: bold;
-        fill: hsla(135, 80%, 80%);
+        fill: hsl(117, 45%, 55%);
         transform: scale(0.85, 1.0);
       }
 
       .text.suffix {
-        fill: hsl(265, 40%, 35%);
+        fill: hsl(265, 30%, 50%);
       }
 
       .text.caret {

@@ -1,10 +1,10 @@
 # ![ex_check](./logo-with-name.svg)
 
-[![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
-[![Build status (GitHub Actions)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
-[![Build status (Travis CI)](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg?logo=travis)](https://travis-ci.org/karolsluszniak/ex_check)
-[![Hex version](https://img.shields.io/hexpm/v/ex_check.svg)](https://hex.pm/packages/ex_check)
+[![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
+[![Build status (GitHub)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
+[![Build status (Travis)](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg?logo=travis)](https://travis-ci.org/karolsluszniak/ex_check)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
+[![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
 
 ![Demo](https://raw.githubusercontent.com/karolsluszniak/ex_check/master/demo-67x16.svg)
 
