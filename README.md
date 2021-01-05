@@ -177,8 +177,8 @@ mix check --fix && \
   git push
 ```
 
-This script performs the check in fix mode and, if no unfixable issues have occurred, checks whether
-any fixes were actually made. If so, it proceeds to commit and push these fixes.
+First, we perform the check in the fix mode. Then, if no unfixable issues have occurred and if fixes
+were actually made, we proceed to commit and push these fixes.
 
 Of course your CI will need to have write permissions to the source repository.
 
