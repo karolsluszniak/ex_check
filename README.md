@@ -13,7 +13,7 @@
 ---
 
 Takes seconds to setup, saves hours in the long term.
-- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including NPM integration for Phoenix assets
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools)
 - Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
 - Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
 - Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
@@ -21,13 +21,14 @@ Takes seconds to setup, saves hours in the long term.
 
 Sports powerful features to enable ultimate flexibility.
 - Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
-- Report status of each check to CI by using [manifest file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file)
+- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix](#autofixing)
 - Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
 - Design complex parallel workflows with [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
 - Compiles the project and collects compilation warnings in one go
-- Ensures that output from tools is still [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Retries `ex_unit` with the `--failed` flag
 
 Read more in the introductory ["One task to rule all Elixir analysis & testing
 tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools)
@@ -192,6 +193,9 @@ mix check
 mix check --failed
 mix check --failed
 ```
+
+This will work as expected because the `--failed` flag will ensure that only failed tools are
+executed, resulting in no-op if previous run has succeeded.
 
 ## Changelog
 
