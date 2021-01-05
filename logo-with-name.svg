@@ -3,7 +3,7 @@
     <style type="text/css">
       @keyframes caret-flash {
         0% { opacity: 0; }
-        25% { opacity: 1; }
+        35% { opacity: 1; }
         50% { opacity: 1; }
         85% { opacity: 0; }
         100% { opacity: 0; }
