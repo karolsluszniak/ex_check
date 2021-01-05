@@ -21,9 +21,9 @@ Takes seconds to setup, saves hours in the long term.
 
 Sports powerful features to enable ultimate flexibility.
 - Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
-- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix](#autofixing)
+- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
 - Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
-- Design complex parallel workflows with [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
 - Compiles the project and collects compilation warnings in one go
@@ -182,7 +182,7 @@ any fixes were actually made. If so, it proceeds to commit and push these fixes.
 
 Of course your CI will need to have write permissions to the source repository.
 
-### Random failues
+### Random failures
 
 You may take advantage of the automatic retry feature to efficiently re-run failed tools & tests
 multiple times. For instance, following shell command runs check up to three times: `mix check ||
