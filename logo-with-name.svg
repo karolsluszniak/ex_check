@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 512" width="750" height="250">
+  <defs>
+    <style type="text/css">
+      @keyframes caret-flash {
+        0% { opacity: 0; }
+        25% { opacity: 1; }
+        50% { opacity: 1; }
+        85% { opacity: 0; }
+        100% { opacity: 0; }
+      }
+
+      .check {
+        transform: scale(0.35);
+        transform-box: fill-box;
+        transform-origin: 50% 50%;
+        fill: hsla(135, 80%, 80%);
+      }
+
+      .bottle {
+        fill: hsl(265, 40%, 35%);
+      }
+
+      .text {
+        font-size: 200px;
+        font-family: Courier;
+        font-weight: bold;
+        fill: hsla(135, 80%, 80%);
+      }
+
+      .text.suffix {
+        fill: hsl(265, 40%, 35%);
+      }
+
+      .text.caret {
+        animation: caret-flash 1s ease infinite;
+      }
+    </style>
+
+    <radialGradient id="bottle-shade" cx="0%" cy="0%" r="100%">
+      <stop offset="0" stop-color="hsla(265, 40%, 60%, 1)" />
+      <stop offset="1" stop-color="hsla(265, 40%, 100%, 0)" />
+    </radialGradient>
+  </defs>
+
+  <g transform="translate(80,0)">
+    <path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82z" class="bottle"/>
+  </g>
+
+  <g transform="translate(80,0)">
+    <path d="M205.22 22.09c-7.94-28.78-49.44-30.12-58.44 0C100.01 179.85 0 222.72 0 333.91 0 432.35 78.72 512 176 512s176-79.65 176-178.09c0-111.75-99.79-153.34-146.78-311.82z" class="bottle-shade" fill="url(#bottle-shade)" />
+  </g>
+
+  <g transform="translate(0, 70)">
+    <path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z" fill="white" class="check"/>
+  </g>
+
+  <!-- <text x="512" y="380" stroke="red" class="text">ex_check</text> -->
+  <text x="512" y="380" class="text">ex</text>
+  <text x="752" y="380" class="text caret">_</text>
+  <text x="872" y="380" class="text suffix">check</text>
+</svg>

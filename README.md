@@ -1,4 +1,4 @@
-# ![ex_check](https://raw.githubusercontent.com/karolsluszniak/ex_check/master/logo.svg) ex_check
+# ![ex_check](./logo-with-name.svg)
 
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
 [![Build status (GitHub Actions)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
