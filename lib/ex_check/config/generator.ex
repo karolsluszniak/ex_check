@@ -6,9 +6,17 @@ defmodule ExCheck.Config.Generator do
 
   @generated_config """
   [
-    ## all available options with default values (see `mix check` docs for description)
-    # parallel: true,
-    # skipped: true,
+    ## don't run tools concurrently
+    # parallel: false,
+
+    ## don't print info about skipped tools
+    # skipped: false,
+
+    ## always run tools in fix mode (put it in ~/.check.exs locally, not in project config)
+    # fix: true,
+
+    ## don't retry automatically even if last run resulted in failures
+    # failed: false,
 
     ## list of tools (see `mix check` docs for a list of default curated tools)
     tools: [

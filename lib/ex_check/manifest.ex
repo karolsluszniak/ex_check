@@ -1,21 +1,12 @@
 defmodule ExCheck.Manifest do
   @moduledoc false
 
-  # sobelow_skip ["Traversal.FileModule", "DOS.StringToAtom"]
   def convert_failed_to_only(opts) do
-    with true <- Keyword.get(opts, :failed),
-         manifest_path = get_path(opts),
-         true <- File.exists?(manifest_path) do
+    if Keyword.get(opts, :failed) do
       only =
-        manifest_path
-        |> File.read!()
-        |> String.split("\n")
-        |> Enum.map(fn
-          "FAIL " <> tool -> deserialize_tool_name_without_app(tool)
-          _ -> nil
-        end)
-        |> Enum.filter(& &1)
-        |> Enum.map(&{:only, String.to_atom(&1)})
+        opts
+        |> get_failed_tools()
+        |> Enum.map(&{:only, &1})
         |> case do
           [] -> [{:only, "-"}]
           only -> only
@@ -23,7 +14,27 @@ defmodule ExCheck.Manifest do
 
       opts ++ only
     else
-      _ -> opts
+      opts
+    end
+  end
+
+  # sobelow_skip ["Traversal.FileModule", "DOS.StringToAtom"]
+  def get_failed_tools(opts) do
+    manifest_path = get_path(opts)
+
+    if File.exists?(manifest_path) do
+      manifest_path
+      |> File.read!()
+      |> String.split("\n")
+      |> Enum.map(fn
+        "FAIL " <> tool -> deserialize_tool_name_without_app(tool)
+        _ -> nil
+      end)
+      |> Enum.filter(& &1)
+      |> Enum.map(&String.to_atom/1)
+      |> Enum.uniq()
+    else
+      []
     end
   end
 

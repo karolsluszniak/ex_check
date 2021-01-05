@@ -14,8 +14,9 @@ defmodule ExCheck.Check.Compiler do
     compiler = List.keyfind(tools, :compiler, 0) || raise("compiler tool definition missing")
     compiler = prepare(compiler, opts)
 
-    with {:disabled, _} <- compiler do
-      {:pending, {:compiler, ["mix", "compile"], []}}
+    case compiler do
+      {:pending, _, _} -> compiler
+      _ -> {:pending, {:compiler, ["mix", "compile"], []}}
     end
   end
 
@@ -137,29 +138,13 @@ defmodule ExCheck.Check.Compiler do
         {:disabled, name}
 
       failed_detection = find_failed_detection(name, tool_opts) ->
-        {base, opts} = failed_detection
-
-        case Keyword.get(opts, :else, :skip) do
-          :disable -> {:disabled, name}
-          :skip -> {:skipped, name, base}
-        end
+        prepare_failed_detection(name, failed_detection)
 
       tool_opts[:cd] && not File.dir?(tool_opts[:cd]) ->
         {:skipped, name, {:cd, tool_opts[:cd]}}
 
       true ->
-        command =
-          tool_opts
-          |> Keyword.fetch!(:command)
-          |> command_to_array()
-          |> postprocess_cmd(tool_opts)
-
-        command_opts =
-          tool_opts
-          |> Keyword.take([:cd, :env, :deps])
-          |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
-
-        {:pending, {name, command, command_opts}}
+        prepare_pending(name, tool_opts, opts)
     end
   end
 
@@ -206,6 +191,45 @@ defmodule ExCheck.Check.Compiler do
   defp failed_detection?({:package, name, app}), do: not Project.has_dep_in_app?(name, app)
   defp failed_detection?({:package, name}), do: not Project.has_dep?(name)
   defp failed_detection?({:file, name}), do: not File.exists?(name)
+
+  defp prepare_failed_detection(name, failed_detection) do
+    {base, opts} = failed_detection
+
+    case Keyword.get(opts, :else, :skip) do
+      :disable -> {:disabled, name}
+      :skip -> {:skipped, name, base}
+    end
+  end
+
+  defp prepare_pending(name, tool_opts, opts) do
+    {mode, command} = pick_mode_and_command(tool_opts, opts)
+
+    command =
+      command
+      |> command_to_array()
+      |> postprocess_cmd(tool_opts)
+
+    command_opts =
+      tool_opts
+      |> Keyword.take([:cd, :env, :deps])
+      |> Keyword.put(:mode, mode)
+      |> Keyword.put(:umbrella_parallel, get_in(tool_opts, [:umbrella, :parallel]))
+
+    {:pending, {name, command, command_opts}}
+  end
+
+  defp pick_mode_and_command(tool_opts, opts) do
+    cond do
+      opts[:fix] && tool_opts[:fix] ->
+        {:fix, tool_opts[:fix]}
+
+      opts[:failed] && tool_opts[:retry] ->
+        {:retry, tool_opts[:retry]}
+
+      true ->
+        {nil, Keyword.fetch!(tool_opts, :command)}
+    end
+  end
 
   defp postprocess_cmd(cmd, opts) do
     if Keyword.get(opts, :enable_ansi, true) do

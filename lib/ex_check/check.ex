@@ -9,18 +9,27 @@ defmodule ExCheck.Check do
   alias ExCheck.Printer
 
   def run(opts) do
-    {tools, config_opts} =
-      opts
-      |> Keyword.put(:file, opts[:config])
-      |> Keyword.delete(:config)
-      |> Config.load()
+    {tools, config_opts} = Config.load(file: opts[:config])
 
     opts =
       config_opts
       |> Keyword.merge(opts)
+      |> maybe_toggle_retry_mode()
       |> Manifest.convert_failed_to_only()
 
     compile_and_run_tools(tools, opts)
+  end
+
+  defp maybe_toggle_retry_mode(opts) do
+    with false <- Keyword.has_key?(opts, :failed),
+         tools = [_ | _] <- Manifest.get_failed_tools(opts) do
+      Printer.info([:cyan, "=> retrying automatically: "] ++ Enum.map(tools, &format_tool_name/1))
+      Printer.info()
+
+      opts ++ [{:failed, true}]
+    else
+      _ -> opts
+    end
   end
 
   defp compile_and_run_tools(tools, opts) do
@@ -171,7 +180,9 @@ defmodule ExCheck.Check do
   end
 
   defp await_tool({:running, {name, cmd, opts}, task}) do
-    Printer.info([:magenta, "=> running "] ++ format_tool_name(name))
+    mode_suffix = if mode = opts[:mode], do: [" in ", b(mode), " mode"], else: []
+
+    Printer.info([:magenta, "=> running "] ++ format_tool_name(name) ++ mode_suffix)
     Printer.info()
     IO.write(IO.ANSI.faint())
 
@@ -219,10 +230,12 @@ defmodule ExCheck.Check do
   defp normalize_tool_name(name = {_, _}), do: name
   defp normalize_tool_name(name), do: {name, 0}
 
-  defp print_summary_item({:ok, {name, _, _}, {_, _, duration}}, _) do
+  defp print_summary_item({:ok, {name, _, opts}, {_, _, duration}}, _) do
     name = format_tool_name(name)
     took = format_duration(duration)
-    Printer.info([:green, " ✓ ", name, " success in ", b(took)])
+    mode = if mode = opts[:mode], do: [" ", to_string(mode)], else: []
+
+    Printer.info([:green, " ✓ ", name, mode, " success in ", b(took)])
   end
 
   defp print_summary_item({:error, {name, _, _}, {code, _, duration}}, _) do

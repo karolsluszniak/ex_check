@@ -45,9 +45,9 @@ defmodule ExCheck.ProjectCases.ManifestTest do
              """
     end
 
-    assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+    assert {output, 1} = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir)
 
+    assert output =~ "retrying automatically"
     assert output =~ "compiler success"
     assert output =~ "formatter error code 1"
     refute output =~ "ex_unit success"
@@ -56,13 +56,35 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
 
-    File.rm!(invalid_file_path)
-
-    assert {output, 0} =
+    assert {output, 1} =
              System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
 
+    refute output =~ "retrying automatically"
     assert output =~ "compiler success"
-    assert output =~ "formatter success"
+    assert output =~ "formatter error code 1"
+    refute output =~ "ex_unit success"
+    refute output =~ "credo skipped due to missing package credo"
+    refute output =~ "sobelow skipped due to missing package sobelow"
+    refute output =~ "dialyzer skipped due to missing package dialyxir"
+    refute output =~ "ex_doc skipped due to missing package ex_doc"
+
+    assert {output, 1} =
+             System.cmd("mix", ~w[check --manifest manifest.txt --no-failed], cd: project_dir)
+
+    refute output =~ "retrying automatically"
+    assert output =~ "compiler success"
+    assert output =~ "formatter error code 1"
+    assert output =~ "ex_unit success"
+    assert output =~ "credo skipped due to missing package credo"
+    assert output =~ "sobelow skipped due to missing package sobelow"
+    assert output =~ "dialyzer skipped due to missing package dialyxir"
+    assert output =~ "ex_doc skipped due to missing package ex_doc"
+
+    assert {output, 0} =
+             System.cmd("mix", ~w[check --manifest manifest.txt --failed --fix], cd: project_dir)
+
+    assert output =~ "compiler success"
+    assert output =~ "formatter fix success"
     refute output =~ "ex_unit success"
     refute output =~ "credo skipped due to missing package credo"
     refute output =~ "sobelow skipped due to missing package sobelow"
@@ -79,5 +101,43 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+
+    failing_test_path =
+      project_dir
+      |> Path.join("test")
+      |> Path.join("failing_test.exs")
+
+    File.write!(failing_test_path, """
+    defmodule TestProjectFailingTest do
+      use ExUnit.Case
+
+      test "sample failure" do
+        assert TestProject.hello() == :universe
+      end
+    end
+    """)
+
+    assert {output, 1} =
+             System.cmd("mix", ~w[check --only ex_unit --only formatter], cd: project_dir)
+
+    assert output =~ "formatter success"
+    assert output =~ "ex_unit error code 1"
+    assert output =~ "2 tests, 1 failure"
+
+    assert {output, 1} = System.cmd("mix", ~w[check --failed], cd: project_dir)
+
+    refute output =~ "formatter"
+    assert output =~ "ex_unit error code 1"
+    assert output =~ "1 test, 1 failure"
+
+    File.write!(
+      failing_test_path,
+      File.read!(failing_test_path) |> String.replace(":universe", ":world")
+    )
+
+    assert {output, 0} = System.cmd("mix", ~w[check --failed], cd: project_dir)
+
+    refute output =~ "formatter"
+    assert output =~ "ex_unit retry success"
   end
 end

@@ -1,4 +1,4 @@
-# ![ex_check](https://raw.githubusercontent.com/karolsluszniak/ex_check/master/logo.svg) ex_check
+# ![ex_check](./logo-with-name.svg)
 
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
 [![Build status (GitHub Actions)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
@@ -13,24 +13,24 @@
 ---
 
 Takes seconds to setup, saves hours in the long term.
-- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools), including NPM integration for Phoenix assets
-- Delivers results faster by [running tools in parallel and identifying all project issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools)
+- Delivers results faster by [running tools in parallel and catching all issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
 - Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
-- Allows to re-run checks that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file)
+- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
+- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-fix-mode)
 
 Sports powerful features to enable ultimate flexibility.
 - Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
-- Report status of each check to CI by using [manifest file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file)
+- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
 - Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
-- Design complex parallel workflows with [cross-tool dependencies](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
 - Compiles the project and collects compilation warnings in one go
-- Ensures that output from tools is still [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Retries ExUnit with the `--failed` flag
 
-Read more in the introductory ["One task to rule all Elixir analysis & testing
-tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools)
-article.
+Read more in the introductory ["One task to rule all Elixir analysis & testing tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools) article.
 
 ## Getting started
 
@@ -58,7 +58,7 @@ mix check
 
 That's it - `mix check` will detect and run all the available tools.
 
-### Configuring tools
+### Tool configuration
 
 If you want to take advantage of curated tools, add following dependencies in `mix.exs`:
 
@@ -90,7 +90,68 @@ Among others, this allows to permamently disable specific tools and avoid the sk
 ]
 ```
 
-### Avoiding duplicate builds
+### Local-only configuration
+
+You should keep local and CI configuration as consistent as possible by putting together the project-specific `.check.exs`. Still, you may introduce local-only config by creating the `~/.check.exs` file. This may be useful to enforce global flags on all local runs. For example, the following config will enable the fix mode in local (writeable) envirnoment:
+
+```elixir
+[
+  fix: true
+]
+```
+
+> You may also [enable the fix mode on the CI](#autofixing).
+
+## Documentation
+
+Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
+
+Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir code check"](http://cloudless.studio/articles/50-writing-your-first-elixir-code-check) article.
+
+## Continuous Integration
+
+With `mix check` you can consistently run the same set of checks locally and on the CI. CI configuration also becomes trivial and comes out of the box with parallelism and error output from all checks at once regardless of which ones have failed.
+
+Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` nstead of `mix test`. This repo features working CI configs for following providers:
+
+- GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
+- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
+
+Yes, `ex_check` uses itself on the CI. Yay for recursion!
+
+### Autofixing
+
+You may automatically fix and commit back trivial issues by triggering the fix mode on the CI as well. In order to do so, you'll need a CI script or workflow similar to the example below:
+
+```bash
+mix check --fix && \
+  git diff-index --quiet HEAD -- && \
+  git config --global user.name 'Autofix' && \
+  git config --global user.email 'autofix@example.com' && \
+  git add --all && \
+  git commit --message "Autofix" && \
+  git push
+```
+
+First, we perform the check in the fix mode. Then, if no unfixable issues have occurred and if fixes were actually made, we proceed to commit and push these fixes.
+
+Of course your CI will need to have write permissions to the source repository.
+
+### Random failures
+
+You may take advantage of the automatic retry feature to efficiently re-run failed tools & tests multiple times. For instance, following shell command runs check up to three times: `mix check || mix check || mix check`. And here goes an alternative without the logical operators:
+
+```bash
+mix check
+mix check --failed
+mix check --failed
+```
+
+This will work as expected because the `--failed` flag will ensure that only failed tools are executed, resulting in no-op if previous run has succeeded.
+
+## Troubleshooting
+
+### Duplicate builds
 
 If, as suggested above, you've added `ex_check` and curated tools to `only: [:dev]`, you're keeping the test environment reserved for `ex_unit`. While a clean setup, it comes at the expense of Mix having to compile your app twice - in order to prepare `:test` build just for `ex_unit` and `:dev` build for other tools. This costs precious time both on local machine and on the CI. It may also cause issues if you set `MIX_ENV=test`, which is a common practice on the CI.
 
@@ -134,30 +195,9 @@ And the following in `.check.exs`:
 
 Above setup will consistently check the project using just the test build, both locally and on the CI.
 
-### Avoiding false negatives of `unused_deps` check
+### `unused_deps` false negatives
 
 You may encounter an issue with the `unused_deps` check failing on the CI while passing locally, caused by fetching only dependencies for specific env. If that happens, remove the `--only test` (or similar) from your `mix deps.get` invocation on the CI to fix the issue.
-
-## Documentation
-
-Learn more about the tools included in the check as well as its workflow, configuration and options
-[on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
-
-Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir
-code check"](http://cloudless.studio/articles/50-writing-your-first-elixir-code-check) article.
-
-## Continuous Integration
-
-With `mix check` you can consistently run the same set of checks locally and on the CI. CI
-configuration also becomes trivial and comes out of the box with parallelism and error output from
-all checks at once regardless of which ones have failed.
-
-Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
-
-- GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
-- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
-
-Yes, `ex_check` uses itself on the CI. Yay for recursion!
 
 ## Changelog
 
