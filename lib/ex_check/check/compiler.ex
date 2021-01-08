@@ -15,7 +15,7 @@ defmodule ExCheck.Check.Compiler do
     compiler = prepare(compiler, opts)
 
     case compiler do
-      {:pending, _, _} -> compiler
+      {:pending, _} -> compiler
       _ -> {:pending, {:compiler, ["mix", "compile"], []}}
     end
   end
