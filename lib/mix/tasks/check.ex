@@ -8,34 +8,39 @@ defmodule Mix.Tasks.Check do
   reasonable additions for most Elixir and Phoenix projects which care about having bug-free,
   maintainable and secure code.
 
-  Following curated tools are configured by default:
+  Following standard library tools are configured by default:
 
   - [`:compiler`] - produces compilation warnings that allow to early detect bugs & typos in the
     code eg. an attempt to call non-existing or deprecated function
 
-  - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
-    maximum number of chars in a line or function indentation
-
   - [`:unused_deps`] - ensures that there are no unused dependencies in the project's `mix.lock`
     file (e.g. after removing a previously used dependency)
+
+  - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
+    maximum number of chars in a line or function indentation
 
   - [`:ex_unit`] - starts the application in test mode and runs all runtime tests against it
     (defined as test modules or embedded in docs as doctests)
 
+  Following community tools are configured by default:
+
   - [`:credo`] - ensures that all the code follows a further established set of software design,
     consistency, readability & misc rules and conventions (still statical)
 
-  - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
-    framework, but also detecting vulnerable dependencies in arbitrary Mix projects
-
   - [`:dialyzer`] - performs static code analysis around type mismatches and other issues that are
     commonly detected by static language compilers
+
+  - [`:doctor`] - ensures that the project documentation is healthy by validating the presence of
+    module docs, functions docs, typespecs and struct typespecs
 
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
   - [`:npm_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
     directory and `package.json` in it (default for Phoenix apps)
+
+  - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
+    framework, but also detecting vulnerable dependencies in arbitrary Mix projects
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
@@ -237,13 +242,14 @@ defmodule Mix.Tasks.Check do
   - `--[no-]skipped` - (don't) print skipped tools in summary
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
-  [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
-  [`:ex_unit`]: https://hexdocs.pm/ex_unit
   [`:credo`]: https://hexdocs.pm/credo
-  [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:dialyzer`]: https://hexdocs.pm/dialyxir
+  [`:doctor`]: https://github.com/akoutmos/doctor
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
+  [`:ex_unit`]: https://hexdocs.pm/ex_unit
+  [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
+  [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:unused_deps`]: https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
   """
 

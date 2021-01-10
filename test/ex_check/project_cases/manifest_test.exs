@@ -24,10 +24,11 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     if Version.match?(System.version(), ">= 1.10.0") do
       assert manifest == """
              PASS compiler
+             PASS unused_deps
              FAIL formatter
              PASS ex_unit
-             PASS unused_deps
              SKIP credo
+             SKIP doctor
              SKIP sobelow
              SKIP ex_doc
              SKIP dialyzer
