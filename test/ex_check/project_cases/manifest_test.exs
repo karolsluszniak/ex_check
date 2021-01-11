@@ -21,30 +21,29 @@ defmodule ExCheck.ProjectCases.ManifestTest do
 
     manifest = File.read!(Path.join(project_dir, "manifest.txt"))
 
-    if Version.match?(System.version(), ">= 1.10.0") do
-      assert manifest == """
-             PASS compiler
-             PASS unused_deps
-             FAIL formatter
-             PASS ex_unit
-             SKIP credo
-             SKIP doctor
-             SKIP sobelow
-             SKIP ex_doc
-             SKIP dialyzer
-             """
-    else
-      assert manifest == """
-             PASS compiler
-             FAIL formatter
-             PASS ex_unit
-             SKIP credo
-             SKIP sobelow
-             SKIP ex_doc
-             SKIP dialyzer
-             SKIP unused_deps
-             """
-    end
+    expected_manifest =
+      """
+      PASS compiler
+      PASS unused_deps
+      FAIL formatter
+      PASS ex_unit
+      SKIP credo
+      SKIP doctor
+      SKIP sobelow
+      SKIP ex_doc
+      SKIP dialyzer
+      """
+      |> String.split("\n")
+      |> Enum.sort()
+
+    expected_manifest =
+      if Version.match?(System.version(), ">= 1.10.0") do
+        expected_manifest
+      else
+        (expected_manifest -- ["PASS unused_deps"]) ++ ["SKIP unused_deps"]
+      end
+
+    assert manifest |> String.split("\n") |> Enum.sort() == expected_manifest
 
     assert {output, 1} = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir)
 

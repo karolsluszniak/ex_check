@@ -10,7 +10,7 @@ defmodule ExCheck.Config.Default do
     {:formatter, "mix format --check-formatted",
      detect: [{:file, ".formatter.exs"}], fix: "mix format"},
     {:credo, "mix credo", detect: [{:package, :credo}]},
-    {:doctor, "mix doctor", detect: [{:package, :doctor}]},
+    {:doctor, "mix doctor", detect: [{:package, :doctor}, {:elixir, ">= 1.8.0"}]},
     {:sobelow, "mix sobelow --exit", umbrella: [recursive: true], detect: [{:package, :sobelow}]},
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
     {:ex_unit, "mix test", detect: [{:file, "test"}], retry: "mix test --failed"},
