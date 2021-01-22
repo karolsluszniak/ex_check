@@ -58,15 +58,16 @@ mix check
 
 That's it - `mix check` will detect and run all the available tools.
 
-### Tool configuration
+### Community tools
 
-If you want to take advantage of curated tools, add following dependencies in `mix.exs`:
+If you want to take advantage of community curated tools, add following dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
     {:credo, ">= 0.0.0", only: [:dev], runtime: false},
     {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
+    {:doctor, ">= 0.0.0", only: [:dev], runtime: false},
     {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
     {:sobelow, ">= 0.0.0", only: [:dev], runtime: false}
   ]
@@ -90,7 +91,7 @@ Among others, this allows to permamently disable specific tools and avoid the sk
 ]
 ```
 
-### Local-only configuration
+### Local-only fix mode
 
 You should keep local and CI configuration as consistent as possible by putting together the project-specific `.check.exs`. Still, you may introduce local-only config by creating the `~/.check.exs` file. This may be useful to enforce global flags on all local runs. For example, the following config will enable the fix mode in local (writeable) envirnoment:
 
@@ -165,6 +166,7 @@ def project do
       check: :test,
       credo: :test,
       dialyzer: :test,
+      doctor: :test,
       sobelow: :test
     ]
   ]
@@ -174,6 +176,7 @@ def deps do
   [
     {:credo, ">= 0.0.0", only: [:test], runtime: false},
     {:dialyxir, ">= 0.0.0", only: [:test], runtime: false},
+    {:doctor, ">= 0.0.0", only: [:test], runtime: false},
     {:ex_check, "~> 0.13.0", only: [:test], runtime: false},
     {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
     {:sobelow, ">= 0.0.0", only: [:test], runtime: false}
