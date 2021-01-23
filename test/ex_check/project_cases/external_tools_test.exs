@@ -10,9 +10,11 @@ defmodule ExCheck.ProjectCases.ExternalToolsTest do
     assert output =~ "formatter success"
     assert output =~ "ex_unit success"
     assert output =~ "credo success"
+
     if Version.match?(System.version(), ">= 1.8.0") do
       assert output =~ "doctor success"
     end
+
     assert output =~ "sobelow success"
     assert output =~ "dialyzer skipped due to missing package dialyxir"
     assert output =~ "ex_doc success"
