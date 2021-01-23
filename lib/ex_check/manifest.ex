@@ -1,8 +1,8 @@
 defmodule ExCheck.Manifest do
   @moduledoc false
 
-  def convert_failed_to_only(opts) do
-    if Keyword.get(opts, :failed) do
+  def convert_retry_to_only(opts) do
+    if Keyword.get(opts, :retry) do
       only =
         opts
         |> get_failed_tools()

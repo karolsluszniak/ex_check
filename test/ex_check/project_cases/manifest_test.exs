@@ -57,7 +57,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+             System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
 
     refute output =~ "retrying automatically"
     assert output =~ "compiler success"
@@ -69,7 +69,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --no-failed], cd: project_dir)
+             System.cmd("mix", ~w[check --manifest manifest.txt --no-retry], cd: project_dir)
 
     refute output =~ "retrying automatically"
     assert output =~ "compiler success"
@@ -81,7 +81,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     assert output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert {output, 0} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed --fix], cd: project_dir)
+             System.cmd("mix", ~w[check --manifest manifest.txt --retry --fix], cd: project_dir)
 
     assert output =~ "compiler success"
     assert output =~ "formatter fix success"
@@ -92,7 +92,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
 
     assert {output, 0} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --failed], cd: project_dir)
+             System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
 
     assert output =~ "compiler success"
     refute output =~ "formatter success"
@@ -124,7 +124,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     assert output =~ "ex_unit error code 1"
     assert output =~ "2 tests, 1 failure"
 
-    assert {output, 1} = System.cmd("mix", ~w[check --failed], cd: project_dir)
+    assert {output, 1} = System.cmd("mix", ~w[check --retry], cd: project_dir)
 
     refute output =~ "formatter"
     assert output =~ "ex_unit error code 1"
@@ -135,7 +135,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       File.read!(failing_test_path) |> String.replace(":universe", ":world")
     )
 
-    assert {output, 0} = System.cmd("mix", ~w[check --failed], cd: project_dir)
+    assert {output, 0} = System.cmd("mix", ~w[check --retry], cd: project_dir)
 
     refute output =~ "formatter"
     assert output =~ "ex_unit retry success"

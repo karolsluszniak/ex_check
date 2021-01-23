@@ -144,11 +144,11 @@ You may take advantage of the automatic retry feature to efficiently re-run fail
 
 ```bash
 mix check
-mix check --failed
-mix check --failed
+mix check --retry
+mix check --retry
 ```
 
-This will work as expected because the `--failed` flag will ensure that only failed tools are executed, resulting in no-op if previous run has succeeded.
+This will work as expected because the `--retry` flag will ensure that only failed tools are executed, resulting in no-op if previous run has succeeded.
 
 ## Troubleshooting
 
