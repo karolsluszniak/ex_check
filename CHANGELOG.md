@@ -2,19 +2,19 @@
 
 ## v0.14.0-dev
 
-- **Added** `--fix` command line option that runs tools in fix mode in order to resolve issues automatically along with `:fix` tool option
-- **Added** capability to run tool command to retry after failure e.g. in order to run only failed tests or checks along with `:retry` tool option
+- **Added** `--fix` command line option to resolve issues automatically for tools that provide the fix command via the `:fix` tool option
 - **Added** automatic toggling of retry mode when previous run resulted in failures (pass `--no-retry` to override)
 - **Added** `:doctor` tool
-- **Renamed** `--failed` opt to `--retry`
+- **Improved** retry mode with capability to run only failed tests or checks for tools that provide the retry command via the `:retry` tool option
 - **Improved** default tool ordering to persist when custom config is applied to default tools
+- **Renamed** `--failed` command line option to `--retry`
 
 ## v0.13.0
 
 - **Added** `:unused_deps` tool
-- **Added** `--config` opt to point to arbitrary configuration file path
-- **Added** `--failed` opt to only run checks that have failed in the last run
-- **Added** `--manifest` opt to specify path to file that holds last run results
+- **Added** `--config` command line option to point to arbitrary configuration file path
+- **Added** `--failed` command line option to only run checks that have failed in the last run
+- **Added** `--manifest` command line option to specify path to file that holds last run results
 
 ## v0.12.0
 
