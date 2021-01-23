@@ -16,7 +16,7 @@ defmodule ExCheck.Config.Generator do
     # fix: true,
 
     ## don't retry automatically even if last run resulted in failures
-    # failed: false,
+    # retry: false,
 
     ## list of tools (see `mix check` docs for a list of default curated tools)
     tools: [

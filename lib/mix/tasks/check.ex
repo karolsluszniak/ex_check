@@ -132,26 +132,26 @@ defmodule Mix.Tasks.Check do
 
   ### Retrying failed tools
 
-  You may only run failed tools in the next run by passing the `--failed` command line option in
+  You may run only failed tools in the next run by passing the `--retry` command line option in
   order to avoid wasting time on checks that have already passed.
 
   In addition, some tools offer the capability to do the same, i.e. run only failed tests or checks.
   If the tool provides such capability, it will be automatically executed this way when the
-  `--failed` command line option is passed. This feature is provided out of the box for `ex_unit`
+  `--retry` command line option is passed. This feature is provided out of the box for `ex_unit`
   tool and may be provided for any tool via `:retry` tool option in config.
 
-  Task will run in retry mode automatically even if `--failed` was not specified when a previous run
-  has resulted in any failures. You can change this behavior with `--no-failed` command line option
-  or by setting `failed: false` in config.
+  Task will run in retry mode automatically even if `--retry` was not specified when a previous run
+  has resulted in any failures. You can change this behavior with `--no-retry` command line option
+  or by setting `retry: false` in config.
 
   ### Fix mode
 
   Some tools are capable of automatically resolving issues by running in the fix mode. You may take
   advantage of this feature by passing the `--fix` command line option. This feature is provided out
-  of the box for `:formatter` and `:unused_deps` tools and may be provided for any tool via `:fix`
+  of the box for `formatter` and `unused_deps` tools and may be provided for any tool via `:fix`
   tool option in config.
 
-  You may combine `--fix` with `--failed` to only request tools that have failed to do the fixing.
+  You may combine `--fix` with `--retry` to only request tools that have failed to do the fixing.
 
   You may also consider adding `~/.check.exs` with `[fix: true]` on a local machine in order to
   always run in the fix mode for convenience. You probably don't want this option in the project
@@ -162,7 +162,7 @@ defmodule Mix.Tasks.Check do
 
   After every run, task writes a list of tool statuses to manifest file specified with `--manifest`
   command line option or to temp directory. This allows to run only failed tools in the next run by
-  passing the `--failed` command line option, but manifest file may also be used for sake of
+  passing the `--retry` command line option, but manifest file may also be used for sake of
   reporting to CI.
 
   It's a simple plain text file with following syntax that should play well with shell commands:
@@ -236,8 +236,8 @@ defmodule Mix.Tasks.Check do
   - `--manifest path/to/manifest` - specify path to file that holds last run results
   - `--only dialyzer --only credo ...` - run only specified check(s)
   - `--except dialyzer --except credo ...` - don't run specified check(s)
-  - `--[no-]failed` - (don't) run only checks that have failed in the last run
   - `--[no-]fix` - (don't) run tools in fix mode in order to resolve issues automatically
+  - `--[no-]retry` - (don't) run only checks that have failed in the last run
   - `--[no-]parallel` - (don't) run tools in parallel
   - `--[no-]skipped` - (don't) print skipped tools in summary
 
@@ -261,20 +261,29 @@ defmodule Mix.Tasks.Check do
   @preferred_cli_env :test
 
   @switches [
-    only: :keep,
-    failed: :boolean,
-    manifest: :string,
-    except: :keep,
-    skipped: :boolean,
-    exit_status: :boolean,
-    parallel: :boolean,
     config: :string,
-    fix: :boolean
+    except: :keep,
+    exit_status: :boolean,
+    fix: :boolean,
+    manifest: :string,
+    only: :keep,
+    parallel: :boolean,
+    retry: :boolean,
+    skipped: :boolean
+  ]
+
+  @aliases [
+    c: :config,
+    f: :fix,
+    m: :manifest,
+    o: :only,
+    r: :retry,
+    x: :except
   ]
 
   @impl Mix.Task
   def run(args) do
-    {opts, _} = OptionParser.parse!(args, strict: @switches)
+    {opts, _} = OptionParser.parse!(args, strict: @switches, aliases: @aliases)
 
     opts
     |> process_opts()

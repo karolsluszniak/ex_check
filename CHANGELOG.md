@@ -4,7 +4,10 @@
 
 - **Added** `--fix` command line option that runs tools in fix mode in order to resolve issues automatically along with `:fix` tool option
 - **Added** capability to run tool command to retry after failure e.g. in order to run only failed tests or checks along with `:retry` tool option
+- **Added** automatic toggling of retry mode when previous run resulted in failures (pass `--no-retry` to override)
 - **Added** `:doctor` tool
+- **Renamed** `--failed` opt to `--retry`
+- **Improved** default tool ordering to persist when custom config is applied to default tools
 
 ## v0.13.0
 

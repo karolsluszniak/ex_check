@@ -22,7 +22,7 @@ defmodule ExCheck.ProjectCases.CompilerTest do
     assert output =~ "compiler error code 1"
     assert output =~ "variable \"a\" is unused"
 
-    assert {output, 0} = System.cmd("mix", ~w[check --except compiler --no-failed], cd: project_dir)
+    assert {output, 0} = System.cmd("mix", ~w[check --except compiler --no-retry], cd: project_dir)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"
