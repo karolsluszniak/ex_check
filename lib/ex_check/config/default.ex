@@ -27,4 +27,8 @@ defmodule ExCheck.Config.Default do
   def get do
     @default_config
   end
+
+  def tool_order(tool) do
+    Enum.find_index(@curated_tools, &(elem(&1, 0) == tool))
+  end
 end

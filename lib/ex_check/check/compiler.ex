@@ -1,7 +1,7 @@
 defmodule ExCheck.Check.Compiler do
   @moduledoc false
 
-  alias ExCheck.Project
+  alias ExCheck.{Config, Project}
 
   def compile(tools, opts) do
     {
@@ -23,10 +23,10 @@ defmodule ExCheck.Check.Compiler do
   defp process_others(tools, opts) do
     tools
     |> List.keydelete(:compiler, 0)
+    |> Enum.sort_by(&get_order/1)
     |> filter_apps_in_umbrella()
     |> unwrap_recursive()
     |> map_recursive_dependents()
-    |> Enum.sort_by(&get_order/1)
     |> Enum.map(&prepare(&1, opts))
     |> Enum.reject(&match?({:disabled, _}, &1))
   end
@@ -223,7 +223,7 @@ defmodule ExCheck.Check.Compiler do
       opts[:fix] && tool_opts[:fix] ->
         {:fix, tool_opts[:fix]}
 
-      opts[:failed] && tool_opts[:retry] ->
+      opts[:retry] && tool_opts[:retry] ->
         {:retry, tool_opts[:retry]}
 
       true ->
@@ -259,5 +259,6 @@ defmodule ExCheck.Check.Compiler do
   defp enable_ansi_erl_cfg_path,
     do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
 
-  defp get_order({_, opts}), do: Keyword.get(opts, :order, 0)
+  defp get_order({name, opts}),
+    do: [Keyword.get(opts, :order, 0), Config.Default.tool_order(name)]
 end
