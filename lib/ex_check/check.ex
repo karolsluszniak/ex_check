@@ -22,7 +22,7 @@ defmodule ExCheck.Check do
 
   defp maybe_toggle_retry_mode(opts) do
     with false <- Keyword.has_key?(opts, :retry),
-         tools = [_ | _] <- Manifest.get_failed_tools(opts) do
+         tools when tools != [] and tools != [:compiler] <- Manifest.get_failed_tools(opts) do
       Printer.info([:cyan, "=> retrying automatically: "] ++ Enum.map(tools, &format_tool_name/1))
       Printer.info()
 
