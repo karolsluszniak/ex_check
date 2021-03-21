@@ -9,6 +9,7 @@ defmodule ExCheck.UmbrellaProjectCases.OnlySpecificAppsTest do
   ]
   """
 
+  @tag copy_ex_check_to_children: true
   test "only specific apps", %{project_dirs: [project_root_dir, child_a_dir, child_b_dir]} do
     config_path = Path.join(project_root_dir, ".check.exs")
     File.write!(config_path, @config)
@@ -20,11 +21,9 @@ defmodule ExCheck.UmbrellaProjectCases.OnlySpecificAppsTest do
     refute output =~ "ex_unit in child_b success"
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: child_a_dir)
-
     assert output =~ "ex_unit success"
 
     assert {output, 0} = System.cmd("mix", ~w[check], cd: child_b_dir)
-
     refute output =~ "ex_unit"
   end
 end

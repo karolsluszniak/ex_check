@@ -1,8 +1,7 @@
 # ![ex_check](./logo-with-name.svg)
 
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
-[![Build status (GitHub)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
-[![Build status (Travis)](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg?logo=travis)](https://travis-ci.org/karolsluszniak/ex_check)
+[![Build status](https://github.com/karolsluszniak/ex_check/workflows/CI/badge.svg)](https://github.com/karolsluszniak/ex_check/actions?query=workflow%3ACI)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
 
@@ -116,7 +115,7 @@ With `mix check` you can consistently run the same set of checks locally and on 
 Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` nstead of `mix test`. This repo features working CI configs for following providers:
 
 - GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
-- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
+- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/d4b609f1de554c2998b398adfe796d85a3d6d7c2/.travis.yml)
 
 Yes, `ex_check` uses itself on the CI. Yay for recursion!
 

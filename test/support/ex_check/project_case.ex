@@ -29,13 +29,12 @@ defmodule ExCheck.ProjectCase do
   end
 
   def create_tmp_directory do
-    timestamp = DateTime.utc_now() |> DateTime.to_unix(:microsecond)
-    unique_id = :crypto.strong_rand_bytes(12) |> Base.url_encode64()
+    rand = Integer.to_string(:rand.uniform(4_294_967_296), 32)
 
     tmp_dir =
       System.tmp_dir!()
       |> Path.join("ex_check_test")
-      |> Path.join("#{timestamp}-#{unique_id}")
+      |> Path.join("#{rand}")
 
     File.mkdir_p!(tmp_dir)
 
