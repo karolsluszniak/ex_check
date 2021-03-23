@@ -15,6 +15,7 @@ defmodule ExCheck.MixProject do
       deps: deps(),
       docs: docs(),
       package: package(),
+      xref: [exclude: [:crypto]],
       preferred_cli_env: [
         check: :test,
         credo: :test,
