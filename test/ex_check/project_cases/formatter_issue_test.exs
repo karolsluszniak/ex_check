@@ -19,9 +19,6 @@ defmodule ExCheck.ProjectCases.FormatterIssueTest do
     assert output =~ "dialyzer skipped due to missing package dialyxir"
     assert output =~ "ex_doc skipped due to missing package ex_doc"
 
-    assert String.contains?(output, """
-           ** (Mix) mix format failed due to --check-formatted.
-           The following files were not formatted:
-           """)
+    assert String.contains?(output, "** (Mix) mix format failed due to --check-formatted.")
   end
 end
