@@ -184,8 +184,9 @@ defmodule Mix.Tasks.Check do
 
   - `:parallel` - toggles running tools in parallel; default: `true`
   - `:skipped` - toggles printing skipped tools in summary; default: `true`
+  - `:fix` - toggles running tools in fix mode in order to resolve issues automatically; default: `false`
+  - `:retry` - toggles running only checks that have failed in the last run; default: 'true' if manifest exists
   - `:tools` - a list of tools to run; default: curated tools; more info below
-  - `:skip` - toggles automatically running task in retry mode if running after a failure; default: `true`
 
   Tool list under `:tools` key may contain following tool tuples:
 
