@@ -11,10 +11,10 @@ jobs:
         include:
           - elixir: '1.10.4'
             otp: '23.0.2'
-          - elixir: '1.7.4'
-            otp: '19.3.6'
+          - elixir: '1.7.0'
+            otp: '19.0'
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     steps:
       - name: Checkout
