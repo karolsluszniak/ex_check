@@ -22,5 +22,8 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 ex_check-*.tar
 
+# Temporary files for e.g. tests.
+/tmp/
+
 # Ignore sobelow last update cache
 .sobelow
