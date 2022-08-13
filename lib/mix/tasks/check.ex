@@ -42,6 +42,8 @@ defmodule Mix.Tasks.Check do
   - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
     framework, but also detecting vulnerable dependencies in arbitrary Mix projects
 
+  - [`:mix_audit`] - scans a project Mix dependencies for known Elixir security vulnerabilities
+
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
   ## Workflow
@@ -175,6 +177,7 @@ defmodule Mix.Tasks.Check do
       SKIP sobelow
       SKIP ex_doc
       SKIP dialyzer
+      SKIP mix_audit
 
   ## Configuration file
 
@@ -253,6 +256,7 @@ defmodule Mix.Tasks.Check do
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
   [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:unused_deps`]: https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
+  [`:mix_audit`]: https://hexdocs.pm/mix_audit
   """
 
   use Mix.Task

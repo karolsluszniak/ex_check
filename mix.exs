@@ -21,7 +21,8 @@ defmodule ExCheck.MixProject do
         credo: :test,
         dialyxir: :test,
         doctor: :test,
-        sobelow: :test
+        sobelow: :test,
+        "deps.audit": :test
       ]
     ]
   end
@@ -40,7 +41,8 @@ defmodule ExCheck.MixProject do
       {:credo, ">= 0.0.0", only: [:test], runtime: false},
       {:doctor, ">= 0.0.0", only: [:test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
-      {:sobelow, ">= 0.0.0", only: [:test], runtime: false}
+      {:sobelow, ">= 0.0.0", only: [:test], runtime: false},
+      {:mix_audit, "~> 2.0", only: [:test], runtime: false}
     ]
   end
 

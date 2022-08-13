@@ -31,6 +31,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       SKIP doctor
       SKIP sobelow
       SKIP ex_doc
+      SKIP mix_audit
       SKIP dialyzer
       """
       |> String.split("\n")
@@ -55,6 +56,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+    refute output =~ "mix_audit skipped due to missing package mix_audit"
 
     assert {output, 1} =
              System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
@@ -67,6 +69,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+    refute output =~ "mix_audit skipped due to missing package mix_audit"
 
     assert {output, 1} =
              System.cmd("mix", ~w[check --manifest manifest.txt --no-retry], cd: project_dir)
@@ -79,6 +82,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     assert output =~ "sobelow skipped due to missing package sobelow"
     assert output =~ "dialyzer skipped due to missing package dialyxir"
     assert output =~ "ex_doc skipped due to missing package ex_doc"
+    assert output =~ "mix_audit skipped due to missing package mix_audit"
 
     assert {output, 0} =
              System.cmd("mix", ~w[check --manifest manifest.txt --retry --fix], cd: project_dir)
@@ -90,6 +94,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+    refute output =~ "mix_audit skipped due to missing package mix_audit"
 
     assert {output, 0} =
              System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
@@ -101,6 +106,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "sobelow skipped due to missing package sobelow"
     refute output =~ "dialyzer skipped due to missing package dialyxir"
     refute output =~ "ex_doc skipped due to missing package ex_doc"
+    refute output =~ "mix_audit skipped due to missing package mix_audit"
 
     failing_test_path =
       project_dir
