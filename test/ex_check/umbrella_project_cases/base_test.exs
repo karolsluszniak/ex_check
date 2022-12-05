@@ -2,6 +2,7 @@ defmodule ExCheck.UmbrellaProjectCases.BaseTest do
   use ExCheck.UmbrellaProjectCase, async: true
 
   test "base", %{project_dirs: [project_root_dir | _]} do
+    assert {_, 0} = System.cmd("mix", ~w[compile], cd: project_root_dir)
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
     assert output =~ "compiler success"
