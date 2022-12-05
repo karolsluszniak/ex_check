@@ -21,34 +21,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Elixir
+      - name: Set up Elixir
         uses: erlef/setup-elixir@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
-      - name: Cache Elixir deps
-        uses: actions/cache@v2
+      - name: Cache deps and build
+        uses: actions/cache@v3
         with:
-          path: deps
-          key: elixir-deps-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          path: |
+            deps
+            _build
+          key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}-git-${{ github.sha }}
           restore-keys: |
-            elixir-deps-${{ runner.os }}-
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+            deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}
 
-      - name: Fetch Elixir deps
+      - name: Fetch deps
         run: mix deps.get
 
-      - name: Cache Elixir build
-        uses: actions/cache@v2
-        with:
-          path: _build
-          key: elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}-${{ hashFiles('lib/**/*.ex', 'config/*.exs', 'mix.exs') }}
-          restore-keys: |
-            elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}-
-            elixir-build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-
+      - name: Remove application build
+        run: mix clean
 
-      - name: Compile Elixir deps
+      - name: Compile deps
         run: mix deps.compile
+
+      - name: Compile app
+        run: mix compile
 
       - name: Run check
         run: mix check
