@@ -11,14 +11,8 @@ defmodule ExCheck.ProjectCases.ExternalToolsTest do
 
     set_mix_deps(project_dir, tools)
 
-    assert {output, status} =
+    assert {output, 0} =
              System.cmd("mix", ~w[check], cd: project_dir, env: %{"MIX_ENV" => "dev"})
-
-    if status != 0 do
-      IO.puts(output)
-    end
-
-    assert status == 1
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"

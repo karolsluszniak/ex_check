@@ -118,7 +118,6 @@ With `mix check` you can consistently run the same set of checks locally and on 
 Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
 
 - GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
-- Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
 
 Yes, `ex_check` uses itself on the CI. Yay for recursion!
 
