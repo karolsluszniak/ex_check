@@ -64,7 +64,8 @@ defmodule ExCheck.MixProject do
 
   defp package do
     [
-      description: "One task to efficiently run all code analysis & testing tools in an Elixir project",
+      description:
+        "One task to efficiently run all code analysis & testing tools in an Elixir project",
       maintainers: ["Karol Słuszniak"],
       licenses: ["MIT"],
       links: %{

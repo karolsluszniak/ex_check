@@ -14,7 +14,8 @@ defmodule ExCheck.UmbrellaProjectCases.AssetTestingTest do
     File.mkdir_p!(Path.dirname(package_json_path))
     File.write!(package_json_path, @package_json)
 
-    assert({output, 1} = System.cmd("mix", ~w[check], cd: project_root_dir))
+    assert {_, 0} = System.cmd("mix", ~w[compile], cd: project_root_dir)
+    assert {output, 1} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
     assert output =~ "npm_test in child_a error code 1"
     refute output =~ "npm_test in child_b"

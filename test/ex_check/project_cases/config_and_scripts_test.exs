@@ -10,7 +10,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     tools: [
       {:compiler, false},
       {:formatter, enabled: false},
-      {:ex_unit, order: 2, command: ~w[mix test --cover]},
+      {:ex_unit, order: 2, command: ~w[mix test --exclude sometag]},
       {:my_mix_task, order: 1, command: "mix my_task a", env: %{"MIX_ENV" => "prod"}},
       {:my_elixir_script, "elixir priv/scripts/script.exs a"},
       {:my_shell_script, command: ["script.sh", "a b"], cd: "scripts", env: %{"SOME" => "xyz"}},
@@ -79,7 +79,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     assert plain_output =~ "my_elixir_script success"
     assert plain_output =~ "my_shell_script success"
 
-    assert output =~ "Generated HTML coverage results"
+    assert output =~ "sometag"
     assert output =~ IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod"
 
     if supports_erl_config do

@@ -127,13 +127,13 @@ defmodule ExCheck.ProjectCases.ManifestTest do
              System.cmd("mix", ~w[check --only ex_unit --only formatter], cd: project_dir)
 
     assert output =~ "formatter success"
-    assert output =~ "ex_unit error code 1"
+    assert output =~ "ex_unit error code"
     assert output =~ "2 tests, 1 failure"
 
     assert {output, 1} = System.cmd("mix", ~w[check --retry], cd: project_dir)
 
     refute output =~ "formatter"
-    assert output =~ "ex_unit error code 1"
+    assert output =~ "ex_unit error code"
     assert output =~ "1 test, 1 failure"
 
     File.write!(

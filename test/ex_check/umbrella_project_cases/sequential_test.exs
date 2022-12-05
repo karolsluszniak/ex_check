@@ -28,6 +28,7 @@ defmodule ExCheck.UmbrellaProjectCases.SequentialTest do
     child_b_script_path = Path.join(child_b_dir, "script.exs")
     File.write!(child_b_script_path, @b_script)
 
+    assert {_, 0} = System.cmd("mix", ~w[compile], cd: project_root_dir)
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
     assert output =~ "seq in child_a success"

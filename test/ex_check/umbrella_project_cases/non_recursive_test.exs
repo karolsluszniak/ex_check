@@ -13,6 +13,7 @@ defmodule ExCheck.UmbrellaProjectCases.NonRecursiveTest do
     config_path = Path.join(project_root_dir, ".check.exs")
     File.write!(config_path, @config)
 
+    assert {_, 0} = System.cmd("mix", ~w[compile], cd: project_root_dir)
     assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
 
     assert output =~ "ex_unit success"
