@@ -17,14 +17,15 @@ defmodule ExCheck.UmbrellaProjectCase do
 
       setup do
         tmp_dir = create_tmp_directory()
-        project_dir = create_mix_project(tmp_dir, umbrella: true)
-        apps_dir = Path.join(project_dir, "apps")
+        root_project_dir = create_mix_project(tmp_dir, umbrella: true)
+        apps_dir = Path.join(root_project_dir, "apps")
         child_a_dir = create_mix_project(apps_dir, name: "child_a")
         child_b_dir = create_mix_project(apps_dir, name: "child_b")
-        project_dirs = [project_dir, child_a_dir, child_b_dir]
+        project_dirs = [root_project_dir, child_a_dir, child_b_dir]
 
-        set_mix_deps(project_dirs, [:ex_check])
-        write_default_config(project_dir)
+        copy_ex_check_dep(root_project_dir)
+        set_mix_deps(root_project_dir, project_dirs, [:ex_check])
+        write_default_config(root_project_dir)
         on_exit(fn -> remove_tmp_directory(tmp_dir) end)
 
         {:ok, project_dirs: project_dirs}
@@ -60,18 +61,29 @@ defmodule ExCheck.UmbrellaProjectCase do
     Path.join(root_dir, name)
   end
 
-  def set_mix_deps(project_dirs, deps) when is_list(project_dirs) do
-    Enum.map(project_dirs, &set_mix_deps(&1, deps))
+  def copy_ex_check_dep(root_project_dir) do
+    ex_check_dir = get_ex_check_dep_dir(root_project_dir)
+
+    if not File.exists?(ex_check_dir) do
+      File.mkdir_p!(ex_check_dir)
+    end
+
+    File.cp_r!(File.cwd!(), ex_check_dir)
   end
 
-  def set_mix_deps(project_dir, deps) do
+  def set_mix_deps(root_project_dir, project_dirs, deps) when is_list(project_dirs) do
+    Enum.map(project_dirs, &set_mix_deps(root_project_dir, &1, deps))
+  end
+
+  def set_mix_deps(root_project_dir, project_dir, deps) do
+    ex_check_dir = get_ex_check_dep_dir(root_project_dir)
     config_path = "#{project_dir}/mix.exs"
     deps_from = ~r/ *defp deps.*end\n/Us
 
     deps_list =
       Enum.map(deps, fn
         :ex_check ->
-          "{:ex_check, path: \"#{File.cwd!()}\", only: [:dev, :test], runtime: false}"
+          "{:ex_check, path: \"#{ex_check_dir}\", only: [:dev, :test], runtime: false}"
 
         dep ->
           "{:#{dep}, \">= 0.0.0\", only: :dev, runtime: false}"
@@ -123,5 +135,9 @@ defmodule ExCheck.UmbrellaProjectCase do
   def write_default_config(project_dir) do
     config_path = Path.join(project_dir, ".check.exs")
     File.write!(config_path, @default_config)
+  end
+
+  defp get_ex_check_dep_dir(root_project_dir) do
+    Path.join([root_project_dir, "priv", "ex_check"])
   end
 end

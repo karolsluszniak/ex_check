@@ -36,13 +36,14 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
+  - [`:mix_audit`] - scans the project's Mix dependencies for known Elixir security vulnerabilities
+    based on a GitHub-sourced list of security advisories
+
   - [`:npm_test`] - runs JavaScript tests in projects with front-end assets embedded in `assets`
     directory and `package.json` in it (default for Phoenix apps)
 
   - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
     framework, but also detecting vulnerable dependencies in arbitrary Mix projects
-
-  - [`:mix_audit`] - scans a project Mix dependencies for known Elixir security vulnerabilities
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
