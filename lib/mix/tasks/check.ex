@@ -25,7 +25,7 @@ defmodule Mix.Tasks.Check do
   Following community tools are configured by default:
 
   - [`:credo`] - ensures that all the code follows a further established set of software design,
-    consistency, readability & misc rules and conventions (still statical)
+    consistency, readability & misc rules and conventions (still statically)
 
   - [`:dialyzer`] - performs static code analysis around type mismatches and other issues that are
     commonly detected by static language compilers
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.Check do
   1. `:compiler` tool is run before others in order to compile the project just once and to avoid
      reprinting the compilation error multiple times.
 
-  2. If the compilation succeded (even if with warnings), further tools are run in parallel while
+  2. If the compilation succeeded (even if with warnings), further tools are run in parallel while
      their output is streamed live one by one for instant insight.
 
   3. Output from tools that have failed gets reprinted for sake of easily reading into them all at

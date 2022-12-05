@@ -1,10 +1,12 @@
-# ![ex_check](./logo-with-name.svg)
+# ![ex_check](./assets/logo-with-name.svg)
 
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
+[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/ex_check/)
 [![Build status (GitHub)](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master?logo=github)](https://github.com/karolsluszniak/ex_check/actions)
 [![Build status (Travis)](https://img.shields.io/travis/karolsluszniak/ex_check/master.svg?logo=travis)](https://travis-ci.org/karolsluszniak/ex_check)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
+[![Last updated](https://img.shields.io/github/last-commit/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/commits/master)
 
 ![Demo](https://raw.githubusercontent.com/karolsluszniak/ex_check/master/demo-67x16.svg)
 
@@ -80,7 +82,7 @@ You may also generate `.check.exs` to adjust the check:
 mix check.gen.config
 ```
 
-Among others, this allows to permamently disable specific tools and avoid the skipped notices.
+Among others, this allows to permanently disable specific tools and avoid the skipped notices.
 
 ```elixir
 [
@@ -93,7 +95,7 @@ Among others, this allows to permamently disable specific tools and avoid the sk
 
 ### Local-only fix mode
 
-You should keep local and CI configuration as consistent as possible by putting together the project-specific `.check.exs`. Still, you may introduce local-only config by creating the `~/.check.exs` file. This may be useful to enforce global flags on all local runs. For example, the following config will enable the fix mode in local (writeable) envirnoment:
+You should keep local and CI configuration as consistent as possible by putting together the project-specific `.check.exs`. Still, you may introduce local-only config by creating the `~/.check.exs` file. This may be useful to enforce global flags on all local runs. For example, the following config will enable the fix mode in local (writable) environment:
 
 ```elixir
 [
@@ -113,7 +115,7 @@ Want to write your own code check? Get yourself started by reading the ["Writing
 
 With `mix check` you can consistently run the same set of checks locally and on the CI. CI configuration also becomes trivial and comes out of the box with parallelism and error output from all checks at once regardless of which ones have failed.
 
-Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` nstead of `mix test`. This repo features working CI configs for following providers:
+Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
 
 - GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
 - Travis - [.travis.yml](https://github.com/karolsluszniak/ex_check/blob/master/.travis.yml)
@@ -204,8 +206,11 @@ You may encounter an issue with the `unused_deps` check failing on the CI while 
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/karolsluszniak/ex_check/blob/master/CHANGELOG.md).
+See [CHANGELOG.md](./CHANGELOG.md).
 
-## License
+## Copyright and License
 
-See [LICENSE.md](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md).
+Copyright (c) 2019 Karol Słuszniak
+
+This work is free. You can redistribute it and/or modify it under the
+terms of the MIT License. See the [LICENSE.md](./LICENSE.md) file for more details.

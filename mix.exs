@@ -2,16 +2,15 @@ defmodule ExCheck.MixProject do
   use Mix.Project
 
   @github_url "https://github.com/karolsluszniak/ex_check"
-  @description "One task to efficiently run all code analysis & testing tools in an Elixir project"
+  @version "0.14.0"
 
   def project do
     [
       app: :ex_check,
-      version: "0.14.0",
+      version: @version,
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      description: @description,
       deps: deps(),
       docs: docs(),
       package: package(),
@@ -46,20 +45,29 @@ defmodule ExCheck.MixProject do
 
   defp docs do
     [
+      extras: [
+        "CHANGELOG.md": [title: "Changelog"],
+        "LICENSE.md": [title: "License"],
+        "README.md": [title: "Overview"]
+      ],
       main: "readme",
-      logo: "logo.svg",
+      assets: "assets",
+      logo: "assets/logo.svg",
       source_url: @github_url,
-      extras: ["README.md"]
+      source_ref: "v#{@version}",
+      api_reference: false,
+      formatters: ["html"]
     ]
   end
 
   defp package do
     [
+      description: "One task to efficiently run all code analysis & testing tools in an Elixir project",
       maintainers: ["Karol Słuszniak"],
       licenses: ["MIT"],
       links: %{
-        "GitHub repository" => @github_url,
-        "Changelog" => @github_url <> "/blob/master/CHANGELOG.md"
+        "Changelog" => "https://hexdocs.pm/ex_check/changelog.html",
+        "GitHub repository" => @github_url
       }
     ]
   end
