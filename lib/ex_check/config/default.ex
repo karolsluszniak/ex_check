@@ -5,6 +5,7 @@ defmodule ExCheck.Config.Default do
   # streaming to display as many outputs as possible as soon as possible.
   @curated_tools [
     {:compiler, "mix compile --warnings-as-errors --force"},
+    {:mix_audit, "mix deps.audit", detect: [{:package, :mix_audit}]},
     {:unused_deps, "mix deps.unlock --check-unused",
      detect: [{:elixir, ">= 1.10.0"}], fix: "mix deps.unlock --unused"},
     {:formatter, "mix format --check-formatted",
