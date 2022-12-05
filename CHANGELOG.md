@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Nothing yet.
 
+## [0.15.0] - 2022-12-05
+
+- **Added** `mix_audit` tool
+- **Fixed** retry mode info to properly split tool names
+- **Improved** docs with numerous fixes & refinements
+
 ## [0.14.0] - 2021-01-26
 
 - **Added** `--fix` command line option to resolve issues automatically for tools that provide the fix command via the `:fix` tool option
