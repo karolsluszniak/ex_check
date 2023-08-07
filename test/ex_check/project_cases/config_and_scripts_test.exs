@@ -75,6 +75,7 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     end
 
     refute plain_output =~ "credo skipped due to missing package credo"
+    refute plain_output =~ "gettext skipped due to missing package credo"
     assert plain_output =~ "my_mix_task success"
     assert plain_output =~ "my_elixir_script success"
     assert plain_output =~ "my_shell_script success"

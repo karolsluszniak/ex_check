@@ -36,6 +36,8 @@ defmodule Mix.Tasks.Check do
   - [`:ex_doc`] - compiles the project documentation in order to ensure that there are no issues
     that would make it impossible for docs to get collected and assembled
 
+  - [`:gettext`] - verifies that your POT files are up to date with the current state of the codebase
+
   - [`:mix_audit`] - scans the project's Mix dependencies for known Elixir security vulnerabilities
     based on a GitHub-sourced list of security advisories
 
@@ -253,6 +255,7 @@ defmodule Mix.Tasks.Check do
   [`:doctor`]: https://github.com/akoutmos/doctor
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
   [`:ex_unit`]: https://hexdocs.pm/ex_unit
+  [`:gettext`]: https://hexdocs.pm/gettext
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
   [`:sobelow`]: https://hexdocs.pm/sobelow

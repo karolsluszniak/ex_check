@@ -6,7 +6,7 @@ defmodule ExCheck.ProjectCases.ExternalToolsTest do
       if Version.match?(System.version(), "< 1.10.0") do
         [:ex_check, :credo, :doctor, :sobelow, :mix_audit]
       else
-        [:ex_check, :credo, :doctor, :ex_doc, :sobelow, :mix_audit]
+        [:ex_check, :credo, :doctor, :ex_doc, :gettext, :sobelow, :mix_audit]
       end
 
     set_mix_deps(project_dir, tools)
@@ -17,6 +17,7 @@ defmodule ExCheck.ProjectCases.ExternalToolsTest do
     assert output =~ "formatter success"
     assert output =~ "ex_unit success"
     assert output =~ "credo success"
+    assert output =~ "gettext success"
 
     if Version.match?(System.version(), ">= 1.8.0") do
       assert output =~ "doctor success"
