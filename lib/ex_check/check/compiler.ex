@@ -180,9 +180,9 @@ defmodule ExCheck.Check.Compiler do
   defp prepare_detection_base({:file, name}, _, tool_opts) do
     filename =
       tool_opts
-      |> Keyword.get(:cd, ".")
+      |> Keyword.get(:cd, "")
       |> Path.join(name)
-      |> Path.relative_to(".")
+      |> Path.relative_to_cwd()
 
     {:file, filename}
   end
