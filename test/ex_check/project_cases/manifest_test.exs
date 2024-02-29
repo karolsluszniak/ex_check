@@ -31,6 +31,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       SKIP doctor
       SKIP sobelow
       SKIP ex_doc
+      SKIP gettext
       SKIP mix_audit
       SKIP dialyzer
       """
