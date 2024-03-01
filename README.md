@@ -1,8 +1,8 @@
 # ![ex_check](./assets/logo-with-name.svg)
 
 [![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
-[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/ex_check/)
-[![Build status](https://img.shields.io/github/workflow/status/karolsluszniak/ex_check/check/master)](https://github.com/karolsluszniak/ex_check/actions)
+[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%))](https://hexdocs.pm/ex_check/)
+[![Build status](https://img.shields.io/github/actions/workflow/status/karolsluszniak/ex_check/check.yml?branch=master)](https://github.com/karolsluszniak/ex_check/actions)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
 [![Last updated](https://img.shields.io/github/last-commit/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/commits/master)
@@ -31,7 +31,7 @@ Takes care of the little details, so you don't have to.
 - Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
 - Retries ExUnit with the `--failed` flag
 
-Read more in the introductory ["One task to rule all Elixir analysis & testing tools"](http://cloudless.studio/articles/49-one-task-to-rule-all-elixir-analysis-testing-tools) article.
+Read more in the introductory ["One task to rule all Elixir analysis & testing tools"](https://cloudless.studio/one-task-to-rule-all-elixir-analysis-testing-tools) article.
 
 ## Getting started
 
@@ -110,7 +110,7 @@ You should keep local and CI configuration as consistent as possible by putting 
 
 Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
 
-Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir code check"](http://cloudless.studio/articles/50-writing-your-first-elixir-code-check) article.
+Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir code check"](https://cloudless.studio/writing-your-first-elixir-code-check) article.
 
 ## Continuous Integration
 

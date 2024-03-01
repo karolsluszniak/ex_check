@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Nothing yet.
 
+## [0.16.0] - 2024-03-01
+
+- **Changed** minimum supported Elixir version from Elixir 1.7 to Elixir 1.12
+- **Added** `gettext` tool
+- **Fixed** incorrect relative path handling in Elixir 1.16
+
 ## [0.15.0] - 2022-12-05
 
 - **Added** `mix_audit` tool
