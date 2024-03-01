@@ -13,6 +13,7 @@ ex_doc_config =
     {:ex_doc, ex_doc_config},
     {:formatter, env: %{"MIX_ENV" => "test"}},
     {:mix_audit, env: %{"MIX_ENV" => "test"}},
-    {:sobelow, "mix sobelow --exit --skip"}
+    {:sobelow, "mix sobelow --exit --skip"},
+    {:gettext, false}
   ]
 ]

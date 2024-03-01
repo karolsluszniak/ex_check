@@ -9,7 +9,7 @@ defmodule ExCheck.ProjectCases.FormatterIssueTest do
 
     File.write!(invalid_file_path, "IO.inspect( 1 )")
 
-    assert {output, 1} = System.cmd("mix", ~w[check], cd: project_dir)
+    output = System.cmd("mix", ~w[check], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "compiler success"
     assert output =~ "formatter error code 1"

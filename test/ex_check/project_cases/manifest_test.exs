@@ -9,7 +9,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
 
     File.write!(invalid_file_path, "IO.inspect( 1 )")
 
-    assert {output, 1} = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir)
+    output = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "compiler success"
     assert output =~ "formatter error code 1"
@@ -38,16 +38,9 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       |> String.split("\n")
       |> Enum.sort()
 
-    expected_manifest =
-      if Version.match?(System.version(), ">= 1.10.0") do
-        expected_manifest
-      else
-        (expected_manifest -- ["PASS unused_deps"]) ++ ["SKIP unused_deps"]
-      end
-
     assert manifest |> String.split("\n") |> Enum.sort() == expected_manifest
 
-    assert {output, 1} = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir)
+    output = System.cmd("mix", ~w[check --manifest manifest.txt], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "retrying automatically"
     assert output =~ "compiler success"
@@ -59,8 +52,8 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "mix_audit skipped due to missing package mix_audit"
 
-    assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir) |> cmd_exit(1)
 
     refute output =~ "retrying automatically"
     assert output =~ "compiler success"
@@ -72,8 +65,9 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "mix_audit skipped due to missing package mix_audit"
 
-    assert {output, 1} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --no-retry], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --manifest manifest.txt --no-retry], cd: project_dir)
+      |> cmd_exit(1)
 
     refute output =~ "retrying automatically"
     assert output =~ "compiler success"
@@ -85,8 +79,9 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     assert output =~ "ex_doc skipped due to missing package ex_doc"
     assert output =~ "mix_audit skipped due to missing package mix_audit"
 
-    assert {output, 0} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --retry --fix], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --manifest manifest.txt --retry --fix], cd: project_dir)
+      |> cmd_exit(0)
 
     assert output =~ "compiler success"
     assert output =~ "formatter fix success"
@@ -97,8 +92,8 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     refute output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "mix_audit skipped due to missing package mix_audit"
 
-    assert {output, 0} =
-             System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --manifest manifest.txt --retry], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
     refute output =~ "formatter success"
@@ -124,14 +119,14 @@ defmodule ExCheck.ProjectCases.ManifestTest do
     end
     """)
 
-    assert {output, 1} =
-             System.cmd("mix", ~w[check --only ex_unit --only formatter], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --only ex_unit --only formatter], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "formatter success"
     assert output =~ "ex_unit error code"
     assert output =~ "2 tests, 1 failure"
 
-    assert {output, 1} = System.cmd("mix", ~w[check --retry], cd: project_dir)
+    output = System.cmd("mix", ~w[check --retry], cd: project_dir) |> cmd_exit(1)
 
     refute output =~ "formatter"
     assert output =~ "ex_unit error code"
@@ -142,7 +137,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       File.read!(failing_test_path) |> String.replace(":universe", ":world")
     )
 
-    assert {output, 0} = System.cmd("mix", ~w[check --retry], cd: project_dir)
+    output = System.cmd("mix", ~w[check --retry], cd: project_dir) |> cmd_exit(0)
 
     refute output =~ "formatter"
     assert output =~ "ex_unit retry success"

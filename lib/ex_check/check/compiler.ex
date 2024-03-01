@@ -58,7 +58,9 @@ defmodule ExCheck.Check.Compiler do
             else: actual_apps_paths
 
         tool_instances =
-          Enum.map(apps_paths, fn {app_name, app_dir} ->
+          apps_paths
+          |> Enum.sort_by(&elem(&1, 0))
+          |> Enum.map(fn {app_name, app_dir} ->
             final_tool_opts = Keyword.update(tool_opts, :cd, app_dir, &Path.join(app_dir, &1))
             {{tool_name, app_name}, final_tool_opts}
           end)

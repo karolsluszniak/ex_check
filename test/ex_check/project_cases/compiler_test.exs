@@ -17,12 +17,13 @@ defmodule ExCheck.ProjectCases.CompilerTest do
     end
     """)
 
-    assert {output, 1} = System.cmd("mix", ~w[check], cd: project_dir)
+    output = System.cmd("mix", ~w[check], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "compiler error code 1"
     assert output =~ "variable \"a\" is unused"
 
-    assert {output, 0} = System.cmd("mix", ~w[check --except compiler --no-retry], cd: project_dir)
+    output =
+      System.cmd("mix", ~w[check --except compiler --no-retry], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"

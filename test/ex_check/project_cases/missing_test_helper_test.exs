@@ -5,7 +5,7 @@ defmodule ExCheck.ProjectCases.MissingTestHelperTest do
     test_dir_path = Path.join(project_dir, "test")
     File.rm_rf!(test_dir_path)
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
+    output = System.cmd("mix", ~w[check], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"

@@ -54,41 +54,29 @@ defmodule ExCheck.ProjectCases.ConfigAndScriptsTest do
     File.write!(shell_script_path, @shell_script)
     File.chmod!(shell_script_path, 0o755)
 
-    supports_erl_config = Version.match?(System.version(), ">= 1.9.0")
-
-    assert {output, 0} =
-             System.cmd(
-               "elixir",
-               ["-e", "Application.put_env(:elixir, :ansi_enabled, true)", "-S", "mix", "check"],
-               cd: project_dir,
-               stderr_to_stdout: true
-             )
+    output =
+      System.cmd(
+        "elixir",
+        ["-e", "Application.put_env(:elixir, :ansi_enabled, true)", "-S", "mix", "check"],
+        cd: project_dir,
+        stderr_to_stdout: true
+      )
+      |> cmd_exit(0)
 
     plain_output = String.replace(output, @ansi_code_regex, "")
 
     assert plain_output =~ "compiler success"
     refute plain_output =~ "formatter success"
     assert plain_output =~ "ex_unit success"
-
-    if Version.match?(System.version(), ">= 1.10.0") do
-      assert plain_output =~ "unused_deps fix success"
-    end
-
+    assert plain_output =~ "unused_deps fix success"
     refute plain_output =~ "credo skipped due to missing package credo"
     refute plain_output =~ "gettext skipped due to missing package credo"
     assert plain_output =~ "my_mix_task success"
     assert plain_output =~ "my_elixir_script success"
     assert plain_output =~ "my_shell_script success"
-
     assert output =~ "sometag"
     assert output =~ IO.ANSI.yellow() <> IO.ANSI.faint() <> "my mix task a prod"
-
-    if supports_erl_config do
-      assert output =~ IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a"
-    else
-      assert output =~ "my elixir script a"
-    end
-
+    assert output =~ IO.ANSI.blue() <> IO.ANSI.faint() <> "my elixir script a"
     assert output =~ "my shell script a b xyz"
     assert plain_output =~ ~r/running my_shell_script.*running my_mix_task.*running ex_unit/s
   end

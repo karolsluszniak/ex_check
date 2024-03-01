@@ -61,7 +61,7 @@ defmodule ExCheck.Manifest do
   defp serialize_tool_name({tool, app}), do: "#{app}/#{tool}"
   defp serialize_tool_name(tool), do: tool
 
-  @escape Enum.map(' [~#%&*{}\\:<>?/+|"]', &<<&1::utf8>>)
+  @escape Enum.map(~c" [~#%&*{}\\:<>?/+|\"]", &<<&1::utf8>>)
 
   defp get_path(opts) do
     Keyword.get_lazy(opts, :manifest, fn ->

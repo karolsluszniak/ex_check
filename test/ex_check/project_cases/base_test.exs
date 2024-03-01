@@ -2,7 +2,7 @@ defmodule ExCheck.ProjectCases.BaseTest do
   use ExCheck.ProjectCase, async: true
 
   test "base", %{project_dir: project_dir} do
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_dir)
+    output = System.cmd("mix", ~w[check], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"
@@ -12,13 +12,7 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert output =~ "dialyzer skipped due to missing package dialyxir"
     assert output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "npm_test"
-
-    if Version.match?(System.version(), ">= 1.10.0") do
-      assert output =~ "unused_deps success"
-    else
-      assert output =~ "unused_deps skipped due to Elixir version ="
-    end
-
+    assert output =~ "unused_deps success"
     assert output =~ "Randomized with seed"
   end
 end

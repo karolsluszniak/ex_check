@@ -42,7 +42,7 @@ defmodule ExCheck.ProjectCases.DepsTest do
     config_path = Path.join(project_dir, ".check.exs")
     File.write!(config_path, @config)
 
-    assert {output, 1} = System.cmd("mix", ~w[check], cd: project_dir)
+    output = System.cmd("mix", ~w[check], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "a success"
     assert output =~ "b success"
@@ -63,7 +63,7 @@ defmodule ExCheck.ProjectCases.DepsTest do
     config_path = Path.join(project_dir, ".check.exs")
     File.write!(config_path, @config)
 
-    assert {output, 1} = System.cmd("mix", ~w[check --no-parallel], cd: project_dir)
+    output = System.cmd("mix", ~w[check --no-parallel], cd: project_dir) |> cmd_exit(1)
 
     assert output =~ "a success"
     assert output =~ "b success"

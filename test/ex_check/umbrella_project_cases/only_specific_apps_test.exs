@@ -13,18 +13,18 @@ defmodule ExCheck.UmbrellaProjectCases.OnlySpecificAppsTest do
     config_path = Path.join(project_root_dir, ".check.exs")
     File.write!(config_path, @config)
 
-    assert {_, 0} = System.cmd("mix", ~w[compile], cd: project_root_dir)
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: project_root_dir)
+    System.cmd("mix", ~w[compile], cd: project_root_dir) |> cmd_exit(0)
+    output = System.cmd("mix", ~w[check], cd: project_root_dir) |> cmd_exit(0)
 
     refute output =~ "ex_unit success"
     assert output =~ "ex_unit in child_a success"
     refute output =~ "ex_unit in child_b success"
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: child_a_dir)
+    output = System.cmd("mix", ~w[check], cd: child_a_dir) |> cmd_exit(0)
 
     assert output =~ "ex_unit success"
 
-    assert {output, 0} = System.cmd("mix", ~w[check], cd: child_b_dir)
+    output = System.cmd("mix", ~w[check], cd: child_b_dir) |> cmd_exit(0)
 
     refute output =~ "ex_unit"
   end

@@ -4,15 +4,15 @@ defmodule ExCheck.ProjectCases.GenConfigTest do
   test "gen config", %{project_dir: project_dir} do
     File.rm!(Path.join(project_dir, ".check.exs"))
 
-    assert {output, 0} = System.cmd("mix", ~w[check.gen.config], cd: project_dir)
+    output = System.cmd("mix", ~w[check.gen.config], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "creating .check.exs"
 
-    assert {output, 0} = System.cmd("mix", ~w[check.gen.config], cd: project_dir)
+    output = System.cmd("mix", ~w[check.gen.config], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ ".check.exs already exists, skipped"
 
-    assert {output, 0} = System.cmd("mix", ~w[check --no-fix], cd: project_dir)
+    output = System.cmd("mix", ~w[check --no-fix], cd: project_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
     assert output =~ "formatter success"

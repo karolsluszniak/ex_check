@@ -16,7 +16,8 @@ defmodule ExCheck.Config.Default do
     {:ex_doc, "mix docs", detect: [{:package, :ex_doc}]},
     {:ex_unit, "mix test", detect: [{:file, "test"}], retry: "mix test --failed"},
     {:dialyzer, "mix dialyzer", detect: [{:package, :dialyxir}]},
-    {:gettext, "mix gettext.extract --check-up-to-date", detect: [{:package, :gettext}]},
+    {:gettext, "mix gettext.extract --check-up-to-date",
+     detect: [{:package, :gettext}], deps: [:ex_unit]},
     {:npm_test, "npm test", cd: "assets", detect: [{:file, "package.json", else: :disable}]}
   ]
 
