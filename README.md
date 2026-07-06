@@ -1,7 +1,7 @@
 # ![ex_check](./assets/logo-with-name.svg)
 
-[![Hex version](https://img.shields.io/hexpm/v/ex_check_ng.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check_ng)
-[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%))](https://hexdocs.pm/ex_check_ng/)
+[![Hex version](<https://img.shields.io/hexpm/v/ex_check_ng.svg?color=hsl(265,40%,60%)>)](https://hex.pm/packages/ex_check_ng)
+[![Hex docs](<https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%)>)](https://hexdocs.pm/ex_check_ng/)
 [![Build status](https://img.shields.io/github/actions/workflow/status/fschoenfeldt/ex_check/check.yml?branch=master)](https://github.com/fschoenfeldt/ex_check/actions)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check_ng.svg)](https://hex.pm/packages/ex_check_ng)
 [![License](https://img.shields.io/github/license/fschoenfeldt/ex_check.svg)](https://github.com/fschoenfeldt/ex_check/blob/master/LICENSE.md)
@@ -19,21 +19,24 @@
 ---
 
 Takes seconds to setup, saves hours in the long term.
-- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools)
-- Delivers results faster by [running tools in parallel and catching all issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
-- Checks the project consistently on every developer's local machine & [on the CI](https://github.com/karolsluszniak/ex_check#continuous-integration)
-- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
-- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-fix-mode)
+
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-tools)
+- Delivers results faster by [running tools in parallel and catching all issues in one go](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-workflow)
+- Checks the project consistently on every developer's local machine & [on the CI](#continuous-integration)
+- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-retrying-failed-tools)
+- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-fix-mode)
 
 Sports powerful features to enable ultimate flexibility.
-- Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
-- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
-- Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
-- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+
+- Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-configuration-file)
+- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
+- Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-umbrella-projects)
+- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
+
 - Compiles the project and collects compilation warnings in one go
-- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
 - Retries ExUnit with the `--failed` flag
 
 Read more in the introductory ["One task to rule all Elixir analysis & testing tools"](https://cloudless.studio/one-task-to-rule-all-elixir-analysis-testing-tools) article.
@@ -88,7 +91,16 @@ You may also generate `.check.exs` to adjust the check:
 mix check.gen.config
 ```
 
-Among others, this allows to permanently disable specific tools and avoid the skipped notices.
+Among others, this allows to permanently disable specific tools and avoid the skipped notices:
+
+```elixir
+[
+  tools: [
+    {:dialyzer, false},
+    {:sobelow, false}
+  ]
+]
+```
 
 ### Usage rules for coding agents
 
@@ -131,14 +143,29 @@ mix usage_rules.sync
 This keeps an `ex_check_ng` section in your `AGENTS.md` in sync with the rules shipped by the
 package, so coding agents run `mix check --format agent` instead of parsing human-oriented output.
 
-```elixir
-[
-  tools: [
-    {:dialyzer, false},
-    {:sobelow, false}
-  ]
-]
+### Output formats
+
+`mix check` renders its results through pluggable reporters selected with `--format` (default
+`pretty`). Batched formats (`agent`, `json`, `junit`) may be written to a file with `--output PATH`
+instead of stdout.
+
+| Format   | Use case                                                                           |
+| -------- | ---------------------------------------------------------------------------------- |
+| `pretty` | Live colored terminal output for humans (default).                                 |
+| `agent`  | JSON status header + raw failure blocks, optimized for LLM/agent consumption.      |
+| `json`   | Single machine-readable JSON object describing the whole run.                      |
+| `github` | GitHub Actions log groups + a Markdown summary appended to `$GITHUB_STEP_SUMMARY`. |
+| `junit`  | JUnit XML report for CI systems like GitLab CI and Jenkins.                        |
+
+```bash
+mix check --format agent                    # LLM-friendly
+mix check --format json --output check.json  # machine-readable file
+mix check --format github                    # inside a GitHub Actions job
+mix check --format junit --output report.xml # JUnit report for CI
 ```
+
+`github` and `pretty` stream to the terminal and reject `--output`. See
+[Continuous Integration](#continuous-integration) for wiring the CI formats into a pipeline.
 
 ### Local-only fix mode
 
@@ -154,19 +181,37 @@ You should keep local and CI configuration as consistent as possible by putting 
 
 ## Documentation
 
-Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
+Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html) or by running `mix help check`.
 
 Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir code check"](https://cloudless.studio/writing-your-first-elixir-code-check) article.
 
 ## Continuous Integration
 
-With `mix check` you can consistently run the same set of checks locally and on the CI. CI configuration also becomes trivial and comes out of the box with parallelism and error output from all checks at once regardless of which ones have failed.
+On GitHub Actions, `--format github` adds collapsible
+per-tool log groups and a run summary on the job page:
 
-Like on a local machine, all you have to do in order to use `ex_check` on CI is run `mix check` instead of `mix test`. This repo features working CI configs for following providers:
+```yaml
+# .github/workflows/check.yml
+name: check
+on: [push, pull_request]
 
-- GitHub - [.github/workflows/check.yml](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml)
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.20"
+          otp-version: "28"
+      - run: mix deps.get
+      - run: mix check --format github
+```
 
-Yes, `ex_check` uses itself on the CI. Yay for recursion!
+For CI systems with a JUnit test report (GitLab CI, Jenkins, ...), use `mix check --format junit
+--output report.xml`. See [Output formats](#output-formats) for the full list.
+
+`ex_check` uses itself on the CI — see [our own workflow](https://github.com/fschoenfeldt/ex_check/blob/master/.github/workflows/check.yml).
 
 ### Autofixing
 

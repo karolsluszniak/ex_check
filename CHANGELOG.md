@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+- **Added** `--format github` reporter emitting GitHub Actions `::group::` log blocks for each tool (raw failure output wrapped in a `::stop-commands::` injection guard) plus a Markdown run summary appended to `$GITHUB_STEP_SUMMARY`
+- **Added** `--format junit` reporter emitting a JUnit XML report (`testsuite`/`testcase`) for CI systems such as GitLab CI and Jenkins, pairing with `--output report.xml`
+- **Changed** our own CI to dogfood the new format via `mix check --format github`
+
 ## [1.0.0-rc.1] - 2026-06-29
 
 - **Documented** the minimum Elixir bump (1.12 → 1.17) as a **breaking** change in the changelog, with an upgrade path for projects on Elixir 1.12–1.16

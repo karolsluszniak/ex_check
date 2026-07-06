@@ -17,7 +17,9 @@ defmodule ExCheck.Reporter do
   @formats %{
     pretty: ExCheck.Reporter.Pretty,
     json: ExCheck.Reporter.Json,
-    agent: ExCheck.Reporter.Agent
+    agent: ExCheck.Reporter.Agent,
+    github: ExCheck.Reporter.Github,
+    junit: ExCheck.Reporter.Junit
   }
 
   @doc "Resolves a format atom to its reporter module."

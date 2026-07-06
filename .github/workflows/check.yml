@@ -54,4 +54,4 @@ jobs:
         run: mix compile
 
       - name: Run check
-        run: mix check
+        run: mix check --format github

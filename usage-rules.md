@@ -29,8 +29,9 @@ mix check --format json --output check.json
 - `--retry` / `-r` — run only tools that failed in the previous run.
 - `--no-parallel` — run tools sequentially.
 - `--config PATH` / `-c PATH` — use a specific config file.
-- `--format pretty|agent|json` — output format (default `pretty`).
-- `--output PATH` — write the report to a file (only with `--format agent` or `json`).
+- `--format pretty|agent|json|github|junit` — output format (default `pretty`). `github` emits
+  GitHub Actions log groups + a `$GITHUB_STEP_SUMMARY` table; `junit` emits a JUnit XML report.
+- `--output PATH` — write the report to a file (only with `--format agent`, `json` or `junit`).
 
 Combine `--fix --retry` to fix only the tools that just failed.
 
