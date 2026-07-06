@@ -1,6 +1,11 @@
 name: check
 
-on: [pull_request, push]
+# Only push to the default branch triggers a run; branches with an open PR run via the
+# pull_request event, avoiding duplicate runs (and duplicate annotations) per commit.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   mix_check:
@@ -12,9 +17,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Only this job emits GitHub annotations; others run check without --format
+          # github so a finding isn't annotated once per matrix entry.
           - elixir: '1.20.2'
             otp: '28.5'
             os: 'ubuntu-24.04'
+            annotate: true
           # Elixir 1.17 floor (minimum supported version).
           - elixir: '1.17.3'
             otp: '26.2.2'
@@ -54,4 +62,4 @@ jobs:
         run: mix compile
 
       - name: Run check
-        run: mix check --format github
+        run: mix check ${{ matrix.annotate && '--format github' || '' }}
