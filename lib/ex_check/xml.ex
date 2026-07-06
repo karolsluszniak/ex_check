@@ -1,5 +1,6 @@
 defmodule ExCheck.XML do
   @moduledoc false
+   
 
   # Minimal XML text escaper for the fully-controlled output of the JUnit reporter.
   # Kept dependency-free on purpose, mirroring ExCheck.JSON: ex_check must not pull a
@@ -7,7 +8,7 @@ defmodule ExCheck.XML do
   # characters that are invalid in XML 1.0 (control chars below 0x20 other than tab,
   # newline and carriage return), which would otherwise make the document unparseable.
 
-  @spec escape(binary) :: iodata
+      @spec escape(binary) :: iodata
   def escape(str) when is_binary(str), do: escape(str, "")
 
   defp escape(<<>>, acc), do: acc
