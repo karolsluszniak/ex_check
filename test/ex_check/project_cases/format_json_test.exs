@@ -40,6 +40,23 @@ defmodule ExCheck.ProjectCases.FormatJsonTest do
     assert Enum.any?(report["checks"], &(&1["name"] == "formatter" and &1["status"] == "error"))
   end
 
+  test "compiler check exposes parsed diagnostics", %{project_dir: project_dir} do
+    # unused variable -> compiler warning -> failure under --warnings-as-errors
+    project_dir
+    |> Path.join("lib")
+    |> Path.join("warn.ex")
+    |> File.write!("defmodule Warn do\n  def f do\n    x = 1\n    :ok\n  end\nend\n")
+
+    output = System.cmd("mix", ~w[check --format json], cd: project_dir) |> cmd_exit(1)
+    report = report(output)
+
+    compiler = Enum.find(report["checks"], &(&1["name"] == "compiler"))
+    assert compiler["status"] == "error"
+    assert [diag | _] = compiler["diagnostics"]
+    assert diag["file"] =~ "warn.ex"
+    assert is_integer(diag["line"])
+  end
+
   test "--output without a batch format is rejected", %{project_dir: project_dir} do
     {output, code} =
       System.cmd("mix", ~w[check --output report.json], cd: project_dir, stderr_to_stdout: true)

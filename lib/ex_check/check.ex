@@ -68,7 +68,7 @@ defmodule ExCheck.Check do
 
   @compile_warn_out "Compilation failed due to warnings while using the --warnings-as-errors option"
 
-  defp run_others?(_compiler_result = {status, _, {_, output, _}}) do
+  defp run_others?({status, _, {_, output, _}} = _compiler_result) do
     status == :ok or String.contains?(output, @compile_warn_out)
   end
 

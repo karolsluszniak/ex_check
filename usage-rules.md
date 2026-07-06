@@ -21,6 +21,10 @@ mix check --format agent              # JSON status header + raw failure blocks
 mix check --format json --output check.json
 ```
 
+Both formats include a `diagnostics` list for failed `compiler`/`credo`/`ex_unit` checks —
+each entry has `file`, `line` and `message`, so you can jump straight to a finding instead
+of parsing the raw output blocks.
+
 ## Useful flags
 
 - `--only NAME` / `-o NAME` — run only the named tool(s); repeatable. e.g. `mix check -o credo -o ex_unit`

@@ -40,6 +40,29 @@ defmodule ExCheck.Reporter.JsonTest do
     refute Map.has_key?(by_name["compiler"], :output)
   end
 
+  test "error check without a parser carries an empty diagnostics list" do
+    summary = Json.build(results(), 15)
+    by_name = Map.new(summary.checks, &{&1.name, &1})
+
+    assert by_name["formatter"].diagnostics == []
+  end
+
+  test "compiler error carries parsed diagnostics" do
+    compiler_output =
+      "    warning: variable \"x\" is unused\n    │\n    └─ lib/foo.ex:5:11: Foo.bar/1\n"
+
+    results = [{:error, {:compiler, ["mix", "compile"], []}, {1, compiler_output, 2}}]
+    summary = Json.build(results, 5)
+    [check] = summary.checks
+
+    assert [diag] = check.diagnostics
+    assert diag.file == "lib/foo.ex"
+    assert diag.line == 5
+    assert diag.column == 11
+    assert diag.severity == "warning"
+    assert diag.message == "variable \"x\" is unused"
+  end
+
   test "umbrella name split and skipped reason" do
     summary = Json.build(results(), 15)
     by_name = Map.new(summary.checks, &{&1.name, &1})

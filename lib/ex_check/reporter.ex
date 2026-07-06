@@ -71,7 +71,7 @@ defmodule ExCheck.Reporter do
   def summary_order({:error, {name, _, _}, _}), do: {1, normalize_name(name)}
   def summary_order({:skipped, name, _}), do: {2, normalize_name(name)}
 
-  defp normalize_name(name = {_, _}), do: name
+  defp normalize_name({_, _} = name), do: name
   defp normalize_name(name), do: {name, 0}
 
   @ansi_code_regex ~r/\x1b\[[0-9;]*[a-zA-Z]/

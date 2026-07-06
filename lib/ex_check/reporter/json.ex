@@ -6,6 +6,7 @@ defmodule ExCheck.Reporter.Json do
 
   @behaviour ExCheck.Reporter
 
+  alias ExCheck.Diagnostics
   alias ExCheck.JSON
   alias ExCheck.Reporter
 
@@ -41,7 +42,7 @@ defmodule ExCheck.Reporter.Json do
     }
   end
 
-  defp check({:error, {name, cmd, _}, {code, output, duration}}) do
+  defp check({:error, {name, cmd, _}, {code, output, duration}} = result) do
     {name, app} = Reporter.split_name(name)
 
     %{
@@ -51,13 +52,24 @@ defmodule ExCheck.Reporter.Json do
       command: command(cmd),
       exit_code: code,
       duration_s: duration,
-      output: Reporter.strip_ansi(output)
+      output: Reporter.strip_ansi(output),
+      diagnostics: result |> Diagnostics.extract() |> Enum.map(&diagnostic/1)
     }
   end
 
   defp check({:skipped, name, reason}) do
     {name, app} = Reporter.split_name(name)
     %{name: name, app: app, status: "skipped", reason: Reporter.skip_reason_string(reason)}
+  end
+
+  defp diagnostic(%Diagnostics.Diagnostic{} = diag) do
+    %{
+      file: diag.file,
+      line: diag.line,
+      column: diag.column,
+      message: diag.message,
+      severity: Atom.to_string(diag.severity)
+    }
   end
 
   defp command(cmd), do: cmd |> List.wrap() |> Enum.join(" ")

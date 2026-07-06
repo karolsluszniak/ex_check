@@ -11,7 +11,11 @@ defmodule ExCheck.Reporter.Github do
 
   @behaviour ExCheck.Reporter
 
+  alias ExCheck.Diagnostics
   alias ExCheck.Reporter
+
+  # GitHub renders at most 10 annotations of each type per step; emitting more is wasted.
+  @max_annotations 10
 
   @impl true
   def report(results, total_duration, _opts) do
@@ -24,11 +28,13 @@ defmodule ExCheck.Reporter.Github do
   @doc """
   Renders the workflow log for `results`. `token` scopes the `::stop-commands::` guard
   that wraps raw failure output so that any workflow-command-looking lines inside a
-  tool's output can't be interpreted by the runner.
+  tool's output can't be interpreted by the runner. Inline `::error`/`::warning` file
+  annotations are emitted after all groups (GitHub ignores annotations that appear
+  inside a stop-commands region).
   """
   def log(results, token) do
     sorted = Enum.sort_by(results, &Reporter.summary_order/1)
-    [Enum.map(sorted, &line(&1, token)), error_line(results)]
+    [Enum.map(sorted, &line(&1, token)), annotations(sorted)]
   end
 
   defp line({:ok, {name, _, _}, {_, _, duration}}, _token) do
@@ -51,17 +57,60 @@ defmodule ExCheck.Reporter.Github do
     ]
   end
 
-  defp error_line(results) do
-    failed =
-      results
-      |> Enum.filter(&match?({:error, _, _}, &1))
-      |> Enum.sort_by(&Reporter.summary_order/1)
-      |> Enum.map(fn {_, {name, _, _}, _} -> Reporter.tool_name_string(name) end)
+  # One inline annotation per structured diagnostic, capped at GitHub's per-type limit.
+  # When a failed check yields no diagnostics (no parser, or unparseable output) we fall
+  # back to a single file-less annotation so every failure still shows up in the PR.
+  defp annotations(sorted_results) do
+    sorted_results
+    |> Enum.filter(&match?({:error, _, _}, &1))
+    |> Enum.map(&check_annotations/1)
+  end
 
-    if failed == [] do
-      []
-    else
-      "::error::#{escape_data("mix check failed: " <> Enum.join(failed, ", "))}\n"
+  defp check_annotations({:error, {name, _cmd, tool_opts}, {code, _output, _}} = result) do
+    case Diagnostics.extract(result) do
+      [] ->
+        message = "#{Reporter.tool_name_string(name)} failed (exit #{code})"
+        "::error::#{escape_data(message)}\n"
+
+      diagnostics ->
+        diagnostics
+        |> Enum.take(@max_annotations)
+        |> Enum.map(&annotation(&1, name, tool_opts))
+    end
+  end
+
+  defp annotation(diagnostic, name, tool_opts) do
+    command = if diagnostic.severity == :warning, do: "warning", else: "error"
+    props = annotation_props(diagnostic, tool_opts, Reporter.tool_name_string(name))
+
+    "::#{command} #{props}::#{escape_data(diagnostic.message)}\n"
+  end
+
+  defp annotation_props(diagnostic, tool_opts, title) do
+    [
+      prop("file", annotation_file(diagnostic, tool_opts)),
+      prop("line", diagnostic.line),
+      prop("col", diagnostic.column),
+      prop("title", title)
+    ]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join(",")
+  end
+
+  defp prop(_key, nil), do: nil
+  defp prop(key, value) when is_integer(value), do: "#{key}=#{value}"
+  defp prop(key, value), do: "#{key}=#{escape_property(value)}"
+
+  # `:cd` (an umbrella child's `apps/<app>`) is relative to the `mix check` cwd. GitHub
+  # anchors annotations against `$GITHUB_WORKSPACE`; if check runs from a different cwd
+  # the path won't line up and GitHub drops the file, degrading to a file-less annotation
+  # — acceptable, and avoids sniffing the environment.
+  defp annotation_file(%{file: nil}, _tool_opts), do: nil
+
+  defp annotation_file(%{file: file}, tool_opts) do
+    case tool_opts[:cd] do
+      nil -> file
+      cd -> Path.join(cd, file)
     end
   end
 

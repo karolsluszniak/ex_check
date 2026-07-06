@@ -27,7 +27,8 @@ defmodule ExCheck.Reporter.GithubTest do
     assert out =~ "⏭ credo skipped (missing package credo)\n"
     assert out =~ "::group::✕ formatter — mix format --check-formatted (exit 1)\n"
     assert out =~ "::endgroup::\n"
-    assert out =~ "::error::mix check failed: formatter\n"
+    # formatter has no diagnostics parser → file-less fallback annotation
+    assert out =~ "::error::formatter failed (exit 1)\n"
   end
 
   test "keeps ANSI in failure output (GitHub renders it)" do
@@ -84,6 +85,85 @@ defmodule ExCheck.Reporter.GithubTest do
 
     assert out =~ "::group::✕ formatter"
     assert out =~ "::stop-commands::"
-    assert out =~ "::error::mix check failed: formatter"
+    assert out =~ "::error::formatter failed (exit 1)"
+  end
+
+  describe "inline annotations (Story 3)" do
+    defp compiler_output do
+      """
+          warning: variable "x" is unused (if the variable is not meant to be used, prefix it with an underscore)
+          │
+        5 │   def bar(x) do
+          │           ~
+          │
+          └─ lib/foo.ex:5:11: Foo.bar/1
+      """
+    end
+
+    defp credo_error_output do
+      """
+      ┃ [F] ↘ There is a complexity problem.
+      ┃       lib/foo.ex:9:3 #(Foo.bar)
+      """
+    end
+
+    test "emits a file/line annotation per compiler diagnostic, after the group" do
+      results = [{:error, {:compiler, ["mix", "compile"], []}, {1, compiler_output(), 2}}]
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+
+      assert out =~
+               "::warning file=lib/foo.ex,line=5,col=11,title=compiler::variable \"x\" is unused"
+
+      # annotation comes after the group's endgroup
+      assert :binary.match(out, "::endgroup::") < :binary.match(out, "::warning file=")
+    end
+
+    test "error-severity diagnostic uses the ::error command" do
+      results = [{:error, {:credo, ["mix", "credo"], []}, {1, credo_error_output(), 1}}]
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+
+      assert out =~
+               "::error file=lib/foo.ex,line=9,col=3,title=credo::There is a complexity problem."
+    end
+
+    test "prefixes the file with the tool's :cd (umbrella child app)" do
+      results = [
+        {:error, {{:compiler, :child}, ["mix", "compile"], [cd: "apps/child"]},
+         {1, compiler_output(), 2}}
+      ]
+
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+      assert out =~ "::warning file=apps/child/lib/foo.ex,line=5,col=11,title=compiler in child::"
+    end
+
+    test "escapes % and CR in the annotation message via escape_data" do
+      output = "    warning: bad 50% off\rthing\n    │\n    └─ lib/foo.ex:5: Foo.bar/0\n"
+
+      results = [{:error, {:compiler, ["mix", "compile"], []}, {1, output, 1}}]
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+
+      assert out =~ "::warning file=lib/foo.ex,line=5,title=compiler::bad 50%25 off%0Dthing"
+    end
+
+    test "caps annotations at 10 per check" do
+      lines =
+        for n <- 1..15 do
+          "    warning: issue #{n}\n    │\n    └─ lib/foo.ex:#{n}: Foo.bar/0\n"
+        end
+
+      results = [{:error, {:compiler, ["mix", "compile"], []}, {1, Enum.join(lines), 1}}]
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+
+      count = out |> String.split("::warning ") |> length() |> Kernel.-(1)
+      assert count == 10
+    end
+
+    test "falls back to a file-less annotation when a check has no diagnostics" do
+      results = [{:error, {:sobelow, ["mix", "sobelow"], []}, {1, "boom\n", 1}}]
+      out = IO.iodata_to_binary(Github.log(results, "T"))
+
+      assert out =~ "::error::sobelow failed (exit 1)\n"
+      refute out =~ "::error file="
+    end
   end
 end
