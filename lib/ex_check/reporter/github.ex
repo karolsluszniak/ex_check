@@ -32,8 +32,6 @@ defmodule ExCheck.Reporter.Github do
   end
 
   defp line({:ok, {name, _, _}, {_, _, duration}}, _token) do
-
-    
     "✓ #{Reporter.tool_name_string(name)} success in #{Reporter.format_duration(duration)}\n"
   end
 
