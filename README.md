@@ -48,7 +48,7 @@ Add `ex_check_ng` dependency in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_check_ng, "~> 1.0", only: [:dev], runtime: false}
+    {:ex_check_ng, "~> 1.0", only: [:dev, :test], runtime: false}
   ]
 end
 ```
@@ -67,6 +67,9 @@ mix check
 
 That's it - `mix check` will detect and run all the available tools.
 
+> [!TIP]
+> Want to avoid duplicate builds when running check? See [Troubleshooting](#duplicate-builds) for a recommended setup.
+
 ### Community tools
 
 If you want to take advantage of community curated tools, add following dependencies in `mix.exs`:
@@ -74,13 +77,13 @@ If you want to take advantage of community curated tools, add following dependen
 ```elixir
 def deps do
   [
-    {:credo, ">= 0.0.0", only: [:dev], runtime: false},
-    {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false},
-    {:doctor, ">= 0.0.0", only: [:dev], runtime: false},
-    {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
-    {:gettext, ">= 0.0.0", only: [:dev], runtime: false},
-    {:sobelow, ">= 0.0.0", only: [:dev], runtime: false},
-    {:mix_audit, ">= 0.0.0", only: [:dev], runtime: false}
+    {:credo, ">= 0.0.0", only: [:test], runtime: false},
+    {:dialyxir, ">= 0.0.0", only: [:test], runtime: false},
+    {:doctor, ">= 0.0.0", only: [:test], runtime: false},
+    {:ex_doc, ">= 0.0.0", only: [:test], runtime: false},
+    {:gettext, ">= 0.0.0", only: [:test], runtime: false},
+    {:sobelow, ">= 0.0.0", only: [:test], runtime: false},
+    {:mix_audit, ">= 0.0.0", only: [:test], runtime: false}
   ]
 end
 ```
@@ -101,6 +104,30 @@ Among others, this allows to permanently disable specific tools and avoid the sk
   ]
 ]
 ```
+
+### Output formats
+
+`mix check` renders its results through pluggable reporters selected with `--format` (default
+`pretty`). Batched formats (`agent`, `json`, `junit`) may be written to a file with `--output PATH`
+instead of stdout.
+
+| Format   | Use case                                                                           |
+| -------- | ---------------------------------------------------------------------------------- |
+| `pretty` | Live colored terminal output for humans (default).                                 |
+| `agent`  | JSON status header + raw failure blocks, optimized for LLM/agent consumption.      |
+| `json`   | Single machine-readable JSON object describing the whole run.                      |
+| `github` | GitHub Actions log groups + a Markdown summary appended to `$GITHUB_STEP_SUMMARY`. |
+| `junit`  | JUnit XML report for CI systems like GitLab CI and Jenkins.                        |
+
+```bash
+mix check --format agent                    # LLM-friendly
+mix check --format json --output check.json  # machine-readable file
+mix check --format github                    # inside a GitHub Actions job
+mix check --format junit --output report.xml # JUnit report for CI
+```
+
+`github` and `pretty` stream to the terminal and reject `--output`. See
+[Continuous Integration](#continuous-integration) for wiring the CI formats into a pipeline.
 
 ### Usage rules for coding agents
 
@@ -142,30 +169,6 @@ mix usage_rules.sync
 
 This keeps an `ex_check_ng` section in your `AGENTS.md` in sync with the rules shipped by the
 package, so coding agents run `mix check --format agent` instead of parsing human-oriented output.
-
-### Output formats
-
-`mix check` renders its results through pluggable reporters selected with `--format` (default
-`pretty`). Batched formats (`agent`, `json`, `junit`) may be written to a file with `--output PATH`
-instead of stdout.
-
-| Format   | Use case                                                                           |
-| -------- | ---------------------------------------------------------------------------------- |
-| `pretty` | Live colored terminal output for humans (default).                                 |
-| `agent`  | JSON status header + raw failure blocks, optimized for LLM/agent consumption.      |
-| `json`   | Single machine-readable JSON object describing the whole run.                      |
-| `github` | GitHub Actions log groups + a Markdown summary appended to `$GITHUB_STEP_SUMMARY`. |
-| `junit`  | JUnit XML report for CI systems like GitLab CI and Jenkins.                        |
-
-```bash
-mix check --format agent                    # LLM-friendly
-mix check --format json --output check.json  # machine-readable file
-mix check --format github                    # inside a GitHub Actions job
-mix check --format junit --output report.xml # JUnit report for CI
-```
-
-`github` and `pretty` stream to the terminal and reject `--output`. See
-[Continuous Integration](#continuous-integration) for wiring the CI formats into a pipeline.
 
 ### Local-only fix mode
 
