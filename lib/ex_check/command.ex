@@ -36,7 +36,7 @@ defmodule ExCheck.Command do
     end)
   end
 
-  def unsilence(task = %Task{pid: pid}) do
+  def unsilence(%Task{pid: pid} = task) do
     send(pid, :unsilence)
     task
   end

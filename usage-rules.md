@@ -21,6 +21,10 @@ mix check --format agent              # JSON status header + raw failure blocks
 mix check --format json --output check.json
 ```
 
+Both formats include a `diagnostics` list for failed `compiler`/`credo`/`ex_unit` checks —
+each entry has `file`, `line` and `message`, so you can jump straight to a finding instead
+of parsing the raw output blocks.
+
 ## Useful flags
 
 - `--only NAME` / `-o NAME` — run only the named tool(s); repeatable. e.g. `mix check -o credo -o ex_unit`
@@ -29,8 +33,9 @@ mix check --format json --output check.json
 - `--retry` / `-r` — run only tools that failed in the previous run.
 - `--no-parallel` — run tools sequentially.
 - `--config PATH` / `-c PATH` — use a specific config file.
-- `--format pretty|agent|json` — output format (default `pretty`).
-- `--output PATH` — write the report to a file (only with `--format agent` or `json`).
+- `--format pretty|agent|json|github|junit` — output format (default `pretty`). `github` emits
+  GitHub Actions log groups + a `$GITHUB_STEP_SUMMARY` table; `junit` emits a JUnit XML report.
+- `--output PATH` — write the report to a file (only with `--format agent`, `json` or `junit`).
 
 Combine `--fix --retry` to fix only the tools that just failed.
 

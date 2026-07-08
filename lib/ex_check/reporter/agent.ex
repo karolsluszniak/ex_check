@@ -7,6 +7,7 @@ defmodule ExCheck.Reporter.Agent do
 
   @behaviour ExCheck.Reporter
 
+  alias ExCheck.Diagnostics
   alias ExCheck.JSON
   alias ExCheck.Reporter
 
@@ -44,8 +45,23 @@ defmodule ExCheck.Reporter.Agent do
       failed: length(failed),
       skipped: skipped,
       duration_s: total_duration,
-      failed_checks: failed_checks
+      failed_checks: failed_checks,
+      diagnostics: diagnostics(failed)
     }
+  end
+
+  defp diagnostics(failed) do
+    Enum.flat_map(failed, fn {_, {name, _, _}, _} = result ->
+      Enum.map(Diagnostics.extract(result), fn diag ->
+        %{
+          check: Reporter.tool_name_string(name),
+          file: diag.file,
+          line: diag.line,
+          message: diag.message,
+          severity: Atom.to_string(diag.severity)
+        }
+      end)
+    end)
   end
 
   defp failure_block({_, {name, cmd, _}, {code, output, _}}) do

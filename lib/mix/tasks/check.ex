@@ -248,11 +248,13 @@ defmodule Mix.Tasks.Check do
   - `--[no-]retry` - (don't) run only checks that have failed in the last run
   - `--[no-]parallel` - (don't) run tools in parallel
   - `--[no-]skipped` - (don't) print skipped tools in summary
-  - `--format pretty|agent|json` - output format; `pretty` (default) is the live
-    colored terminal output, `agent` is an LLM-friendly JSON status header followed by
-    raw failure blocks, `json` is a single machine-readable JSON object
+  - `--format pretty|agent|json|github|junit` - output format; `pretty` (default) is the
+    live colored terminal output, `agent` is an LLM-friendly JSON status header followed by
+    raw failure blocks, `json` is a single machine-readable JSON object, `github` emits
+    GitHub Actions workflow-command log groups plus a `$GITHUB_STEP_SUMMARY` table, `junit`
+    is a JUnit XML report for CI systems like GitLab CI and Jenkins
   - `--output path/to/report` - write the report to a file instead of stdout
-    (only valid with `--format agent` or `--format json`)
+    (only valid with `--format agent`, `--format json` or `--format junit`)
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
   [`:credo`]: https://hexdocs.pm/credo
@@ -324,15 +326,23 @@ defmodule Mix.Tasks.Check do
   defp parse_format("pretty"), do: :pretty
   defp parse_format("agent"), do: :agent
   defp parse_format("json"), do: :json
+  defp parse_format("github"), do: :github
+  defp parse_format("junit"), do: :junit
 
   defp parse_format(other) do
-    Mix.raise("Invalid --format #{inspect(other)}, expected one of: pretty, agent, json")
+    Mix.raise(
+      "Invalid --format #{inspect(other)}, expected one of: pretty, agent, json, github, junit"
+    )
   end
 
+  # Formats that render a single batched report and can therefore be written to a file.
+  @batch_formats [:agent, :json, :junit]
+
   defp validate_opts(opts) do
-    if opts[:output] && Keyword.get(opts, :format, :pretty) == :pretty do
+    if opts[:output] && Keyword.get(opts, :format, :pretty) not in @batch_formats do
       Mix.raise(
-        "--output requires --format agent or --format json (pretty streams to the terminal)"
+        "--output requires --format agent, --format json or --format junit " <>
+          "(pretty and github stream to the terminal)"
       )
     end
   end
