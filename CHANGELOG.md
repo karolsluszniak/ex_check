@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0-rc.2] - 2026-07-08
+
 - **Added** `--format github` reporter emitting GitHub Actions `::group::` log blocks for each tool (raw failure output wrapped in a `::stop-commands::` injection guard) plus a Markdown run summary appended to `$GITHUB_STEP_SUMMARY`
 - **Added** `--format junit` reporter emitting a JUnit XML report (`testsuite`/`testcase`) for CI systems such as GitLab CI and Jenkins, pairing with `--output report.xml`
 - **Added** structured diagnostics parsed from `compiler`, `credo` and `ex_unit` failure output (`ExCheck.Diagnostics`), exposed as a `diagnostics` list (`file`, `line`, `column`, `message`, `severity`) in the `json` and `agent` reporters so agents can jump straight to findings

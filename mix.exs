@@ -3,7 +3,7 @@ defmodule ExCheck.MixProject do
 
   @github_url "https://github.com/fschoenfeldt/ex_check"
   @upstream_url "https://github.com/karolsluszniak/ex_check"
-  @version "1.0.0-rc.1"
+  @version "1.0.0-rc.2"
 
   def project do
     [
