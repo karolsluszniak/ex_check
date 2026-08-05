@@ -44,8 +44,8 @@ defmodule ExCheck.CaseHelpers do
 
     deps_list =
       Enum.map(deps, fn
-        :ex_check_ng ->
-          "{:ex_check_ng, path: \"#{File.cwd!()}\", only: [:dev, :test], runtime: false}"
+        :ex_check ->
+          "{:ex_check, path: \"#{File.cwd!()}\", only: [:dev, :test], runtime: false}"
 
         dep ->
           "{:#{dep}, \">= 0.0.0\", only: :dev, runtime: false}"

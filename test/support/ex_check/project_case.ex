@@ -14,7 +14,7 @@ defmodule ExCheck.ProjectCase do
         tmp_dir = create_tmp_directory()
         project_dir = create_mix_project(tmp_dir)
 
-        set_mix_deps(project_dir, [:ex_check_ng])
+        set_mix_deps(project_dir, [:ex_check])
         write_default_config(project_dir)
         on_exit(fn -> remove_tmp_directory(tmp_dir) end)
 

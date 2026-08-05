@@ -1,7 +1,6 @@
 # The MIT License
 
-Copyright (c) 2019 Karol Słuszniak
-Copyright (c) 2026 Frederik Schönfeldt and ex_check_ng contributors
+Copyright (c) 2019 Karol Słuszniak and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

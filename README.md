@@ -1,16 +1,11 @@
 # ![ex_check](./assets/logo-with-name.svg)
 
-[![Hex version](<https://img.shields.io/hexpm/v/ex_check_ng.svg?color=hsl(265,40%,60%)>)](https://hex.pm/packages/ex_check_ng)
-[![Hex docs](<https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%)>)](https://hexdocs.pm/ex_check_ng/)
-[![Build status](https://img.shields.io/github/actions/workflow/status/fschoenfeldt/ex_check/check.yml?branch=master)](https://github.com/fschoenfeldt/ex_check/actions)
-[![Downloads](https://img.shields.io/hexpm/dt/ex_check_ng.svg)](https://hex.pm/packages/ex_check_ng)
-[![License](https://img.shields.io/github/license/fschoenfeldt/ex_check.svg)](https://github.com/fschoenfeldt/ex_check/blob/master/LICENSE.md)
-[![Last updated](https://img.shields.io/github/last-commit/fschoenfeldt/ex_check.svg)](https://github.com/fschoenfeldt/ex_check/commits/master)
-
-> **`ex_check_ng`** is a community-maintained fork of
-> [`ex_check`](https://github.com/karolsluszniak/ex_check) (dormant since 2024). Module namespace
-> (`ExCheck`) and the `mix check` task are unchanged — drop-in replacement. Install as
-> `{:ex_check_ng, "~> 1.0", only: [:dev], runtime: false}`.
+[![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
+[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%))](https://hexdocs.pm/ex_check/)
+[![Build status](https://img.shields.io/github/actions/workflow/status/karolsluszniak/ex_check/check.yml?branch=master)](https://github.com/karolsluszniak/ex_check/actions)
+[![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
+[![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
+[![Last updated](https://img.shields.io/github/last-commit/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/commits/master)
 
 ![Demo](./assets/demo-67x16.svg)
 
@@ -20,35 +15,35 @@
 
 Takes seconds to setup, saves hours in the long term.
 
-- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-tools)
-- Delivers results faster by [running tools in parallel and catching all issues in one go](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-workflow)
+- Comes out of the box with a [predefined set of curated tools](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tools)
+- Delivers results faster by [running tools in parallel and catching all issues in one go](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-workflow)
 - Checks the project consistently on every developer's local machine & [on the CI](#continuous-integration)
-- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-retrying-failed-tools)
-- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-fix-mode)
+- Runs only the tools & tests that have [failed in the last run](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-retrying-failed-tools)
+- Fixes issues automatically in [the fix mode](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-fix-mode)
 
 Sports powerful features to enable ultimate flexibility.
 
-- Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-configuration-file)
-- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
-- Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-umbrella-projects)
-- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-cross-tool-dependencies)
+- Add custom mix tasks, shell scripts and commands via [configuration file](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-configuration-file)
+- Enhance you CI workflow to [report status](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-manifest-file), [retry random failures](#random-failures) or [autofix issues](#autofixing)
+- Empower umbrella projects with [parallel recursion over child apps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-umbrella-projects)
+- Design complex parallel workflows with [cross-tool deps](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-cross-tool-dependencies)
 
 Takes care of the little details, so you don't have to.
 
 - Compiles the project and collects compilation warnings in one go
-- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
+- Ensures that output from tools is [ANSI formatted & colorized](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html#module-tool-processes-and-ansi-formatting)
 - Retries ExUnit with the `--failed` flag
 
 Read more in the introductory ["One task to rule all Elixir analysis & testing tools"](https://cloudless.studio/one-task-to-rule-all-elixir-analysis-testing-tools) article.
 
 ## Getting started
 
-Add `ex_check_ng` dependency in `mix.exs`:
+Add `ex_check` dependency in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:ex_check_ng, "~> 1.0", only: [:dev, :test], runtime: false}
+    {:ex_check, "~> 1.0", only: [:dev, :test], runtime: false}
   ]
 end
 ```
@@ -131,7 +126,7 @@ mix check --format junit --output report.xml # JUnit report for CI
 
 ### Usage rules for coding agents
 
-`ex_check_ng` ships [usage rules](https://hexdocs.pm/usage_rules) — concise, authoritative
+`ex_check` ships [usage rules](https://hexdocs.pm/usage_rules) — concise, authoritative
 guidance written for LLM coding agents (Claude Code, Cursor, ...) on how to drive `mix check`,
 including using `mix check --format agent` for machine-readable output.
 
@@ -154,7 +149,7 @@ def project do
     # ...
     usage_rules: [
       file: "AGENTS.md",
-      usage_rules: [:ex_check_ng]
+      usage_rules: [:ex_check]
     ]
   ]
 end
@@ -167,7 +162,7 @@ mix deps.get
 mix usage_rules.sync
 ```
 
-This keeps an `ex_check_ng` section in your `AGENTS.md` in sync with the rules shipped by the
+This keeps an `ex_check` section in your `AGENTS.md` in sync with the rules shipped by the
 package, so coding agents run `mix check --format agent` instead of parsing human-oriented output.
 
 ### Local-only fix mode
@@ -184,7 +179,7 @@ You should keep local and CI configuration as consistent as possible by putting 
 
 ## Documentation
 
-Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check_ng/Mix.Tasks.Check.html) or by running `mix help check`.
+Learn more about the tools included in the check as well as its workflow, configuration and options [on HexDocs](https://hexdocs.pm/ex_check/Mix.Tasks.Check.html) or by running `mix help check`.
 
 Want to write your own code check? Get yourself started by reading the ["Writing your first Elixir code check"](https://cloudless.studio/writing-your-first-elixir-code-check) article.
 
@@ -214,7 +209,7 @@ jobs:
 For CI systems with a JUnit test report (GitLab CI, Jenkins, ...), use `mix check --format junit
 --output report.xml`. See [Output formats](#output-formats) for the full list.
 
-`ex_check` uses itself on the CI — see [our own workflow](https://github.com/fschoenfeldt/ex_check/blob/master/.github/workflows/check.yml).
+`ex_check` uses itself on the CI — see [our own workflow](https://github.com/karolsluszniak/ex_check/blob/master/.github/workflows/check.yml).
 
 ### Autofixing
 
@@ -275,7 +270,7 @@ def deps do
     {:credo, ">= 0.0.0", only: [:test], runtime: false},
     {:dialyxir, ">= 0.0.0", only: [:test], runtime: false},
     {:doctor, ">= 0.0.0", only: [:test], runtime: false},
-    {:ex_check_ng, "~> 1.0", only: [:test], runtime: false},
+    {:ex_check, "~> 1.0", only: [:test], runtime: false},
     {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
     {:mix_audit, ">= 0.0.0", only: [:test], runtime: false}
     {:sobelow, ">= 0.0.0", only: [:test], runtime: false},

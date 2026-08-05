@@ -18,7 +18,7 @@ defmodule ExCheck.UmbrellaProjectCase do
         child_b_dir = create_mix_project(apps_dir, name: "child_b")
         project_dirs = [project_dir, child_a_dir, child_b_dir]
 
-        set_mix_deps(project_dirs, [:ex_check_ng])
+        set_mix_deps(project_dirs, [:ex_check])
         write_default_config(project_dir)
         on_exit(fn -> remove_tmp_directory(tmp_dir) end)
 

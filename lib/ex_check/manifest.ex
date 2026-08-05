@@ -66,7 +66,7 @@ defmodule ExCheck.Manifest do
   defp get_path(opts) do
     Keyword.get_lazy(opts, :manifest, fn ->
       app_id = File.cwd!() |> String.replace(@escape, "_") |> String.replace(~r/^_+/, "")
-      Path.join([System.tmp_dir!(), "ex_check_ng-manifest-#{app_id}.txt"])
+      Path.join([System.tmp_dir!(), "ex_check-manifest-#{app_id}.txt"])
     end)
   end
 end

@@ -259,7 +259,7 @@ defmodule ExCheck.Check.Compiler do
     do: cmd
 
   defp enable_ansi_erl_cfg_path,
-    do: Application.app_dir(:ex_check_ng, ~w[priv enable_ansi enable_ansi.config])
+    do: Application.app_dir(:ex_check, ~w[priv enable_ansi enable_ansi.config])
 
   defp get_order({name, opts}),
     do: [Keyword.get(opts, :order, 0), Config.Default.tool_order(name)]
