@@ -9,10 +9,7 @@ defmodule ExCheck.Reporter do
   # for run tools (status `:ok`/`:error`) and `{:skipped, name, reason}` for skipped
   # ones. `name` is an atom or `{atom, app}` for umbrella instances.
 
-  @type result :: tuple
-  @type opts :: keyword
-
-  @callback report(results :: [result], total_duration :: integer, opts) :: :ok
+  @callback report(results :: [tuple], total_duration :: integer, opts :: keyword) :: :ok
 
   @formats %{
     pretty: ExCheck.Reporter.Pretty,
@@ -28,7 +25,7 @@ defmodule ExCheck.Reporter do
   end
 
   @doc "List of supported format atoms."
-  def formats, do: Map.keys(@formats)
+  def formats, do: @formats |> Map.keys() |> Enum.sort()
 
   @doc """
   Sink shared by the batch reporters (agent/json): writes the rendered report to the
@@ -53,6 +50,9 @@ defmodule ExCheck.Reporter do
   @doc "Colored tool name iodata for terminal output."
   def format_tool_name(name) when is_atom(name), do: bright(name)
   def format_tool_name({name, app}) when is_atom(name), do: [bright(name), " in ", bright(app)]
+
+  @doc "Command list joined into a single shell-like string."
+  def command(cmd), do: Enum.join(cmd, " ")
 
   @doc "Formats a duration in seconds as `M:SS`."
   def format_duration(secs) do

@@ -66,10 +66,9 @@ defmodule ExCheck.Reporter.Agent do
 
   defp failure_block({_, {name, cmd, _}, {code, output, _}}) do
     name = Reporter.tool_name_string(name)
-    command = cmd |> List.wrap() |> Enum.join(" ")
     output = output |> Reporter.strip_ansi() |> ensure_trailing_newline()
 
-    ["=== FAILED: #{name} — #{command} (exit #{code}) ===\n", output]
+    ["=== FAILED: #{name} — #{Reporter.command(cmd)} (exit #{code}) ===\n", output]
   end
 
   defp ensure_trailing_newline(""), do: ""

@@ -29,37 +29,32 @@ defmodule ExCheck.Reporter.Json do
     }
   end
 
-  defp check({:ok, {name, cmd, _}, {code, _, duration}}) do
-    {name, app} = Reporter.split_name(name)
+  defp check({:ok, _, _} = result), do: run_check(result)
 
-    %{
-      name: name,
-      app: app,
-      status: "ok",
-      command: command(cmd),
-      exit_code: code,
-      duration_s: duration
-    }
-  end
-
-  defp check({:error, {name, cmd, _}, {code, output, duration}} = result) do
-    {name, app} = Reporter.split_name(name)
-
-    %{
-      name: name,
-      app: app,
-      status: "error",
-      command: command(cmd),
-      exit_code: code,
-      duration_s: duration,
+  defp check({:error, _, {_, output, _}} = result) do
+    Map.merge(run_check(result), %{
       output: Reporter.strip_ansi(output),
       diagnostics: result |> Diagnostics.extract() |> Enum.map(&diagnostic/1)
-    }
+    })
   end
 
   defp check({:skipped, name, reason}) do
     {name, app} = Reporter.split_name(name)
     %{name: name, app: app, status: "skipped", reason: Reporter.skip_reason_string(reason)}
+  end
+
+  # Fields shared by every tool that actually ran (ok or error).
+  defp run_check({status, {name, cmd, _}, {code, _, duration}}) do
+    {name, app} = Reporter.split_name(name)
+
+    %{
+      name: name,
+      app: app,
+      status: Atom.to_string(status),
+      command: Reporter.command(cmd),
+      exit_code: code,
+      duration_s: duration
+    }
   end
 
   defp diagnostic(%Diagnostics.Diagnostic{} = diag) do
@@ -71,6 +66,4 @@ defmodule ExCheck.Reporter.Json do
       severity: Atom.to_string(diag.severity)
     }
   end
-
-  defp command(cmd), do: cmd |> List.wrap() |> Enum.join(" ")
 end

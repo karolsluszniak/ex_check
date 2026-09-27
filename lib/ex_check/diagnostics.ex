@@ -48,6 +48,15 @@ defmodule ExCheck.Diagnostics do
 
   def extract(_), do: []
 
+  @doc """
+  Turns a `[match, file, line]` or `[match, file, line, column]` regex result into
+  `{file, line, column}`. `Regex.run/2` drops a trailing unmatched column group.
+  """
+  def parse_location([_, file, line]), do: {file, String.to_integer(line), nil}
+
+  def parse_location([_, file, line, column]),
+    do: {file, String.to_integer(line), String.to_integer(column)}
+
   defp base_name({name, _app}), do: name
   defp base_name(name), do: name
 end

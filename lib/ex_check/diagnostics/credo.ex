@@ -7,6 +7,7 @@ defmodule ExCheck.Diagnostics.Credo do
 
   @behaviour ExCheck.Diagnostics
 
+  alias ExCheck.Diagnostics
   alias ExCheck.Diagnostics.Diagnostic
 
   @issue ~r/\[([RCWFDE])\]\s+\S\s+(.+?)\s*$/u
@@ -23,33 +24,25 @@ defmodule ExCheck.Diagnostics.Credo do
 
   defp walk(line, {acc, pending}) do
     case Regex.run(@issue, line) do
-      [_, category, message] ->
-        {acc, {severity(category), message}}
+      [_, category, message] -> {acc, {severity(category), message}}
+      nil -> walk_location(line, acc, pending)
+    end
+  end
 
-      nil ->
-        case pending && Regex.run(@location, line) do
-          loc when is_list(loc) -> {[emit(loc, pending) | acc], nil}
-          _ -> {acc, pending}
-        end
+  defp walk_location(_line, acc, nil), do: {acc, nil}
+
+  defp walk_location(line, acc, pending) do
+    case Regex.run(@location, line) do
+      nil -> {acc, pending}
+      loc -> {[emit(loc, pending) | acc], nil}
     end
   end
 
   defp emit(loc, {severity, message}) do
-    {file, line, column} = parse_loc(loc)
+    {file, line, column} = Diagnostics.parse_location(loc)
     %Diagnostic{file: file, line: line, column: column, message: message, severity: severity}
   end
 
-  defp parse_loc([_, file, line]), do: {file, to_int(line), nil}
-  defp parse_loc([_, file, line, ""]), do: {file, to_int(line), nil}
-  defp parse_loc([_, file, line, column]), do: {file, to_int(line), to_int(column)}
-
   defp severity("W"), do: :warning
   defp severity(_), do: :error
-
-  defp to_int(str) do
-    case Integer.parse(str) do
-      {int, _} -> int
-      :error -> nil
-    end
-  end
 end

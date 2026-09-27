@@ -47,7 +47,7 @@ defmodule ExCheck.Check do
     {compiler, others} = Compiler.compile(tools, opts)
 
     start_time = DateTime.utc_now()
-    compiler_result = run_compiler(compiler, opts)
+    compiler_result = run_tool(compiler, opts)
     others_results = if run_others?(compiler_result), do: run_others(others, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
 
@@ -58,10 +58,6 @@ defmodule ExCheck.Check do
     reporter.report(all_results, total_duration, opts)
     Manifest.save(all_results, opts)
     maybe_set_exit_status(failed_results)
-  end
-
-  defp run_compiler(compiler, opts) do
-    run_tool(compiler, opts)
   end
 
   defp live?(opts), do: Keyword.get(opts, :format, :pretty) == :pretty

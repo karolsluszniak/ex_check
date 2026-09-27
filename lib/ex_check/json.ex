@@ -6,32 +6,28 @@ defmodule ExCheck.JSON do
   # JSON module only arrived in 1.18) and must not pull a runtime dep like Jason.
 
   @spec encode(term) :: iodata
-  def encode(term), do: do_encode(term)
+  def encode(nil), do: "null"
+  def encode(true), do: "true"
+  def encode(false), do: "false"
+  def encode(int) when is_integer(int), do: Integer.to_string(int)
+  def encode(float) when is_float(float), do: Float.to_string(float)
+  def encode(atom) when is_atom(atom), do: encode_string(Atom.to_string(atom))
+  def encode(str) when is_binary(str), do: encode_string(str)
 
-  defp do_encode(nil), do: "null"
-  defp do_encode(true), do: "true"
-  defp do_encode(false), do: "false"
-  defp do_encode(int) when is_integer(int), do: Integer.to_string(int)
-  defp do_encode(float) when is_float(float), do: Float.to_string(float)
-  defp do_encode(atom) when is_atom(atom), do: encode_string(Atom.to_string(atom))
-  defp do_encode(str) when is_binary(str), do: encode_string(str)
-
-  defp do_encode(list) when is_list(list) do
-    inner = list |> Enum.map(&do_encode/1) |> Enum.intersperse(",")
+  def encode(list) when is_list(list) do
+    inner = list |> Enum.map(&encode/1) |> Enum.intersperse(",")
     ["[", inner, "]"]
   end
 
-  defp do_encode(map) when is_map(map) do
+  # Keys are always atoms or strings in our reports, so they reuse the value clauses.
+  def encode(map) when is_map(map) do
     inner =
       map
-      |> Enum.map(fn {key, value} -> [encode_key(key), ":", do_encode(value)] end)
+      |> Enum.map(fn {key, value} -> [encode(key), ":", encode(value)] end)
       |> Enum.intersperse(",")
 
     ["{", inner, "}"]
   end
-
-  defp encode_key(key) when is_atom(key), do: encode_string(Atom.to_string(key))
-  defp encode_key(key) when is_binary(key), do: encode_string(key)
 
   defp encode_string(str) do
     [?", escape(str, ""), ?"]

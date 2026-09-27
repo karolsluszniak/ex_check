@@ -46,7 +46,7 @@ defmodule ExCheck.Reporter.Github do
   end
 
   defp line({:error, {name, cmd, _}, {code, output, _}}, token) do
-    title = "✕ #{Reporter.tool_name_string(name)} — #{command(cmd)} (exit #{code})"
+    title = "✕ #{Reporter.tool_name_string(name)} — #{Reporter.command(cmd)} (exit #{code})"
 
     [
       "::group::#{escape_data(title)}\n",
@@ -98,8 +98,7 @@ defmodule ExCheck.Reporter.Github do
   end
 
   defp prop(_key, nil), do: nil
-  defp prop(key, value) when is_integer(value), do: "#{key}=#{value}"
-  defp prop(key, value), do: "#{key}=#{escape_property(value)}"
+  defp prop(key, value), do: "#{key}=#{escape_property(to_string(value))}"
 
   # `:cd` (an umbrella child's `apps/<app>`) is relative to the `mix check` cwd. GitHub
   # anchors annotations against `$GITHUB_WORKSPACE`; if check runs from a different cwd
@@ -170,8 +169,6 @@ defmodule ExCheck.Reporter.Github do
   defp summary_row({:skipped, name, _reason}) do
     "| #{Reporter.tool_name_string(name)} | ⏭ | — |\n"
   end
-
-  defp command(cmd), do: cmd |> List.wrap() |> Enum.join(" ")
 
   defp ensure_trailing_newline(""), do: "\n"
 

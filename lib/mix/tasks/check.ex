@@ -272,6 +272,7 @@ defmodule Mix.Tasks.Check do
 
   use Mix.Task
   alias ExCheck.Check
+  alias ExCheck.Reporter
 
   @shortdoc "Runs all code analysis & testing tools in an Elixir project"
 
@@ -323,16 +324,11 @@ defmodule Mix.Tasks.Check do
     opts
   end
 
-  defp parse_format("pretty"), do: :pretty
-  defp parse_format("agent"), do: :agent
-  defp parse_format("json"), do: :json
-  defp parse_format("github"), do: :github
-  defp parse_format("junit"), do: :junit
+  defp parse_format(format) do
+    formats = Reporter.formats()
 
-  defp parse_format(other) do
-    Mix.raise(
-      "Invalid --format #{inspect(other)}, expected one of: pretty, agent, json, github, junit"
-    )
+    Enum.find(formats, &(Atom.to_string(&1) == format)) ||
+      Mix.raise("Invalid --format #{inspect(format)}, expected one of: #{Enum.join(formats, ", ")}")
   end
 
   # Formats that render a single batched report and can therefore be written to a file.

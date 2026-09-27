@@ -9,21 +9,14 @@ defmodule ExCheck.Diagnostics.ExUnit do
 
   alias ExCheck.Diagnostics.Diagnostic
 
-  @failure ~r/^\s{2}(\d+)\) (.+)\n\s+([^\s:]+\.exs):(\d+)/m
+  @failure ~r/^\s{2}\d+\) (.+)\n\s+([^\s:]+\.exs):(\d+)/m
 
   @impl true
   def parse(text) do
     @failure
     |> Regex.scan(text)
-    |> Enum.map(fn [_, _num, message, file, line] ->
-      %Diagnostic{file: file, line: to_int(line), message: String.trim(message), severity: :error}
+    |> Enum.map(fn [_, message, file, line] ->
+      %Diagnostic{file: file, line: String.to_integer(line), message: String.trim(message)}
     end)
-  end
-
-  defp to_int(str) do
-    case Integer.parse(str) do
-      {int, _} -> int
-      :error -> nil
-    end
   end
 end
