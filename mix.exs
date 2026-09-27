@@ -55,7 +55,9 @@ defmodule ExCheck.MixProject do
   defp usage_rules do
     [
       file: "AGENTS.md",
-      usage_rules: :all
+      usage_rules: [
+        :usage_rules
+      ]
     ]
   end
 
