@@ -3,6 +3,12 @@ defmodule ExCheck.UmbrellaProjectCases.BaseTest do
 
   test "base", %{project_dirs: [project_root_dir | _]} do
     System.cmd("mix", ~w[compile], cd: project_root_dir) |> cmd_exit(0)
+
+    # Prebuild the shared _build/test so parallel ex_unit runs in child apps don't race
+    # compiling the same deps.
+    System.cmd("mix", ~w[compile], cd: project_root_dir, env: %{"MIX_ENV" => "test"})
+    |> cmd_exit(0)
+
     output = System.cmd("mix", ~w[check], cd: project_root_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
