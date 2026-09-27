@@ -95,6 +95,9 @@ defmodule ExCheck.Reporter do
   def skip_reason_string({:deps, [name | _]}),
     do: "unsatisfied dependency #{tool_name_string(name)}"
 
+  def skip_reason_string({:halted, name}),
+    do: "halted after failure of #{tool_name_string(name)}"
+
   def skip_reason_string({:package, name}), do: "missing package #{name}"
   def skip_reason_string({:package, name, app}), do: "missing package #{name} in #{app}"
   def skip_reason_string({:file, name}), do: "missing file #{name}"

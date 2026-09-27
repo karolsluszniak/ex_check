@@ -32,6 +32,7 @@ of parsing the raw output blocks.
 - `--fix` / `-f` — auto-fix what can be fixed (e.g. `mix format`, unlock unused deps).
 - `--retry` / `-r` — run only tools that failed in the previous run.
 - `--no-parallel` — run tools sequentially.
+- `--halt-on-failure` — don't start further tools once one has failed (best with `--no-parallel`).
 - `--config PATH` / `-c PATH` — use a specific config file.
 - `--format pretty|agent|json|github|junit` — output format (default `pretty`). `github` emits
   GitHub Actions log groups + a `$GITHUB_STEP_SUMMARY` table; `junit` emits a JUnit XML report.
@@ -54,6 +55,7 @@ mix check.gen.config
 - `:parallel` — `false` to disable parallelism (default `true`).
 - `:retry` — `false` to disable auto-retry (default: on when a manifest exists).
 - `:skipped` — `false` to hide skipped tools in the summary.
+- `:halt_on_failure` — `true` to stop starting tools after the first failure (default `false`).
 
 Tool tuple forms:
 

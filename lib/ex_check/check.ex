@@ -84,9 +84,25 @@ defmodule ExCheck.Check do
         collect_fn: &await_tool(&1, opts)
       )
 
-    skipped = filter_broken_skipped(broken, finished)
+    skipped =
+      if failed_name = halted_by(finished, opts) do
+        Enum.map(broken, fn {:pending, {name, _, _}} ->
+          {:skipped, name, {:halted, failed_name}}
+        end)
+      else
+        filter_broken_skipped(broken, finished)
+      end
 
     {finished, skipped}
+  end
+
+  defp halted_by(finished, opts) do
+    with true <- Keyword.get(opts, :halt_on_failure, false),
+         {:error, {name, _, _}, _} <- Enum.find(finished, &match?({:error, _, _}, &1)) do
+      name
+    else
+      _ -> nil
+    end
   end
 
   defp filter_broken_skipped(broken, finished) do
@@ -111,6 +127,10 @@ defmodule ExCheck.Check do
   end
 
   defp throttle_tools(pending, running, finished, opts) do
+    if halted_by(finished, opts), do: [], else: throttle_pending(pending, running, finished, opts)
+  end
+
+  defp throttle_pending(pending, running, finished, opts) do
     parallel = Keyword.get(opts, :parallel, true)
 
     pending

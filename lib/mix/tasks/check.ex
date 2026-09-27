@@ -199,6 +199,7 @@ defmodule Mix.Tasks.Check do
   - `:skipped` - toggles printing skipped tools in summary; default: `true`
   - `:fix` - toggles running tools in fix mode in order to resolve issues automatically; default: `false`
   - `:retry` - toggles running only checks that have failed in the last run; default: 'true' if manifest exists
+  - `:halt_on_failure` - toggles not starting further tools once one has failed; default: `false`
   - `:tools` - a list of tools to run; default: curated tools; more info below
 
   Tool list under `:tools` key may contain following tool tuples:
@@ -255,6 +256,9 @@ defmodule Mix.Tasks.Check do
   - `--[no-]retry` - (don't) run only checks that have failed in the last run
   - `--[no-]parallel` - (don't) run tools in parallel
   - `--[no-]skipped` - (don't) print skipped tools in summary
+  - `--[no-]halt-on-failure` - (don't) stop starting further tools once one has failed; tools
+    already running finish and the rest is reported as skipped (most useful with
+    `--no-parallel` on CI, as in parallel mode most tools start right away)
   - `--format pretty|agent|json|github|junit` - output format; `pretty` (default) is the
     live colored terminal output, `agent` is an LLM-friendly JSON status header followed by
     raw failure blocks, `json` is a single machine-readable JSON object, `github` emits
@@ -295,6 +299,7 @@ defmodule Mix.Tasks.Check do
     exit_status: :boolean,
     fix: :boolean,
     format: :string,
+    halt_on_failure: :boolean,
     manifest: :string,
     only: :keep,
     output: :string,

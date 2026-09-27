@@ -75,6 +75,10 @@ defmodule ExCheck.Reporter.Pretty do
     ["unsatisfied dependency ", Reporter.format_tool_name(name)]
   end
 
+  defp format_skip_reason({:halted, name}) do
+    ["halted after failure of ", Reporter.format_tool_name(name)]
+  end
+
   defp format_skip_reason({:package, name}) do
     ["missing package ", Reporter.bright(name)]
   end

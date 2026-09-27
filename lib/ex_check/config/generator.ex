@@ -18,6 +18,9 @@ defmodule ExCheck.Config.Generator do
     ## don't retry automatically even if last run resulted in failures
     # retry: false,
 
+    ## stop starting further tools once one has failed (e.g. on CI, together with parallel: false)
+    # halt_on_failure: true,
+
     ## list of tools (see `mix check` docs for a list of default curated tools)
     tools: [
       ## curated tools may be disabled (e.g. the check for compilation warnings)
