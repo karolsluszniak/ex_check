@@ -1,3 +1,25 @@
+# ex_check
+
+`mix check`: one task that runs all code analysis & testing tools of an Elixir project
+in parallel. Entry point `lib/mix/tasks/check.ex`, orchestration `lib/ex_check/check.ex`,
+output formats in `lib/ex_check/reporter/`.
+
+## Rules
+
+- Supports Elixir `~> 1.17`: no stdlib features newer than that (e.g. no built-in `JSON`).
+- No runtime dependencies. Dev/test-only deps are fine.
+- All modules under `ExCheck` are internal (`@moduledoc false`); the public API is the
+  `mix check` CLI, `.check.exs` options and the report formats — don't break those.
+- Record user-facing changes under `## [Unreleased]` in `CHANGELOG.md`.
+- The rules shipped to package users live in `usage-rules.md` and
+  `usage-rules/**/*`. Keep them in sync with CLI changes.
+
+## Verify
+
+- `mix check --format agent` before calling work done (the project checks itself).
+- `test/ex_check/project_cases/` spin up real temp Mix projects and are slow; for quick
+  iteration run the unit tests of the module you touched.
+
 <!-- usage-rules-start -->
 <!-- usage_rules-start -->
 ## usage_rules usage
