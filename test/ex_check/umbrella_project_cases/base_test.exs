@@ -3,6 +3,12 @@ defmodule ExCheck.UmbrellaProjectCases.BaseTest do
 
   test "base", %{project_dirs: [project_root_dir | _]} do
     System.cmd("mix", ~w[compile], cd: project_root_dir) |> cmd_exit(0)
+
+    # Prebuild the shared _build/test so parallel ex_unit runs in child apps don't race
+    # compiling the same deps.
+    System.cmd("mix", ~w[compile], cd: project_root_dir, env: %{"MIX_ENV" => "test"})
+    |> cmd_exit(0)
+
     output = System.cmd("mix", ~w[check], cd: project_root_dir) |> cmd_exit(0)
 
     assert output =~ "compiler success"
@@ -17,6 +23,7 @@ defmodule ExCheck.UmbrellaProjectCases.BaseTest do
     assert output =~ "dialyzer skipped due to missing package dialyxir"
     assert output =~ "ex_doc skipped due to missing package ex_doc"
 
-    assert output =~ "Randomized with seed"
+    assert output =~ "Randomized with seed" or
+             output =~ "Running ExUnit with seed"
   end
 end

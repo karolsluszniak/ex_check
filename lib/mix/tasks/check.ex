@@ -19,6 +19,8 @@ defmodule Mix.Tasks.Check do
   - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
     maximum number of chars in a line or function indentation
 
+  - [`:hex_audit`] - fails on Hex dependencies that are retired or have security advisories
+
   - [`:ex_unit`] - starts the application in test mode and runs all runtime tests against it
     (defined as test modules or embedded in docs as doctests)
 
@@ -38,6 +40,9 @@ defmodule Mix.Tasks.Check do
 
   - [`:gettext`] - verifies that your POT files are up to date with the current state of the codebase
 
+  - [`:knigge`] / [`:ex_knigge`] - verifies that all Knigge facades point to existing
+    implementations (always run with `MIX_ENV=dev`, one tool per package name)
+
   - [`:mix_audit`] - scans the project's Mix dependencies for known Elixir security vulnerabilities
     based on a GitHub-sourced list of security advisories
 
@@ -46,6 +51,8 @@ defmodule Mix.Tasks.Check do
 
   - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
     framework, but also detecting vulnerable dependencies in arbitrary Mix projects
+
+  - [`:usage_rules`] - ensures that agent rules & skills synced from dependencies are up to date
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
@@ -192,6 +199,7 @@ defmodule Mix.Tasks.Check do
   - `:skipped` - toggles printing skipped tools in summary; default: `true`
   - `:fix` - toggles running tools in fix mode in order to resolve issues automatically; default: `false`
   - `:retry` - toggles running only checks that have failed in the last run; default: 'true' if manifest exists
+  - `:halt_on_failure` - toggles not starting further tools once one has failed; default: `false`
   - `:tools` - a list of tools to run; default: curated tools; more info below
 
   Tool list under `:tools` key may contain following tool tuples:
@@ -248,6 +256,16 @@ defmodule Mix.Tasks.Check do
   - `--[no-]retry` - (don't) run only checks that have failed in the last run
   - `--[no-]parallel` - (don't) run tools in parallel
   - `--[no-]skipped` - (don't) print skipped tools in summary
+  - `--[no-]halt-on-failure` - (don't) stop starting further tools once one has failed; tools
+    already running finish and the rest is reported as skipped (most useful with
+    `--no-parallel` on CI, as in parallel mode most tools start right away)
+  - `--format pretty|agent|json|github|junit` - output format; `pretty` (default) is the
+    live colored terminal output, `agent` is an LLM-friendly JSON status header followed by
+    raw failure blocks, `json` is a single machine-readable JSON object, `github` emits
+    GitHub Actions workflow-command log groups plus a `$GITHUB_STEP_SUMMARY` table, `junit`
+    is a JUnit XML report for CI systems like GitLab CI and Jenkins
+  - `--output path/to/report` - write the report to a file instead of stdout
+    (only valid with `--format agent`, `--format json` or `--format junit`)
 
   [`:compiler`]: https://hexdocs.pm/mix/Mix.Tasks.Compile.html
   [`:credo`]: https://hexdocs.pm/credo
@@ -256,15 +274,20 @@ defmodule Mix.Tasks.Check do
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
   [`:ex_unit`]: https://hexdocs.pm/ex_unit
   [`:gettext`]: https://hexdocs.pm/gettext
+  [`:hex_audit`]: https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
   [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:unused_deps`]: https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
   [`:mix_audit`]: https://hexdocs.pm/mix_audit
+  [`:knigge`]: https://hexdocs.pm/knigge
+  [`:ex_knigge`]: https://hexdocs.pm/ex_knigge
+  [`:usage_rules`]: https://hexdocs.pm/usage_rules
   """
 
   use Mix.Task
   alias ExCheck.Check
+  alias ExCheck.Reporter
 
   @shortdoc "Runs all code analysis & testing tools in an Elixir project"
 
@@ -275,8 +298,11 @@ defmodule Mix.Tasks.Check do
     except: :keep,
     exit_status: :boolean,
     fix: :boolean,
+    format: :string,
+    halt_on_failure: :boolean,
     manifest: :string,
     only: :keep,
+    output: :string,
     parallel: :boolean,
     retry: :boolean,
     skipped: :boolean
@@ -301,10 +327,35 @@ defmodule Mix.Tasks.Check do
   end
 
   defp process_opts(opts) do
-    Enum.map(opts, fn
-      {:only, name} -> {:only, String.to_atom(name)}
-      {:except, name} -> {:except, String.to_atom(name)}
-      opt -> opt
-    end)
+    opts =
+      Enum.map(opts, fn
+        {:only, name} -> {:only, String.to_atom(name)}
+        {:except, name} -> {:except, String.to_atom(name)}
+        {:format, format} -> {:format, parse_format(format)}
+        opt -> opt
+      end)
+
+    validate_opts(opts)
+
+    opts
+  end
+
+  defp parse_format(format) do
+    formats = Reporter.formats()
+
+    Enum.find(formats, &(Atom.to_string(&1) == format)) ||
+      Mix.raise("Invalid --format #{inspect(format)}, expected one of: #{Enum.join(formats, ", ")}")
+  end
+
+  # Formats that render a single batched report and can therefore be written to a file.
+  @batch_formats [:agent, :json, :junit]
+
+  defp validate_opts(opts) do
+    if opts[:output] && Keyword.get(opts, :format, :pretty) not in @batch_formats do
+      Mix.raise(
+        "--output requires --format agent, --format json or --format junit " <>
+          "(pretty and github stream to the terminal)"
+      )
+    end
   end
 end

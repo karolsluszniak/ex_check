@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- **BREAKING** – minimum supported Elixir version from Elixir 1.12 to Elixir 1.17
+- **BREAKING** – new curated tools run by default: `hex_audit` and `usage_rules`
+- **CI** – test Elixir 1.17 (ubuntu 22.04) & 1.20 (ubuntu 24.04), uses the new `--format github`
+
+### Added
+
+- New tools:
+  1. **`usage_rules`** – runs `mix usage_rules.sync --check` (no default fix; opt-in example in `mix check.gen.config`)
+  2. **`knigge`** & **`ex_knigge`** – run `mix knigge.verify` (detected via package `knigge` or `ex_knigge`), always with `MIX_ENV=dev`
+  3. **`hex_audit`** – runs `mix hex.audit`, fails on retired dependencies or ones with security advisories
+- **`--halt-on-failure`** – option, most useful on CI together with `--no-parallel`
+- **`ExCheck.Reporter`** – Behaviour for implementing custom reporters.
+  - activate them with the `--format <reporter>` option, built-in reporters:
+    1. `ExCheck.Reporter.Agent`
+    2. `ExCheck.Reporter.Github`
+    3. `ExCheck.Reporter.Json`
+    4. `ExCheck.Reporter.Junit`
+    5. `ExCheck.Reporter.Pretty` _the reporter you're used to know (default)_
+  - write the report to a file with the new `--output <path>` option
+- **`ExCheck.Diagnostics`** – Provides structured diagnostics for failed tasks, exposed as a `diagnostics` list (`file`, `line`, `column`, `message`, `severity`) in the `json` and `agent` reporters
+- **Usage Rules** – to tell your agents what ex_check does and how to use it (see [usage_rules docs](https://usage-rules.hexdocs.pm/) and [README.md](./README.md))
 
 ## [0.16.0] - 2024-03-01
 
@@ -114,7 +136,9 @@ No user-facing changes.
 
 Initial release.
 
-[Unreleased]: https://github.com/karolsluszniak/ex_check/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/karolsluszniak/ex_check/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/karolsluszniak/ex_check/compare/v0.15.0...v0.16.0
+[0.15.0]: https://github.com/karolsluszniak/ex_check/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/karolsluszniak/ex_check/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/karolsluszniak/ex_check/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/karolsluszniak/ex_check/compare/v0.11.0...v0.12.0

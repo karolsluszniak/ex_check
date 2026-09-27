@@ -27,3 +27,6 @@ ex_check-*.tar
 
 # Ignore sobelow last update cache
 .sobelow
+
+# Hex package build artifacts
+*.tar

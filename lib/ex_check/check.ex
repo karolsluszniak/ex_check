@@ -7,6 +7,7 @@ defmodule ExCheck.Check do
   alias ExCheck.Config
   alias ExCheck.Manifest
   alias ExCheck.Printer
+  alias ExCheck.Reporter
 
   def run(opts) do
     {tools, config_opts} = Config.load(file: opts[:config])
@@ -27,12 +28,14 @@ defmodule ExCheck.Check do
         tools
         |> Enum.with_index()
         |> Enum.map(fn
-          {tool, 0} -> format_tool_name(tool)
-          {tool, _} -> [" ", format_tool_name(tool)]
+          {tool, 0} -> Reporter.format_tool_name(tool)
+          {tool, _} -> [" ", Reporter.format_tool_name(tool)]
         end)
 
-      Printer.info([:cyan, "=> retrying automatically: "] ++ tool_names)
-      Printer.info()
+      if live?(opts) do
+        Printer.info([:cyan, "=> retrying automatically: "] ++ tool_names)
+        Printer.info()
+      end
 
       opts ++ [{:retry, true}]
     else
@@ -44,26 +47,24 @@ defmodule ExCheck.Check do
     {compiler, others} = Compiler.compile(tools, opts)
 
     start_time = DateTime.utc_now()
-    compiler_result = run_compiler(compiler)
+    compiler_result = run_tool(compiler, opts)
     others_results = if run_others?(compiler_result), do: run_others(others, opts), else: []
     total_duration = DateTime.diff(DateTime.utc_now(), start_time)
 
     all_results = [compiler_result | others_results]
     failed_results = Enum.filter(all_results, &match?({:error, _, _}, &1))
 
-    reprint_errors(failed_results)
-    print_summary(all_results, total_duration, opts)
+    reporter = Reporter.resolve(Keyword.get(opts, :format, :pretty))
+    reporter.report(all_results, total_duration, opts)
     Manifest.save(all_results, opts)
     maybe_set_exit_status(failed_results)
   end
 
-  defp run_compiler(compiler) do
-    run_tool(compiler)
-  end
+  defp live?(opts), do: Keyword.get(opts, :format, :pretty) == :pretty
 
   @compile_warn_out "Compilation failed due to warnings while using the --warnings-as-errors option"
 
-  defp run_others?(_compiler_result = {status, _, {_, output, _}}) do
+  defp run_others?({status, _, {_, output, _}} = _compiler_result) do
     status == :ok or String.contains?(output, @compile_warn_out)
   end
 
@@ -79,13 +80,29 @@ defmodule ExCheck.Check do
       Pipeline.run(
         tools,
         throttle_fn: &throttle_tools(&1, &2, &3, opts),
-        start_fn: &start_tool/1,
-        collect_fn: &await_tool/1
+        start_fn: &start_tool(&1, opts),
+        collect_fn: &await_tool(&1, opts)
       )
 
-    skipped = filter_broken_skipped(broken, finished)
+    skipped =
+      if failed_name = halted_by(finished, opts) do
+        Enum.map(broken, fn {:pending, {name, _, _}} ->
+          {:skipped, name, {:halted, failed_name}}
+        end)
+      else
+        filter_broken_skipped(broken, finished)
+      end
 
     {finished, skipped}
+  end
+
+  defp halted_by(finished, opts) do
+    with true <- Keyword.get(opts, :halt_on_failure, false),
+         {:error, {name, _, _}, _} <- Enum.find(finished, &match?({:error, _, _}, &1)) do
+      name
+    else
+      _ -> nil
+    end
   end
 
   defp filter_broken_skipped(broken, finished) do
@@ -103,13 +120,17 @@ defmodule ExCheck.Check do
     |> Enum.filter(& &1)
   end
 
-  defp run_tool(tool) do
+  defp run_tool(tool, opts) do
     tool
-    |> start_tool()
-    |> await_tool()
+    |> start_tool(opts)
+    |> await_tool(opts)
   end
 
   defp throttle_tools(pending, running, finished, opts) do
+    if halted_by(finished, opts), do: [], else: throttle_pending(pending, running, finished, opts)
+  end
+
+  defp throttle_pending(pending, running, finished, opts) do
     parallel = Keyword.get(opts, :parallel, true)
 
     pending
@@ -180,17 +201,32 @@ defmodule ExCheck.Check do
   defp umbrella_instance_from_same_app?({name, _}, {name, _}), do: true
   defp umbrella_instance_from_same_app?(_, _), do: false
 
-  defp start_tool({:pending, {name, cmd, opts}}) do
-    opts = Keyword.merge(opts, stream: true, silenced: true, tint: IO.ANSI.faint())
-    task = Command.async(cmd, opts)
+  defp start_tool({:pending, {name, cmd, tool_opts}}, opts) do
+    cmd_opts =
+      if live?(opts) do
+        Keyword.merge(tool_opts, stream: true, silenced: true, tint: IO.ANSI.faint())
+      else
+        Keyword.merge(tool_opts, stream: false, silenced: true)
+      end
 
-    {:running, {name, cmd, opts}, task}
+    task = Command.async(cmd, cmd_opts)
+
+    {:running, {name, cmd, cmd_opts}, task}
   end
 
-  defp await_tool({:running, {name, cmd, opts}, task}) do
-    mode_suffix = if mode = opts[:mode], do: [" in ", b(mode), " mode"], else: []
+  defp await_tool({:running, {name, cmd, tool_opts}, task}, opts) do
+    if live?(opts) do
+      await_tool_live(name, cmd, tool_opts, task)
+    else
+      {output, code, duration} = Command.await(task)
+      {tool_status(code), {name, cmd, tool_opts}, {code, output, duration}}
+    end
+  end
 
-    Printer.info([:magenta, "=> running "] ++ format_tool_name(name) ++ mode_suffix)
+  defp await_tool_live(name, cmd, tool_opts, task) do
+    mode_suffix = if mode = tool_opts[:mode], do: [" in ", Reporter.bright(mode), " mode"], else: []
+
+    Printer.info([:magenta, "=> running "] ++ Reporter.format_tool_name(name) ++ mode_suffix)
     Printer.info()
     IO.write(IO.ANSI.faint())
 
@@ -199,110 +235,14 @@ defmodule ExCheck.Check do
       |> Command.unsilence()
       |> Command.await()
 
-    if output_needs_padding?(output), do: Printer.info()
+    if Reporter.output_needs_padding?(output), do: Printer.info()
     IO.write(IO.ANSI.reset())
 
-    status = if code == 0, do: :ok, else: :error
-
-    {status, {name, cmd, opts}, {code, output, duration}}
+    {tool_status(code), {name, cmd, tool_opts}, {code, output, duration}}
   end
 
-  defp output_needs_padding?(output) do
-    not (String.match?(output, ~r/\n{2,}$/) or output == "")
-  end
-
-  defp reprint_errors(failed_tools) do
-    Enum.each(failed_tools, fn {_, {name, _, _}, {_, output, _}} ->
-      Printer.info([:red, "=> reprinting errors from "] ++ format_tool_name(name))
-      Printer.info()
-      IO.write(output)
-      if output_needs_padding?(output), do: Printer.info()
-    end)
-  end
-
-  defp print_summary(items, total_duration, opts) do
-    Printer.info([:magenta, "=> finished in ", :bright, format_duration(total_duration)])
-    Printer.info()
-
-    items
-    |> Enum.sort_by(&get_summary_item_order/1)
-    |> Enum.each(&print_summary_item(&1, opts))
-
-    Printer.info()
-  end
-
-  defp get_summary_item_order({:ok, {name, _, _}, _}), do: {0, normalize_tool_name(name)}
-  defp get_summary_item_order({:error, {name, _, _}, _}), do: {1, normalize_tool_name(name)}
-  defp get_summary_item_order({:skipped, name, _}), do: {2, normalize_tool_name(name)}
-
-  defp normalize_tool_name(name = {_, _}), do: name
-  defp normalize_tool_name(name), do: {name, 0}
-
-  defp print_summary_item({:ok, {name, _, opts}, {_, _, duration}}, _) do
-    name = format_tool_name(name)
-    took = format_duration(duration)
-    mode = if mode = opts[:mode], do: [" ", to_string(mode)], else: []
-
-    Printer.info([:green, " ✓ ", name, mode, " success in ", b(took)])
-  end
-
-  defp print_summary_item({:error, {name, _, _}, {code, _, duration}}, _) do
-    name = format_tool_name(name)
-    took = format_duration(duration)
-    Printer.info([:red, " ✕ ", name, " error code ", b(code), " in ", b(took)])
-  end
-
-  defp print_summary_item({:skipped, name, reason}, opts) do
-    if Keyword.get(opts, :skipped, true) do
-      name = format_tool_name(name)
-      reason = format_skip_reason(reason)
-      Printer.info([:cyan, "   ", name, " skipped due to ", reason])
-    end
-  end
-
-  defp format_skip_reason({:elixir, version}) do
-    ["Elixir version = ", System.version(), ", not ", version]
-  end
-
-  defp format_skip_reason({:deps, [name | _]}) do
-    ["unsatisfied dependency ", format_tool_name(name)]
-  end
-
-  defp format_skip_reason({:package, name}) do
-    ["missing package ", b(name)]
-  end
-
-  defp format_skip_reason({:package, name, app}) do
-    ["missing package ", b(name), " in ", b(app)]
-  end
-
-  defp format_skip_reason({:file, name}) do
-    ["missing file ", b(name)]
-  end
-
-  defp format_skip_reason({:cd, cd}) do
-    ["missing directory ", b(cd)]
-  end
-
-  defp format_tool_name(name) when is_atom(name) do
-    b(name)
-  end
-
-  defp format_tool_name({name, app}) when is_atom(name) do
-    [b(name), " in ", b(app)]
-  end
-
-  defp b(inner) do
-    [:bright, to_string(inner), :normal]
-  end
-
-  defp format_duration(secs) do
-    min = div(secs, 60)
-    sec = rem(secs, 60)
-    sec_str = if sec < 10, do: "0#{sec}", else: "#{sec}"
-
-    "#{min}:#{sec_str}"
-  end
+  defp tool_status(0), do: :ok
+  defp tool_status(_), do: :error
 
   defp maybe_set_exit_status(failed_tools) do
     if Enum.any?(failed_tools) do

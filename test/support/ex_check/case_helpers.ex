@@ -67,7 +67,12 @@ defmodule ExCheck.CaseHelpers do
     unless String.contains?(new_config, "ex_check"), do: raise("unable to add ex_check dep")
 
     File.write!(config_path, new_config)
-    {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
+    # Format the rewritten mix.exs by explicit path rather than `mix format` (no args). Since Elixir
+    # 1.18 the argless form seeds an incremental cache (`_build/.../format_timestamp`); a later
+    # `mix check --fix` would then skip any file whose mtime isn't strictly newer than that seed,
+    # making formatter-fix tests flaky on same-second writes. Passing an explicit file bypasses the
+    # cache entirely, so the suite never depends on file timestamps.
+    {_, 0} = System.cmd("mix", ~w[format mix.exs], cd: project_dir)
     {_, 0} = System.cmd("mix", ~w[deps.get], cd: project_dir)
   end
 
@@ -91,7 +96,10 @@ defmodule ExCheck.CaseHelpers do
     unless String.contains?(new_config, mod), do: raise("unable to set #{mod} app mod")
 
     File.write!(config_path, new_config)
-    {_, 0} = System.cmd("mix", ~w[format], cd: project_dir)
+
+    # Explicit path (not `mix format`) to avoid
+    # seeding the incremental format cache - see set_mix_deps/2.
+    {_, 0} = System.cmd("mix", ~w[format mix.exs], cd: project_dir)
   end
 
   def write_default_config(project_dir) do

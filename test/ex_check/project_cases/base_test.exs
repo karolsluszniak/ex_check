@@ -13,6 +13,6 @@ defmodule ExCheck.ProjectCases.BaseTest do
     assert output =~ "ex_doc skipped due to missing package ex_doc"
     refute output =~ "npm_test"
     assert output =~ "unused_deps success"
-    assert output =~ "Randomized with seed"
+    assert output =~ "Running ExUnit with seed"
   end
 end

@@ -1,36 +1,50 @@
 name: check
 
-on: [pull_request, push]
+# Only push to the default branch triggers a run; branches with an open PR run via the
+# pull_request event, avoiding duplicate runs (and duplicate annotations) per commit.
+on:
+  push:
+    branches: [master]
+  pull_request:
 
 jobs:
   mix_check:
     name: mix check (Elixir ${{matrix.elixir}}, OTP ${{matrix.otp}})
 
+    runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - elixir: '1.16.1'
-            otp: '26.2.2'
-          - elixir: '1.14.5'
-            otp: '24.3.4.16'
-          - elixir: '1.12.3'
-            otp: '22.3.4.26'
-
-    runs-on: ubuntu-20.04
+          # Only this job emits GitHub annotations; others run check without --format
+          # github so a finding isn't annotated once per matrix entry.
+          - elixir: "1.20.4"
+            otp: "29.1"
+            os: "ubuntu-24.04"
+            annotate: true
+          - elixir: "1.20.4"
+            otp: "28.5"
+            os: "ubuntu-24.04"
+            annotate: false
+          # Elixir 1.17 floor (minimum supported version).
+          - elixir: "1.17.3"
+            otp: "26.2.2"
+            os: "ubuntu-22.04"
+            annotate: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Elixir
-        uses: erlef/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
       - name: Cache deps and build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             deps
@@ -53,4 +67,4 @@ jobs:
         run: mix compile
 
       - name: Run check
-        run: mix check
+        run: mix check ${{ matrix.annotate && '--format github' || '' }}
