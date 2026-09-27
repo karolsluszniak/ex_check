@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-27
+
 ### Changed
 
 - **BREAKING** – minimum supported Elixir version from Elixir 1.12 to Elixir 1.17
