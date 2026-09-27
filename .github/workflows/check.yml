@@ -19,14 +19,15 @@ jobs:
         include:
           # Only this job emits GitHub annotations; others run check without --format
           # github so a finding isn't annotated once per matrix entry.
-          - elixir: '1.20.2'
-            otp: '28.5'
-            os: 'ubuntu-24.04'
+          - elixir: "1.20.2"
+            otp: "28.5"
+            os: "ubuntu-24.04"
             annotate: true
           # Elixir 1.17 floor (minimum supported version).
-          - elixir: '1.17.3'
-            otp: '26.2.2'
-            os: 'ubuntu-22.04'
+          - elixir: "1.17.3"
+            otp: "26.2.2"
+            os: "ubuntu-22.04"
+            annotate: false
 
     steps:
       - name: Checkout
