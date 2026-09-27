@@ -77,8 +77,10 @@ def deps do
     {:doctor, ">= 0.0.0", only: [:test], runtime: false},
     {:ex_doc, ">= 0.0.0", only: [:test], runtime: false},
     {:gettext, ">= 0.0.0", only: [:test], runtime: false},
+    {:knigge, ">= 0.0.0", only: [:dev, :test], runtime: false},
     {:sobelow, ">= 0.0.0", only: [:test], runtime: false},
-    {:mix_audit, ">= 0.0.0", only: [:test], runtime: false}
+    {:mix_audit, ">= 0.0.0", only: [:test], runtime: false},
+    {:usage_rules, ">= 0.0.0", only: [:dev, :test], runtime: false}
   ]
 end
 ```
@@ -136,7 +138,7 @@ the right flags. Add [`usage_rules`](https://hex.pm/packages/usage_rules):
 ```elixir
 def deps do
   [
-    {:usage_rules, "~> 1.2", only: [:dev], runtime: false}
+    {:usage_rules, "~> 1.2", only: [:dev, :test], runtime: false}
   ]
 end
 ```

@@ -38,6 +38,9 @@ defmodule Mix.Tasks.Check do
 
   - [`:gettext`] - verifies that your POT files are up to date with the current state of the codebase
 
+  - [`:knigge`] / [`:ex_knigge`] - verifies that all Knigge facades point to existing
+    implementations (always run with `MIX_ENV=dev`, one tool per package name)
+
   - [`:mix_audit`] - scans the project's Mix dependencies for known Elixir security vulnerabilities
     based on a GitHub-sourced list of security advisories
 
@@ -46,6 +49,8 @@ defmodule Mix.Tasks.Check do
 
   - [`:sobelow`] - performs security-focused static analysis mainly focused on the Phoenix
     framework, but also detecting vulnerable dependencies in arbitrary Mix projects
+
+  - [`:usage_rules`] - ensures that agent rules & skills synced from dependencies are up to date
 
   You can disable or adjust curated tools as well as add custom ones via the configuration file.
 
@@ -268,6 +273,9 @@ defmodule Mix.Tasks.Check do
   [`:sobelow`]: https://hexdocs.pm/sobelow
   [`:unused_deps`]: https://hexdocs.pm/mix/Mix.Tasks.Deps.Unlock.html
   [`:mix_audit`]: https://hexdocs.pm/mix_audit
+  [`:knigge`]: https://hexdocs.pm/knigge
+  [`:ex_knigge`]: https://hexdocs.pm/ex_knigge
+  [`:usage_rules`]: https://hexdocs.pm/usage_rules
   """
 
   use Mix.Task

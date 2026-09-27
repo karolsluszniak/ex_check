@@ -18,6 +18,9 @@ Nothing, yet.
 
 ### Added
 
+- New tools:
+  1. **`usage_rules`** – runs `mix usage_rules.sync --check` (no default fix; opt-in example in `mix check.gen.config`)
+  2. **`knigge`** & **`ex_knigge`** – run `mix knigge.verify` (detected via package `knigge` or `ex_knigge`), always with `MIX_ENV=dev`
 - **`ExCheck.Reporter`** – Behaviour for implementing custom reporters.
   - activate them with the `--format <reporter>` option, built-in reporters:
     1. `ExCheck.Reporter.Agent`

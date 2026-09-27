@@ -94,6 +94,8 @@ tools recursively per child app by default; tune via each tool's `:umbrella` opt
 - `sobelow` — `mix sobelow --exit` (needs `:sobelow`)
 - `mix_audit` — `mix deps.audit` (needs `:mix_audit`)
 - `gettext` — `mix gettext.extract --check-up-to-date` (needs `:gettext`)
+- `knigge` / `ex_knigge` — `mix knigge.verify` (needs `:knigge` or `:ex_knigge`, always runs with `MIX_ENV=dev`)
+- `usage_rules` — `mix usage_rules.sync --check` (needs `:usage_rules`; no fix by default, run `mix usage_rules.sync` deliberately)
 - `ex_unit` — `mix test` (retry: `mix test --failed`)
 - `npm_test` — `npm test` in `assets/` (needs `package.json`)
 

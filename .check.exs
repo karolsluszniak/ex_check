@@ -14,6 +14,8 @@ ex_doc_config =
     {:formatter, env: %{"MIX_ENV" => "test"}},
     {:mix_audit, env: %{"MIX_ENV" => "test"}},
     {:sobelow, "mix sobelow --exit --skip"},
-    {:gettext, false}
+    {:gettext, false},
+    {:knigge, false},
+    {:ex_knigge, false}
   ]
 ]

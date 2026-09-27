@@ -48,7 +48,7 @@ defmodule ExCheck.MixProject do
       {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
       {:sobelow, ">= 0.0.0", only: [:test], runtime: false},
       {:mix_audit, ">= 0.0.0", only: [:test], runtime: false},
-      {:usage_rules, "~> 1.2", only: [:dev], runtime: false}
+      {:usage_rules, "~> 1.2", only: [:dev, :test], runtime: false}
     ]
   end
 
