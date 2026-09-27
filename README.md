@@ -43,7 +43,7 @@ Add `ex_check` dependency in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_check, "~> 1.0", only: [:dev, :test], runtime: false}
+    {:ex_check, "~> 0.17", only: [:dev, :test], runtime: false}
   ]
 end
 ```
@@ -269,10 +269,10 @@ def deps do
     {:credo, ">= 0.0.0", only: [:test], runtime: false},
     {:dialyxir, ">= 0.0.0", only: [:test], runtime: false},
     {:doctor, ">= 0.0.0", only: [:test], runtime: false},
-    {:ex_check, "~> 1.0", only: [:test], runtime: false},
+    {:ex_check, "~> 0.17", only: [:test], runtime: false},
     {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false},
-    {:mix_audit, ">= 0.0.0", only: [:test], runtime: false}
-    {:sobelow, ">= 0.0.0", only: [:test], runtime: false},
+    {:mix_audit, ">= 0.0.0", only: [:test], runtime: false},
+    {:sobelow, ">= 0.0.0", only: [:test], runtime: false}
   ]
 end
 ```

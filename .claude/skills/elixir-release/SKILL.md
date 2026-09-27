@@ -6,7 +6,7 @@ description: Cut a release of this Elixir package and publish it to Hex — bump
 # Elixir release + Hex publish
 
 Project-local skill for `ex_check`. Not a general Elixir release guide — follows the
-exact convention already used in this repo's git history (see `chore: release 1.0.0-rc.1`).
+`chore: release X.Y.Z` commit + `vX.Y.Z` tag convention.
 
 ## Preconditions
 

@@ -7,14 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing, yet.
-
-## [0.17.0] - 2026-09-27
-
 ### Changed
 
 - **BREAKING** – minimum supported Elixir version from Elixir 1.12 to Elixir 1.17
-- **CI** – bump worker to ubuntu 22.04, tests Elixir 1.17 & 1.20. uses new `--format github`.
+- **BREAKING** – new curated tools run by default: `hex_audit` and `usage_rules`
+- **CI** – test Elixir 1.17 (ubuntu 22.04) & 1.20 (ubuntu 24.04), uses the new `--format github`
 
 ### Added
 
@@ -30,7 +27,7 @@ Nothing, yet.
     3. `ExCheck.Reporter.Json`
     4. `ExCheck.Reporter.Junit`
     5. `ExCheck.Reporter.Pretty` _the reporter you're used to know (default)_
-  - choose output directory with the new `--output <path>` option
+  - write the report to a file with the new `--output <path>` option
 - **`ExCheck.Diagnostics`** – Provides structured diagnostics for failed tasks, exposed as a `diagnostics` list (`file`, `line`, `column`, `message`, `severity`) in the `json` and `agent` reporters
 - **Usage Rules** – to tell your agents what ex_check does and how to use it (see [usage_rules docs](https://usage-rules.hexdocs.pm/) and [README.md](./README.md))
 
@@ -139,7 +136,9 @@ No user-facing changes.
 
 Initial release.
 
-[Unreleased]: https://github.com/karolsluszniak/ex_check/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/karolsluszniak/ex_check/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/karolsluszniak/ex_check/compare/v0.15.0...v0.16.0
+[0.15.0]: https://github.com/karolsluszniak/ex_check/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/karolsluszniak/ex_check/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/karolsluszniak/ex_check/compare/v0.12.0...v0.13.0
 [0.12.0]: https://github.com/karolsluszniak/ex_check/compare/v0.11.0...v0.12.0
