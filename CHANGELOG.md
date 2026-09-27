@@ -7,28 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.0-rc.2] - 2026-07-08
+Nothing, yet.
 
-- **Added** `--format github` reporter emitting GitHub Actions `::group::` log blocks for each tool (raw failure output wrapped in a `::stop-commands::` injection guard) plus a Markdown run summary appended to `$GITHUB_STEP_SUMMARY`
-- **Added** `--format junit` reporter emitting a JUnit XML report (`testsuite`/`testcase`) for CI systems such as GitLab CI and Jenkins, pairing with `--output report.xml`
-- **Added** structured diagnostics parsed from `compiler`, `credo` and `ex_unit` failure output (`ExCheck.Diagnostics`), exposed as a `diagnostics` list (`file`, `line`, `column`, `message`, `severity`) in the `json` and `agent` reporters so agents can jump straight to findings
-- **Added** inline `::error`/`::warning file=…,line=…` annotations to the `github` reporter (from the structured diagnostics) so findings surface directly in the GitHub PR diff
-- **Changed** our own CI to dogfood the new format via `mix check --format github`
+## [0.17.0] - 2026-09-27
 
-## [1.0.0-rc.1] - 2026-06-29
+### Changed
 
-- **Documented** the minimum Elixir bump (1.12 → 1.17) as a **breaking** change in the changelog, with an upgrade path for projects on Elixir 1.12–1.16
-- **Added** README "Usage rules for coding agents" section recommending [`usage_rules`](https://hex.pm/packages/usage_rules) so projects sync the shipped rules into `AGENTS.md` and agents drive `mix check --format agent`
+- **BREAKING** – minimum supported Elixir version from Elixir 1.12 to Elixir 1.17
+- **CI** – bump worker to ubuntu 22.04, tests Elixir 1.17 & 1.20. uses new `--format github`.
 
-## [1.0.0-rc.0] - 2026-06-26
+### Added
 
-- **BREAKING — Changed** minimum supported Elixir version from Elixir 1.12 to Elixir 1.17 (bundled tooling — `usage_rules` and `mix_audit`'s `yaml_elixir` — requires it). Projects on Elixir 1.12–1.16 must stay on `ex_check` `0.16.0` or upgrade Elixir.
-- **Added** pluggable `ExCheck.Reporter` behaviour, replacing inline result rendering in `ExCheck.Check`
-- **Added** `--format json` reporter emitting the full run as a JSON document for machine consumption
-- **Added** `--format agent` reporter with a compact one-line-per-tool summary and failing output only, optimised for LLM/agent consumption
-- **Added** `--output <path>` option to write reporter output to a file instead of stdout
-- **Added** `usage-rules.md` and a `verify-with-check` agent skill (shipped in the Hex package) so LLM coding agents get accurate guidance on driving `mix check`
-- **Improved** toolchain and CI matrix to Elixir 1.20 / OTP 28
+- **`ExCheck.Reporter`** – Behaviour for implementing custom reporters.
+  - activate them with the `--format <reporter>` option, built-in reporters:
+    1. `ExCheck.Reporter.Agent`
+    2. `ExCheck.Reporter.Github`
+    3. `ExCheck.Reporter.Json`
+    4. `ExCheck.Reporter.Junit`
+    5. `ExCheck.Reporter.Pretty` _the reporter you're used to know (default)_
+  - choose output directory with the new `--output <path>` option
+- **`ExCheck.Diagnostics`** – Provides structured diagnostics for failed tasks, exposed as a `diagnostics` list (`file`, `line`, `column`, `message`, `severity`) in the `json` and `agent` reporters
+- **Usage Rules** – to tell your agents what ex_check does and how to use it (see [usage_rules docs](https://usage-rules.hexdocs.pm/) and [README.md](./README.md))
 
 ## [0.16.0] - 2024-03-01
 

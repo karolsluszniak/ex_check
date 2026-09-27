@@ -1,7 +1,7 @@
 # ![ex_check](./assets/logo-with-name.svg)
 
-[![Hex version](https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%))](https://hex.pm/packages/ex_check)
-[![Hex docs](https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%))](https://hexdocs.pm/ex_check/)
+[![Hex version](<https://img.shields.io/hexpm/v/ex_check.svg?color=hsl(265,40%,60%)>)](https://hex.pm/packages/ex_check)
+[![Hex docs](<https://img.shields.io/badge/hex-docs-lightgreen.svg?color=hsl(265,40%,60%)>)](https://hexdocs.pm/ex_check/)
 [![Build status](https://img.shields.io/github/actions/workflow/status/karolsluszniak/ex_check/check.yml?branch=master)](https://github.com/karolsluszniak/ex_check/actions)
 [![Downloads](https://img.shields.io/hexpm/dt/ex_check.svg)](https://hex.pm/packages/ex_check)
 [![License](https://img.shields.io/github/license/karolsluszniak/ex_check.svg)](https://github.com/karolsluszniak/ex_check/blob/master/LICENSE.md)
@@ -148,7 +148,7 @@ def project do
   [
     # ...
     usage_rules: [
-      file: "AGENTS.md",
+      file: "AGENTS.md", # you might want to create a symlink to your agent specific file, e.g. CLAUDE.md
       usage_rules: [:ex_check]
     ]
   ]
@@ -157,13 +157,10 @@ end
 
 Then run:
 
-```
+```bash
 mix deps.get
 mix usage_rules.sync
 ```
-
-This keeps an `ex_check` section in your `AGENTS.md` in sync with the rules shipped by the
-package, so coding agents run `mix check --format agent` instead of parsing human-oriented output.
 
 ### Local-only fix mode
 
