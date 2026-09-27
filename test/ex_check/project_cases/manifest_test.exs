@@ -37,6 +37,7 @@ defmodule ExCheck.ProjectCases.ManifestTest do
       SKIP knigge
       SKIP ex_knigge
       SKIP usage_rules
+      PASS hex_audit
       """
       |> String.split("\n")
       |> Enum.sort()

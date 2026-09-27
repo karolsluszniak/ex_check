@@ -10,6 +10,7 @@ defmodule ExCheck.Config.Default do
     {:formatter, "mix format --check-formatted",
      detect: [{:file, ".formatter.exs"}], fix: "mix format"},
     {:usage_rules, "mix usage_rules.sync --check", detect: [{:package, :usage_rules}]},
+    {:hex_audit, "mix hex.audit"},
     {:mix_audit, "mix deps.audit", detect: [{:package, :mix_audit}]},
     {:knigge, "mix knigge.verify", detect: [{:package, :knigge}], env: %{"MIX_ENV" => "dev"}},
     {:ex_knigge, "mix knigge.verify", detect: [{:package, :ex_knigge}], env: %{"MIX_ENV" => "dev"}},

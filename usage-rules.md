@@ -87,6 +87,7 @@ tools recursively per child app by default; tune via each tool's `:umbrella` opt
 - `compiler` — `mix compile --warnings-as-errors`
 - `formatter` — `mix format --check-formatted` (fix: `mix format`)
 - `unused_deps` — `mix deps.unlock --check-unused` (fix: `--unused`)
+- `hex_audit` — `mix hex.audit` (retired deps & security advisories)
 - `credo` — `mix credo`
 - `dialyzer` — `mix dialyzer` (needs `:dialyxir`)
 - `doctor` — `mix doctor` (needs `:doctor`)

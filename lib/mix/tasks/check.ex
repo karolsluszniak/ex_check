@@ -19,6 +19,8 @@ defmodule Mix.Tasks.Check do
   - [`:formatter`] - ensures that all the code follows the same basic formatting rules such as
     maximum number of chars in a line or function indentation
 
+  - [`:hex_audit`] - fails on Hex dependencies that are retired or have security advisories
+
   - [`:ex_unit`] - starts the application in test mode and runs all runtime tests against it
     (defined as test modules or embedded in docs as doctests)
 
@@ -268,6 +270,7 @@ defmodule Mix.Tasks.Check do
   [`:ex_doc`]: https://hexdocs.pm/ex_doc
   [`:ex_unit`]: https://hexdocs.pm/ex_unit
   [`:gettext`]: https://hexdocs.pm/gettext
+  [`:hex_audit`]: https://hexdocs.pm/hex/Mix.Tasks.Hex.Audit.html
   [`:formatter`]: https://hexdocs.pm/mix/Mix.Tasks.Format.html
   [`:npm_test`]: https://docs.npmjs.com/cli/test.html
   [`:sobelow`]: https://hexdocs.pm/sobelow
