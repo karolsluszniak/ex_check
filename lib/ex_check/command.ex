@@ -32,7 +32,7 @@ defmodule ExCheck.Command do
     Task.async(fn ->
       start_time = DateTime.utc_now()
       port = Port.open({:spawn_executable, exec_path}, spawn_opts)
-      handle_port(port, stream_fn, "", opts[:silenced], start_time)
+      handle_port(port, stream_fn, "", "", opts[:silenced], start_time)
     end)
   end
 
@@ -79,7 +79,7 @@ defmodule ExCheck.Command do
     end
   end
 
-  defp handle_port(port, stream_fn, output, silenced, start_time) do
+  defp handle_port(port, stream_fn, output, pending, silenced, start_time) do
     receive do
       {^port, {:data, data}} ->
         data =
@@ -87,16 +87,37 @@ defmodule ExCheck.Command do
             do: String.replace(data, ~r/^\s*/, ""),
             else: data
 
-        unless silenced, do: stream_fn.(data)
-        handle_port(port, stream_fn, output <> data, silenced, start_time)
+        pending =
+          if silenced,
+            do: pending,
+            else: stream_complete(stream_fn, pending <> data)
+
+        handle_port(port, stream_fn, output <> data, pending, silenced, start_time)
 
       {^port, {:exit_status, status}} ->
+        unless silenced || pending == "", do: stream_fn.(pending)
         duration = DateTime.diff(DateTime.utc_now(), start_time)
         {output, status, stream_fn, silenced, duration}
 
       :unsilence ->
-        stream_fn.(output)
-        handle_port(port, stream_fn, output, false, start_time)
+        pending = stream_complete(stream_fn, output)
+        handle_port(port, stream_fn, output, pending, false, start_time)
     end
+  end
+
+  # A port delivers whatever bytes the pipe holds, so a chunk can end inside a
+  # multi-byte UTF-8 character, and IO.write/1 raises ArgumentError on such a
+  # chunk. Stream the complete characters and hold back an incomplete trailing
+  # sequence until the next chunk completes it. Invalid bytes pass through as
+  # before.
+  defp stream_complete(stream_fn, bytes) do
+    {complete, pending} =
+      case :unicode.characters_to_binary(bytes) do
+        {:incomplete, complete, pending} -> {complete, pending}
+        _complete_or_invalid -> {bytes, ""}
+      end
+
+    if complete != "", do: stream_fn.(complete)
+    pending
   end
 end
