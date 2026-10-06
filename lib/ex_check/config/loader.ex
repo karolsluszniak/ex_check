@@ -101,7 +101,22 @@ defmodule ExCheck.Config.Loader do
   end
 
   defp merge_tool(tool, next_tool)
-  defp merge_tool(nil, next_tool), do: next_tool
+
+  defp merge_tool(nil, {name, opts}) do
+    cond do
+      Keyword.has_key?(opts, :command) ->
+        {name, opts}
+
+      Keyword.get(opts, :enabled, true) == false ->
+        Mix.raise(
+          "cannot disable unknown tool #{inspect(name)}: it is not defined and has no :command"
+        )
+
+      true ->
+        Mix.raise("unknown tool #{inspect(name)} has no :command")
+    end
+  end
+
   defp merge_tool({name, opts}, {name, next_opts}), do: {name, merge_tool_opts(opts, next_opts)}
 
   defp merge_tool_opts(opts, next_opts) do
