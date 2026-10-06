@@ -1,6 +1,6 @@
 ---
 name: verify-with-check
-description: Run mix check and resolve failures before completing an Elixir change. Use after editing Elixir code, before declaring work done, or when mix check reports failures.
+description: Run mix check and read its results to verify an Elixir change. Use after editing Elixir code, before declaring work done, or when mix check reports failures.
 ---
 
 # Verify an Elixir change with mix check
@@ -9,20 +9,15 @@ description: Run mix check and resolve failures before completing an Elixir chan
    ```
    mix check --format agent
    ```
-2. If green — done.
+2. Read the JSON header after `<<<EX_CHECK_REPORT>>>`. `"status":"ok"` means every tool that ran
+   passed; skipped tools are not failures.
 3. Auto-fix the mechanical failures, then re-run only what failed:
    ```
    mix check --fix --retry
    ```
    (`--fix` handles `formatter` and `unused_deps`.)
-4. For remaining failures, fix by tool:
-   - `compiler` — resolve warnings (treated as errors).
-   - `credo` — address the flagged lines, or justify in `.check.exs`.
-   - `dialyzer` — fix the type mismatch; don't blanket-ignore.
-   - `ex_unit` — fix code or test; re-run with `mix check -o ex_unit` while iterating.
-   - `doctor`/`ex_doc` — add missing docs/typespecs.
-   - `sobelow`/`mix_audit` — treat security findings as real; patch, don't suppress.
-5. Re-run `mix check` until it exits 0.
-
-Do not disable a failing tool to make the check pass. Narrow with `-o NAME` while
-iterating; always finish on a full `mix check`.
+4. For remaining failures:
+   - `compiler`, `credo`, `ex_unit` — findings are in the header's `diagnostics` (`file`, `line`, `message`).
+   - Other tools (`dialyzer`, `sobelow`, `mix_audit`, ...) — read their `=== FAILED: ... ===` block.
+   - Iterate on one tool with `mix check -o NAME`; `--retry` re-runs `ex_unit` as `mix test --failed`.
+5. Finish on a full `mix check --format agent`; a run narrowed with `-o` doesn't cover the other tools.

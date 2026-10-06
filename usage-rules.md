@@ -14,11 +14,11 @@ Runs every detected tool. Tools whose package or required files are absent are s
 automatically — you do not need to configure them. Exit status is non-zero if any tool
 fails.
 
-For machine-readable output (preferred when an agent parses results):
+For machine-readable output:
 
 ```
-mix check --format agent              # JSON status header + raw failure blocks
-mix check --format json --output check.json
+mix check --format agent                     # for agents: JSON status header + raw failure blocks
+mix check --format json --output check.json  # for CI and tooling: one JSON document
 ```
 
 Both formats include a `diagnostics` list for failed `compiler`/`credo`/`ex_unit` checks —
@@ -104,9 +104,28 @@ tools recursively per child app by default; tune via each tool's `:umbrella` opt
 
 ## Agent guidance
 
-- Run `mix check` before considering an Elixir change complete — it surfaces compile
-  warnings, format drift, credo/dialyzer/test failures in one pass.
-- Prefer `mix check --format agent` for parseable output.
-- Use `mix check --fix` to resolve formatting and unused-dep issues automatically.
-- Do not add tools that aren't installed; ex_check auto-skips missing ones.
-- To narrow a slow run while iterating, use `-o`/`--only`.
+### Do
+
+- Use `mix check --format agent` to verify an Elixir change.
+- Read the report from stdout. The first line after `<<<EX_CHECK_REPORT>>>` is a JSON header:
+
+  ```json
+  {"status":"error","passed":9,"failed":2,"skipped":4,"duration_s":41.2,
+   "failed_checks":["credo","formatter"],
+   "diagnostics":[{"check":"credo","file":"lib/foo.ex","line":12,"message":"...","severity":"warning"}]}
+  ```
+
+  Raw output for each failed check follows as `=== FAILED: <name> — <command> (exit <code>) ===` blocks.
+- Use the raw block when a failed check has no `diagnostics` entry (e.g. `formatter`, `dialyzer`).
+- Use `mix check --fix` for formatting and unused deps.
+- Use `--only`/`-o` to narrow runs while iterating, and `--retry` to re-run only failures.
+
+### Don't
+
+- Don't redirect `mix check` output to `/dev/null` or pipe it through scripts (`python`, `jq`, `head`).
+  A crash before the report is written then goes unnoticed.
+- Don't use `--format json --output FILE` to work around agent output. That format is for CI and
+  tooling, and a stale file from an earlier run looks like a fresh result.
+- Don't truncate the report. If `<<<END_EX_CHECK_REPORT>>>` is missing, the run aborted: read the
+  Mix error output instead.
+- Don't treat skipped tools as failures. `status` and `failed` only count tools that ran.
