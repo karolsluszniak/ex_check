@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **usage rules** – improved agent guidance
 
+### Fixed
+
+- Disabling an unknown tool in `.check.exs` raises an error instead of `KeyError` on `:command`
+
 ## [0.17.0] - 2026-09-27
 
 ### Changed
