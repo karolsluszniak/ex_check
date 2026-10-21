@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Disabling an unknown tool in `.check.exs` raises an error instead of `KeyError` on `:command`
+- Disabling an unknown tool in `.check.exs` prints a warning instead of crashing with `KeyError` on `:command`; other tools without `:command` raise a clear error
 
 ## [0.17.0] - 2026-09-27
 

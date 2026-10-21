@@ -60,14 +60,15 @@ mix check.gen.config
 Tool tuple forms:
 
 ```elixir
-{:credo, false}                              # disable a curated or previously defined tool
+{:credo, false}                              # disable a curated or custom tool
 {:credo, "mix credo --strict"}               # override the command
 {:my_task, "mix my_task"}                    # add a custom mix task
 {:my_tool, ["my_tool", "arg with spaces"]}   # add an arbitrary command
 {:npm_test, command: "npm test", cd: "assets", env: %{"CI" => "true"}}
 ```
 
-The name in `{:credo, false}` must already be a curated or previously defined tool. An unknown name is an error.
+Disabling a tool that no config file defines prints a warning and is ignored. Any other tool
+without a `:command` (after merging all config files) is an error.
 
 Example `.check.exs`:
 
