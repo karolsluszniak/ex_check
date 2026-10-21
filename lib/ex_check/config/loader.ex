@@ -2,6 +2,7 @@ defmodule ExCheck.Config.Loader do
   @moduledoc false
 
   alias ExCheck.Config.Default, as: DefaultConfig
+  alias ExCheck.Printer
   alias ExCheck.Project
 
   @config_filename ".check.exs"
@@ -20,10 +21,25 @@ defmodule ExCheck.Config.Loader do
 
     default_config = normalize_config(DefaultConfig.get())
     config = load_from_files(files, default_config)
-    tools = Keyword.fetch!(config, :tools)
+    tools = config |> Keyword.fetch!(:tools) |> Enum.filter(&defined_tool?/1)
     opts = Keyword.take(config, @option_list)
 
     {tools, opts}
+  end
+
+  # runs after all config files are merged, as a later file may add the :command
+  defp defined_tool?({name, opts}) do
+    cond do
+      Keyword.has_key?(opts, :command) ->
+        true
+
+      opts[:enabled] == false ->
+        Printer.error([:yellow, "warning: ignoring unknown disabled tool #{inspect(name)}"])
+        false
+
+      true ->
+        Mix.raise("unknown tool #{inspect(name)} has no :command")
+    end
   end
 
   defp config_filename(nil), do: []
