@@ -11,12 +11,12 @@ defmodule ExCheck.Check.Compiler do
   end
 
   defp process_compiler(tools, opts) do
-    compiler = List.keyfind(tools, :compiler, 0) || raise("compiler tool definition missing")
-    compiler = prepare(compiler, opts)
+    {:compiler, tool_opts} =
+      List.keyfind(tools, :compiler, 0) || raise("compiler tool definition missing")
 
-    case compiler do
-      {:pending, _} -> compiler
-      _ -> {:pending, {:compiler, ["mix", "compile"], []}}
+    case prepare({:compiler, tool_opts}, opts) do
+      {:pending, _} = result -> result
+      _ -> {:pending, {:compiler, ["mix", "compile"], [env: Keyword.get(tool_opts, :env, %{})]}}
     end
   end
 
